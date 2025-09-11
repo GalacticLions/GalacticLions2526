@@ -4,7 +4,7 @@
 
 ![Android Studio](https://img.shields.io/badge/built_in-Android_Studio-3DDC84?style=for-the-badge)![Java](https://img.shields.io/badge/with-java-%23ED8B00.svg?style=for-the-badge)
 
-[![Android CI](https://github.com/GalacticLions/GalacticLions2526/actions/workflows/android-ci.yml/badge.svg)](https://github.com/GalacticLions/GalacticLions2526/actions/workflows/android.yml)
+[![Android CI](https://github.com/GalacticLions/GalacticLions2526/actions/workflows/android.yml/badge.svg)](https://github.com/GalacticLions/GalacticLions2526/actions/workflows/android.yml)
 [![License](https://img.shields.io/github/license/GalacticLions/GalacticLions2526?color=0088ff)](https://raw.githubusercontent.com/GalacticLions/GalacticLions2526/refs/heads/master/LICENSE)
 [![Contributers](https://img.shields.io/github/contributors/GalacticLions/GalacticLions2526?color=0088ff)](https://github.com/GalacticLions/GalacticLions2526/graphs/contributors)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/GalacticLions/GalacticLions2526?color=0088ff)](https://github.com/GalacticLions/GalacticLions2526/pulse/monthly)

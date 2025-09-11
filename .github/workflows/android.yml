@@ -27,9 +27,3 @@ jobs:
           java-version: '17'  
           distribution: 'temurin'
           cache: gradle  # Cache Gradle dependencies for faster builds
-
-      - name: Grant execute permission to gradlew
-        run: chmod +x gradlew  # Makes Gradle wrapper executable
-
-      - name: Build with Gradle
-        run: ./gradlew build

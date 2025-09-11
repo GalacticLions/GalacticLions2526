@@ -6,9 +6,9 @@ name: Android CI
 
 on:
   push:
-    branches: [ master ]  # Run workflow on push to master branch
+    branches: [ 18443 ]  # Run workflow on push to 18443 branch
   pull_request:
-    branches: [ master ]  # Run workflow on pull requests targeting master branch
+    branches: [ 18443 ]  # Run workflow on pull requests targeting master branch
   
 jobs:
   build:

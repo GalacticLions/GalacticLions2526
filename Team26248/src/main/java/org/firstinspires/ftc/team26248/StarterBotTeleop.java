@@ -71,8 +71,8 @@ public class StarterBotTeleop extends OpMode {
      * velocity. Here we are setting the target, and minimum velocity that the launcher should run
      * at. The minimum velocity is a threshold for determining when to fire.
      */
-    final double LAUNCHER_TARGET_VELOCITY = 1125;
-    final double LAUNCHER_MIN_VELOCITY = 1075;
+    final double LAUNCHER_TARGET_VELOCITY = 2775;
+    final double LAUNCHER_MIN_VELOCITY = 1100;
 
     // Declare OpMode members.
     private DcMotor leftDrive = null;
@@ -164,7 +164,7 @@ public class StarterBotTeleop extends OpMode {
         leftFeeder.setPower(STOP_SPEED);
         rightFeeder.setPower(STOP_SPEED);
 
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+        launcher.setVelocityPIDFCoefficients(30,2.5,0,11.7);
 
         /*
          * Much like our drivetrain motors, we set the left feeder servo to reverse so that they

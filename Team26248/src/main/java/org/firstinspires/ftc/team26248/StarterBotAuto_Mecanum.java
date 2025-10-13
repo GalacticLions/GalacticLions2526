@@ -22,9 +22,9 @@ public class StarterBotAuto_Mecanum extends OpMode {
     // === LAUNCHER PARAMETERS ===
     // ============================
     final double FEED_TIME = 0.20;
-    final double LAUNCHER_TARGET_VELOCITY = 1125;
-    final double LAUNCHER_MIN_VELOCITY    = 1075;
-    final double TIME_BETWEEN_SHOTS       = 2;
+    final double LAUNCHER_TARGET_VELOCITY = 1050;
+    final double LAUNCHER_MIN_VELOCITY    = 950;
+    final double TIME_BETWEEN_SHOTS       = 5;
 
     // ============================
     // === DRIVE PARAMETERS     ===
@@ -53,10 +53,10 @@ public class StarterBotAuto_Mecanum extends OpMode {
     // === HARDWARE             ===
     // ============================
     // === CONFIG NAMES: replace these with your actual config names ===
-    private static final String FL_NAME = "front_left";
-    private static final String FR_NAME = "front_right";
-    private static final String BL_NAME = "back_left";
-    private static final String BR_NAME = "back_right";
+    private static final String FL_NAME = "left_front_drive";
+    private static final String FR_NAME = "right_front_drive";
+    private static final String BL_NAME = "left_back_drive";
+    private static final String BR_NAME = "right_back_drive";
 
     private DcMotor fl, fr, bl, br;
     private DcMotorEx launcher = null;
@@ -70,6 +70,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
     private LaunchState launchState;
 
     private enum AutonomousState {
+        DRIVING_BACK,
         LAUNCH,
         WAIT_FOR_LAUNCH,
         DRIVING_AWAY_FROM_GOAL,
@@ -86,7 +87,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
 
     @Override
     public void init() {
-        autonomousState = AutonomousState.LAUNCH;
+        autonomousState = AutonomousState.DRIVING_BACK;
         launchState = LaunchState.IDLE;
 
         // === Map hardware ===
@@ -101,9 +102,9 @@ public class StarterBotAuto_Mecanum extends OpMode {
 
         // === Motor directions ===
         // Typical mecanum: reverse left side or right side (pick one) so forward stick = forward.
-        fl.setDirection(DcMotorSimple.Direction.REVERSE);
+        fl.setDirection(DcMotorSimple.Direction.FORWARD);
         bl.setDirection(DcMotorSimple.Direction.REVERSE);
-        fr.setDirection(DcMotorSimple.Direction.FORWARD);
+        fr.setDirection(DcMotorSimple.Direction.REVERSE);
         br.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // === Reset + brake ===
@@ -141,6 +142,12 @@ public class StarterBotAuto_Mecanum extends OpMode {
     @Override
     public void loop() {
         switch (autonomousState) {
+            case DRIVING_BACK:
+                if (driveLinear(DRIVE_SPEED, -4, DistanceUnit.INCH, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.LAUNCH;
+                }
+                break;
             case LAUNCH:
                 launch(true);
                 autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
@@ -252,7 +259,8 @@ public class StarterBotAuto_Mecanum extends OpMode {
     private void resetDriveEncoders() {
         for (DcMotor m : new DcMotor[]{fl, fr, bl, br}) {
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            m.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            m.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            m.setPower(0);
         }
     }
 
@@ -280,6 +288,11 @@ public class StarterBotAuto_Mecanum extends OpMode {
         fr.setTargetPosition(frTgt);
         bl.setTargetPosition(blTgt);
         br.setTargetPosition(brTgt);
+
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         fl.setPower(speed);
         fr.setPower(speed);
@@ -317,6 +330,11 @@ public class StarterBotAuto_Mecanum extends OpMode {
         bl.setTargetPosition(blTgt);
         br.setTargetPosition(brTgt);
 
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         fl.setPower(speed);
         fr.setPower(speed);
         bl.setPower(speed);
@@ -353,6 +371,11 @@ public class StarterBotAuto_Mecanum extends OpMode {
         fr.setTargetPosition(frTgt);
         bl.setTargetPosition(blTgt);
         br.setTargetPosition(brTgt);
+
+        fl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        br.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         fl.setPower(speed);
         fr.setPower(speed);

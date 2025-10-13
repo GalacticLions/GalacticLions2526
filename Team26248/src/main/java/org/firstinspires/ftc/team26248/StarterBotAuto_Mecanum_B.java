@@ -87,7 +87,7 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
 
     @Override
     public void init() {
-        autonomousState = AutonomousState.DRIVING_BACK;
+        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
         launchState = LaunchState.IDLE;
 
         // === Map hardware ===

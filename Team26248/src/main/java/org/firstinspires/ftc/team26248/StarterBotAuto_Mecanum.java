@@ -143,7 +143,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
     public void loop() {
         switch (autonomousState) {
             case DRIVING_BACK:
-                if (driveLinear(DRIVE_SPEED, -4, DistanceUnit.INCH, 1)) {
+                if (driveLinear(DRIVE_SPEED, -12, DistanceUnit.INCH, 1)) {
                     resetDriveEncoders();
                     autonomousState = AutonomousState.LAUNCH;
                 }
@@ -174,7 +174,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
                 break;
 
             case ROTATING:
-                robotRotationAngle = (alliance == Alliance.RED) ? 45 : -45;
+                robotRotationAngle = (alliance == Alliance.RED) ? 90 : -90;
                 if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
                     resetDriveEncoders();
                     autonomousState = AutonomousState.DRIVING_OFF_LINE;
@@ -182,7 +182,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
                 break;
 
             case DRIVING_OFF_LINE:
-                if (driveLinear(DRIVE_SPEED, -26, DistanceUnit.INCH, 1)) {
+                if (driveLinear(DRIVE_SPEED, -36, DistanceUnit.INCH, 1)) {
                     // Example: you could strafe to the side to park:
                     // resetDriveEncoders();
                     // autonomousState = AutonomousState.STRAFE_TO_PARK;
@@ -275,7 +275,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
      * @return true once within tolerance for holdSeconds.
      */
     boolean driveLinear(double speed, double distance, DistanceUnit distanceUnit, double holdSeconds) {
-        final double TOLERANCE_MM = 10;
+        final double TOLERANCE_MM = 20;
 
         double targetTicks = distanceUnit.toMm(distance) * TICKS_PER_MM;
 

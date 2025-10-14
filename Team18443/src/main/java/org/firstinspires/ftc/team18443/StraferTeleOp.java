@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamm18443;
+package org.firstinspires.ftc.team18443;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;

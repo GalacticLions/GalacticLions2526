@@ -5,32 +5,32 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class RobotHardware {
 
-    // Declare Motors
+    // Drive Motors
     public DcMotorEx leftFront, leftRear, rightFront, rightRear;
+
+    // Mechanism Motors
     public DcMotorEx launcher, belt;
 
-    // Declare Servos
+    // Servos (add as needed)
     // public Servo claw, grabber, leftOuttake, rightOuttake, wrist, leftIntake, rightIntake;
 
-    // public GoBildaPinpointDriver odo;
+    // Odometry (future addition)
+    // public GoBildaPinpointDriver odo;   // <— Odometry pod driver (future integration)
+    // To use: instantiate with hardwareMap.get(GoBildaPinpointDriver.class, "odo");
+    // Then read pose data via odo.getPosition() or odo.getHeadingRadians().
 
     // Sensors
     public IMU imu;
 
-    // declare some constants (servo positions, etc)
-    /*public final double INTAKE_IN_LEFT = .78;
-    public final double INTAKE_IN_RIGHT = .22;
-    public final double GRABBER_OPEN = 0;
-    public final double GRABBER_CLOSE = .2;
-    public final double WRIST_NEUTRAL = .3;
-    */
-
-
     // Hardware Map Reference
-    private HardwareMap hardwareMap;
+    private final HardwareMap hardwareMap;
+
+    // Drive tunables
+    public double strafeComp = 1.10; // Strafe compensation factor (empirical)
 
     // Constructor
     public RobotHardware(HardwareMap hwMap) {
@@ -39,53 +39,83 @@ public class RobotHardware {
 
     // Initialize hardware
     public void init() {
-        // Make sure the device name matches what is in the config on the bot.
         // Motors
-        leftFront = hardwareMap.get(DcMotorEx.class, "FL");
-        leftRear = hardwareMap.get(DcMotorEx.class, "BL");
+        leftFront  = hardwareMap.get(DcMotorEx.class, "FL");
+        leftRear   = hardwareMap.get(DcMotorEx.class, "BL");
         rightFront = hardwareMap.get(DcMotorEx.class, "FR");
-        rightRear = hardwareMap.get(DcMotorEx.class, "BR");
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        belt = hardwareMap.get(DcMotorEx.class, "belt");
+        rightRear  = hardwareMap.get(DcMotorEx.class, "BR");
+        launcher   = hardwareMap.get(DcMotorEx.class, "launcher");
+        belt       = hardwareMap.get(DcMotorEx.class, "belt");
 
-
-        // Set motor directions (typically the left side)
+        // Set motor directions (reverse left side)
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
 
-
-        // Set motors to brake when power is zero
+        // Set zero power behavior
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         belt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Optionally apply to drivetrain for better control:
+        // leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // GoBildaPinpointDriver odo = hardwareMap.get(GoBildaPinpointDriver.class,"odo");
+        // Odometry setup (future)
+        // odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
+        // odo.resetPosAndIMU();  // Resets odometry and IMU to starting pose
 
-
-        // clear encoder values for slides
-        /* slideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-         */
-
-        // Servos (make sure names match config)
-        /* claw = hardwareMap.get(Servo.class, "Claw");
-         */
-
-        // Sensors (make sure imu is created in config)
+        // IMU setup
         imu = hardwareMap.get(IMU.class, "imu");
-
-        // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
-        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
     }
 
+    /* ==================================================
+       Helper Methods for Driving & Orientation
+       ================================================== */
 
-    // Create methods/functions that you will use multiple times across multiple
-    // op modes (auto and/or tele).
-        
+    /** Reset IMU yaw to zero. */
+    public void resetYaw() {
+        if (imu != null) imu.resetYaw();
+    }
 
+    /** Return heading in radians (-π to π). */
+    public double getHeadingRad() {
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+    }
+
+    /** Return heading in degrees (-180° to 180°). */
+    public double getHeadingDeg() {
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+    }
+
+    /** Set normalized drive motor powers. */
+    public void setDrivePowers(double fl, double fr, double bl, double br) {
+        double max = Math.max(1.0, Math.max(Math.abs(fl),
+                Math.max(Math.abs(fr), Math.max(Math.abs(bl), Math.abs(br)))));
+        leftFront.setPower(fl / max);
+        rightFront.setPower(fr / max);
+        leftRear.setPower(bl / max);
+        rightRear.setPower(br / max);
+    }
+
+    /** Robot-centric mecanum drive. */
+    public void driveRobotCentric(double x, double y, double rx) {
+        double fl = y + x + rx;
+        double bl = y - x + rx;
+        double fr = y - x - rx;
+        double br = y + x - rx;
+        setDrivePowers(fl, fr, bl, br);
+    }
+
+    /** Field-centric mecanum drive (uses IMU yaw). */
+    public void driveFieldCentric(double x, double y, double rx) {
+        x *= strafeComp;
+        double heading = getHeadingRad();
+        double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
+        double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
+        driveRobotCentric(rotX, rotY, rx);
+    }
 }

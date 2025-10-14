@@ -15,10 +15,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //   Usage:
 //      - Deploy as TeleOp via FTC Driver Station
 //
-//   Notes:
-//      - This version uses a generic RobotHardware class for initialization
-//        and basic helpers (motors + IMU). Update device names/orientation
-//        inside RobotHardware to match your configuration.
 //
 // ****************************************************************************
 // This program is released under the BSD-3-Clause-Clear License
@@ -34,20 +30,13 @@ public class StraferTeleOp_Generic extends LinearOpMode {
     public void runOpMode() {
 
 // ----------------------------------------------------------------------------
-//    Define and Initialize the Motors
+//    Define and Initialize the Hardware Map
 // ----------------------------------------------------------------------------
-// Note: Make sure the ID's match in your configuration
-//       (Device names and IMU orientation are set in RobotHardware.init())
+// Note: Device names and IMU orientation are set in RobotHardware.init()
 
         robot = new RobotHardware(hardwareMap);
-        robot.init();       // sets up FL/BL/FR/BR, launcher, belt, IMU, directions, etc.
-        robot.resetYaw();   // start with a zeroed heading for field-centric control
-
-// ----------------------------------------------------------------------------
-//    Define and Initialize the REV Hub's IMU (Inertial measurement unit)
-// ----------------------------------------------------------------------------
-// Note: Adjust orientation parameters in RobotHardware to match your mounting
-//       By default, RobotHardware initializes and manages the IMU and yaw reset.
+        robot.init();
+        robot.resetYaw();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

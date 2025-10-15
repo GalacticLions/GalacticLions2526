@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class RobotHardware {
 
 // ----------------------------------------------------------------------------
-//    (Section Name)
+//    Hardware Device Definitions
 // ----------------------------------------------------------------------------
 
     // Drive Motors
@@ -56,7 +56,7 @@ public class RobotHardware {
     }
 
 // ----------------------------------------------------------------------------
-//    (Section Name)
+//    Initialization Setup
 // ----------------------------------------------------------------------------
     
     public void init() {

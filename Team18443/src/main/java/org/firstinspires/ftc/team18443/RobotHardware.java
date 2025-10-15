@@ -118,10 +118,10 @@ public class RobotHardware {
 
     /** Set normalized drive motor powers
      * Parameters:
-     *   fl: front left power
-     *   fr: front right power
-     *   bl: back left power
-     *   br: back right power
+     *   @param fl - front left power
+     *   @param fr - front right power
+     *   @param bl - back left power
+     *   @param br - back right power
     */
     public void setDrivePowers(double fl, double fr, double bl, double br) {
         double max = Math.max(1.0, Math.max(Math.abs(fl),
@@ -134,9 +134,9 @@ public class RobotHardware {
 
     /** Robot-centric mecanum drive mode (controls relative to robot's orientation).
      * Parameters:
-     *   x: strafe (left/right)
-     *   y: forward/backward
-     *   rx: rotation (clockwise/counterclockwise)
+     *   @param x - strafe (left/right)
+     *   @param y - forward/backward
+     *   @param rx - rotation (clockwise/counterclockwise)
     */
     public void driveRobotCentric(double x, double y, double rx) {
         double fl = y + x + rx;
@@ -149,9 +149,9 @@ public class RobotHardware {
     /** Field-centric mecanum drive mode (controls relative to field orientation)
      * Uses IMU yaw angle for heading compensation
      * Parameters:
-     *   x: strafe (left/right)
-     *   y: forward/backward
-     *   rx: rotation (clockwise/counterclockwise)
+     *   @param x - strafe (left/right)
+     *   @param y - forward/backward
+     *   @param rx - rotation (clockwise/counterclockwise)
     */
     public void driveFieldCentric(double x, double y, double rx) {
         x *= strafeComp;

@@ -11,10 +11,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 //  RobotHardware.java                                       GalacticLions2526
 // ****************************************************************************
 //   Description:
-//
+//      Hardware abstraction class for the robot. Initializes and manages
+//      motors, sensors, and provides drive control methods
 //
 //   Usage:
-//      - 
+//      - Instantiate RobotHardware with a HardwareMap in your OpMode
+//      - Call init() to initialize all hardware devices
 //
 // ****************************************************************************
 // This program is released under the BSD-3-Clause-Clear License
@@ -99,22 +101,28 @@ public class RobotHardware {
 //    Methods for Driving & Orientation
 // ----------------------------------------------------------------------------
 
-    /** Reset IMU yaw to zero. */
+    /** Resets the IMU's yaw angle to zero */
     public void resetYaw() {
         if (imu != null) imu.resetYaw();
     }
 
-    /** Return heading in radians (-π to π). */
+    /** Gets the robot's heading (yaw) in radians (-π to π) from the IMU */
     public double getHeadingRad() {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
-    /** Return heading in degrees (-180° to 180°). */
+    /** Gets the robot's heading (yaw) in degrees (-180° to 180°) from the IMU */
     public double getHeadingDeg() {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
-    /** Set normalized drive motor powers. */
+    /** Set normalized drive motor powers
+     * Parameters:
+     *   fl: front left power
+     *   fr: front right power
+     *   bl: back left power
+     *   br: back right power
+    */
     public void setDrivePowers(double fl, double fr, double bl, double br) {
         double max = Math.max(1.0, Math.max(Math.abs(fl),
                 Math.max(Math.abs(fr), Math.max(Math.abs(bl), Math.abs(br)))));
@@ -124,7 +132,12 @@ public class RobotHardware {
         rightRear.setPower(br / max);
     }
 
-    /** Robot-centric mecanum drive. */
+    /** Robot-centric mecanum drive mode (controls relative to robot's orientation).
+     * Parameters:
+     *   x: strafe (left/right)
+     *   y: forward/backward
+     *   rx: rotation (clockwise/counterclockwise)
+    */
     public void driveRobotCentric(double x, double y, double rx) {
         double fl = y + x + rx;
         double bl = y - x + rx;
@@ -133,7 +146,13 @@ public class RobotHardware {
         setDrivePowers(fl, fr, bl, br);
     }
 
-    /** Field-centric mecanum drive (uses IMU yaw). */
+    /** Field-centric mecanum drive mode (controls relative to field orientation)
+     * Uses IMU yaw angle for heading compensation
+     * Parameters:
+     *   x: strafe (left/right)
+     *   y: forward/backward
+     *   rx: rotation (clockwise/counterclockwise)
+    */
     public void driveFieldCentric(double x, double y, double rx) {
         x *= strafeComp;
         double heading = getHeadingRad();

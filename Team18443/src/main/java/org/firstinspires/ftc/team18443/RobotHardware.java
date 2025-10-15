@@ -7,7 +7,25 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+// ****************************************************************************
+//  RobotHardware.java                                       GalacticLions2526
+// ****************************************************************************
+//   Description:
+//
+//
+//   Usage:
+//      - 
+//
+// ****************************************************************************
+// This program is released under the BSD-3-Clause-Clear License
+// See LICENSE file in root of this repository
+// ****************************************************************************
+
 public class RobotHardware {
+
+// ----------------------------------------------------------------------------
+//    (Section Name)
+// ----------------------------------------------------------------------------
 
     // Drive Motors
     public DcMotorEx leftFront, leftRear, rightFront, rightRear;
@@ -37,7 +55,10 @@ public class RobotHardware {
         this.hardwareMap = hwMap;
     }
 
-    // Initialize hardware
+// ----------------------------------------------------------------------------
+//    (Section Name)
+// ----------------------------------------------------------------------------
+    
     public void init() {
         // Motors
         leftFront  = hardwareMap.get(DcMotorEx.class, "FL");
@@ -47,7 +68,8 @@ public class RobotHardware {
         launcher   = hardwareMap.get(DcMotorEx.class, "launcher");
         belt       = hardwareMap.get(DcMotorEx.class, "belt");
 
-        // Set motor directions (reverse left side)
+        // Reverse one side of the motors for mecanum drive to ensure consistent forward movement
+        // If the robot drives backwards, reverse the other side instead
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
 
@@ -69,12 +91,13 @@ public class RobotHardware {
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
+        // By default, IMU assumes REV Hub is mounted with logo up and USB port facing forward
         imu.initialize(parameters);
     }
 
-    /* ==================================================
-       Helper Methods for Driving & Orientation
-       ================================================== */
+// ----------------------------------------------------------------------------
+//    Methods for Driving & Orientation
+// ----------------------------------------------------------------------------
 
     /** Reset IMU yaw to zero. */
     public void resetYaw() {

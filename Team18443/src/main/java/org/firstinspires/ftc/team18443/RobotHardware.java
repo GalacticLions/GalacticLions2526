@@ -30,7 +30,7 @@ public class RobotHardware {
 // ----------------------------------------------------------------------------
 
     // Drive Motors
-    public DcMotorEx leftFront, leftRear, rightFront, rightRear;
+    public DcMotorEx frontLeft, backLeft, frontRight, backRight;
 
     // Mechanism Motors
     public DcMotorEx launcher, belt;
@@ -46,11 +46,11 @@ public class RobotHardware {
     // Sensors
     public IMU imu;
 
-    // Hardware Map Reference
-    private final HardwareMap hardwareMap;
-
     // Drive tunables
     public double strafeComp = 1.10; // Strafe compensation factor (empirical)
+
+    // Hardware Map Reference
+    private final HardwareMap hardwareMap;
 
     // Constructor
     public RobotHardware(HardwareMap hwMap) {
@@ -63,17 +63,17 @@ public class RobotHardware {
     
     public void init() {
         // Motors
-        leftFront  = hardwareMap.get(DcMotorEx.class, "FL");
-        leftRear   = hardwareMap.get(DcMotorEx.class, "BL");
-        rightFront = hardwareMap.get(DcMotorEx.class, "FR");
-        rightRear  = hardwareMap.get(DcMotorEx.class, "BR");
+        frontLeft  = hardwareMap.get(DcMotorEx.class, "fl");
+        backLeft   = hardwareMap.get(DcMotorEx.class, "bl");
+        frontRight = hardwareMap.get(DcMotorEx.class, "fr");
+        backRight  = hardwareMap.get(DcMotorEx.class, "br");
         launcher   = hardwareMap.get(DcMotorEx.class, "launcher");
         belt       = hardwareMap.get(DcMotorEx.class, "belt");
 
         // Reverse one side of the motors for mecanum drive to ensure consistent forward movement
         // If the robot drives backwards, reverse the other side instead
-        leftFront.setDirection(DcMotor.Direction.REVERSE);
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
 
         // Set zero power behavior
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -101,43 +101,49 @@ public class RobotHardware {
 //    Methods for Driving & Orientation
 // ----------------------------------------------------------------------------
 
-    /** Resets the IMU's yaw angle to zero */
+    /**
+     * Resets the IMU's yaw angle to zero
+     */
     public void resetYaw() {
         if (imu != null) imu.resetYaw();
     }
 
-    /** Gets the robot's heading (yaw) in radians (-π to π) from the IMU */
+    /**
+     * Gets the robot's heading (yaw) in radians (-π to π) from the IMU
+     */
     public double getHeadingRad() {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
     }
 
-    /** Gets the robot's heading (yaw) in degrees (-180° to 180°) from the IMU */
+    /**
+     * Gets the robot's heading (yaw) in degrees (-180° to 180°) from the IMU
+     */
     public double getHeadingDeg() {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
-    /** Set normalized drive motor powers
-     * Parameters:
-     *   @param fl - front left power
-     *   @param fr - front right power
-     *   @param bl - back left power
-     *   @param br - back right power
-    */
+    /**
+     * Set normalized drive motor powers
+     *  @param fl - front left power
+     *  @param fr - front right power
+     *  @param bl - back left power
+     *  @param br - back right power
+     */
     public void setDrivePowers(double fl, double fr, double bl, double br) {
         double max = Math.max(1.0, Math.max(Math.abs(fl),
                 Math.max(Math.abs(fr), Math.max(Math.abs(bl), Math.abs(br)))));
-        leftFront.setPower(fl / max);
-        rightFront.setPower(fr / max);
-        leftRear.setPower(bl / max);
-        rightRear.setPower(br / max);
+        frontLeft.setPower(fl / max);
+        frontRight.setPower(fr / max);
+        backLeft.setPower(bl / max);
+        backRight.setPower(br / max);
     }
 
-    /** Robot-centric mecanum drive mode (controls relative to robot's orientation).
-     * Parameters:
-     *   @param x - strafe (left/right)
-     *   @param y - forward/backward
-     *   @param rx - rotation (clockwise/counterclockwise)
-    */
+    /**
+     * Robot-centric mecanum drive mode (controls relative to robot's orientation)
+     *  @param x - strafe (left/right)
+     *  @param y - forward/backward
+     *  @param rx - rotation (clockwise/counterclockwise)
+     */
     public void driveRobotCentric(double x, double y, double rx) {
         double fl = y + x + rx;
         double bl = y - x + rx;
@@ -146,13 +152,13 @@ public class RobotHardware {
         setDrivePowers(fl, fr, bl, br);
     }
 
-    /** Field-centric mecanum drive mode (controls relative to field orientation)
+    /**
+     * Field-centric mecanum drive mode (controls relative to field orientation)
      * Uses IMU yaw angle for heading compensation
-     * Parameters:
-     *   @param x - strafe (left/right)
-     *   @param y - forward/backward
-     *   @param rx - rotation (clockwise/counterclockwise)
-    */
+     *  @param x - strafe (left/right)
+     *  @param y - forward/backward
+     *  @param rx - rotation (clockwise/counterclockwise)
+     */
     public void driveFieldCentric(double x, double y, double rx) {
         x *= strafeComp;
         double heading = getHeadingRad();

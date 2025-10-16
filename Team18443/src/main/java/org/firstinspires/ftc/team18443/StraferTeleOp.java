@@ -57,14 +57,13 @@ public class StraferTeleOp extends LinearOpMode {
             double X = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
             double Y = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-            // Normalize motor powers to keep within [-1, 1] while maintaining power ratios
-            double denominator = Math.max(Math.abs(Y) + Math.abs(X) + Math.abs(rx), 1.0);
-            double frontLeftPower  = (Y + X + rx) / denominator;
-            double backLeftPower   = (Y - X + rx) / denominator;
-            double frontRightPower = (Y - X - rx) / denominator;
-            double backRightPower  = (Y + X - rx) / denominator;
+            // Combine the joystick requests for each axis-motion
+            double frontLeftPower  = (Y + X + rx);
+            double frontRightPower = (Y - X - rx);
+            double backLeftPower   = (Y - X + rx);
+            double backRightPower  = (Y + X - rx);
 
-            // Apply powers via RobotHardware helper (handles safe normalization as well)
+            // Normalize motor power values
             robot.setDrivePowers(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
 
             // Reset IMU yaw angle to zero manually by pressing the 'guide' button

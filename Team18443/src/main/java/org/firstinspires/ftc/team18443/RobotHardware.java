@@ -35,7 +35,7 @@ public class RobotHardware {
     // Mechanism Motors
     public DcMotorEx launcher, belt;
 
-    // Servos (add as needed)
+    // Servos
     // public Servo claw, grabber, leftOuttake, rightOuttake, wrist, leftIntake, rightIntake;
 
     // Odometry (future addition)
@@ -123,11 +123,11 @@ public class RobotHardware {
     }
 
     /**
-     * Set normalized drive motor powers
-     *  @param fl - front left power
-     *  @param fr - front right power
-     *  @param bl - back left power
-     *  @param br - back right power
+     * Set normalized drive motor powers to keep within [-1, 1]
+     *  @param fl The front left power
+     *  @param fr The front right power
+     *  @param bl The back left power
+     *  @param br The back right power
      */
     public void setDrivePowers(double fl, double fr, double bl, double br) {
         double max = Math.max(1.0, Math.max(Math.abs(fl),
@@ -140,9 +140,9 @@ public class RobotHardware {
 
     /**
      * Robot-centric mecanum drive mode (controls relative to robot's orientation)
-     *  @param x - strafe (left/right)
-     *  @param y - forward/backward
-     *  @param rx - rotation (clockwise/counterclockwise)
+     *  @param x Strafe (left/right)
+     *  @param y Forward/backward
+     *  @param rx Rotation (clockwise/counterclockwise)
      */
     public void driveRobotCentric(double x, double y, double rx) {
         double fl = y + x + rx;
@@ -153,11 +153,11 @@ public class RobotHardware {
     }
 
     /**
-     * Field-centric mecanum drive mode (controls relative to field orientation)
+     * Field-centric mecanum drive mode (controls relative to field orientation).
      * Uses IMU yaw angle for heading compensation
-     *  @param x - strafe (left/right)
-     *  @param y - forward/backward
-     *  @param rx - rotation (clockwise/counterclockwise)
+     *  @param x Strafe (left/right)
+     *  @param y Forward/backward
+     *  @param rx Rotation (clockwise/counterclockwise)
      */
     public void driveFieldCentric(double x, double y, double rx) {
         x *= strafeComp;

@@ -9,11 +9,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //  StraferTeleOp.java                                       GalacticLions2526
 // ****************************************************************************
 //   Description:
-//      This OpMode executes a field-centric Teleop for a mecanum drive robot
+//      This OpMode executes a field-centric Teleop for a mecanum-drive robot.
 //      The code is structured as a LinearOpMode
 //
 //   Usage:
-//      - Deploy as TeleOp via FTC Driver Station
+//      - Deploy this OpMode as a TeleOp on the FTC Driver Station
 //
 // ****************************************************************************
 // This program is released under the BSD-3-Clause-Clear License
@@ -26,10 +26,11 @@ public class StraferTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //    Define and Initialize the Hardware Map
-// ----------------------------------------------------------------------------
-// Note: Device names and IMU orientation are set in RobotHardware.init()
+// -------------------------------------------------------------------------------------------------
+// Note: Device names, IMU orientation, motor directions, and any device-specific
+//       configuration are handled in RobotHardware.init()
 
         RobotHardware robot = new RobotHardware(hardwareMap);
         robot.init();
@@ -42,17 +43,18 @@ public class StraferTeleOp extends LinearOpMode {
 
         if (isStopRequested()) return;
 
+        // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //    Primary Driver Controls (gamepad1)
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
             double y  = -gamepad1.left_stick_y;  // Forward/backward (negative because up is negative)
-            double x  =  gamepad1.left_stick_x * robot.strafeComp; // Strafe left/right (scaled to compensate for imperfect strafing)
+            double x  =  gamepad1.left_stick_x * robot.strafeComp; // Strafe left/right (scaled)
             double rx =  gamepad1.right_stick_x; // Rotation
 
-            // Convert field-relative joystick inputs to robot-relative using IMU heading
+            // Convert field-relative joystick inputs (x,y) to robot-relative using IMU heading
             double botHeading = robot.getHeadingRad();
             double X = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
             double Y = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
@@ -67,13 +69,14 @@ public class StraferTeleOp extends LinearOpMode {
             robot.setDrivePowers(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
 
             // Reset IMU yaw angle to zero manually by pressing the 'guide' button
+            // Note: The 'guide' button mapping may vary by controller
             if (gamepad1.guide) {
                 robot.resetYaw();
             }
 
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 //    Secondary Driver Controls (gamepad2)
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
             telemetry.addData("Heading (deg)", "%.1f", robot.getHeadingDeg());
             telemetry.update();

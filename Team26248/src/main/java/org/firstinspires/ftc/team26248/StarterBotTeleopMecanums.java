@@ -216,6 +216,31 @@ public class StarterBotTeleopMecanums extends OpMode {
          * both motors work to rotate the robot. Combinations of these inputs can be used to create
          * more complex maneuvers.
          */
+        if (gamepad1.dpad_left){
+            leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        }
+        if (gamepad1.dpad_right) {
+            leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+            leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        }
+        if (gamepad1.dpad_up) {
+            leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            leftBackDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightBackDrive.setDirection(DcMotor.Direction.REVERSE);
+        }
+        if (gamepad1.dpad_down){
+           launcher.setVelocity(1000);
+        }
+        if (gamepad1.left_bumper){
+            launcher.setVelocity(1400);
+        }
+
         mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
         /*

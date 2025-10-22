@@ -22,8 +22,8 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     // === LAUNCHER PARAMETERS ===
     // ============================
     final double FEED_TIME = 0.20;
-    final double LAUNCHER_TARGET_VELOCITY = 1050;
-    final double LAUNCHER_MIN_VELOCITY    = 950;
+    final double LAUNCHER_TARGET_VELOCITY = 1000;
+    final double LAUNCHER_MIN_VELOCITY    = 900;
     final double TIME_BETWEEN_SHOTS       = 5;
 
     // ============================
@@ -147,6 +147,15 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
                     resetDriveEncoders();
                     autonomousState = AutonomousState.ROTATING;
                 }
+
+            break;
+
+            case ROTATING:
+                robotRotationAngle = (alliance == Alliance.RED) ? 30 : -30;
+                if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.LAUNCH;
+                }
                 break;
 
             case LAUNCH:
@@ -162,36 +171,10 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
                     } else {
                         resetDriveEncoders();
                         launcher.setVelocity(0);
-                        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
+                        autonomousState = AutonomousState.COMPLETE;
                     }
                 }
                 break;
-
-            case ROTATING:
-                robotRotationAngle = (alliance == Alliance.RED) ? 45 : -45;
-                if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
-                    resetDriveEncoders();
-                    autonomousState = AutonomousState.DRIVING_OFF_LINE;
-                }
-                break;
-
-            case DRIVING_OFF_LINE:
-                if (driveLinear(DRIVE_SPEED, -26, DistanceUnit.INCH, 1)) {
-                    // Example: you could strafe to the side to park:
-                    // resetDriveEncoders();
-                    // autonomousState = AutonomousState.STRAFE_TO_PARK;
-                    autonomousState = AutonomousState.COMPLETE;
-                }
-                break;
-
-            /*
-            case STRAFE_TO_PARK:
-                // Positive distance = strafe right, negative = strafe left
-                if (strafe(DRIVE_SPEED, 12, DistanceUnit.INCH, 1)) {
-                    autonomousState = AutonomousState.COMPLETE;
-                }
-                break;
-            */
 
             case COMPLETE:
                 // Do nothing

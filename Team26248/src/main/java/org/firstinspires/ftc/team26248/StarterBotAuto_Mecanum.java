@@ -140,32 +140,8 @@ public class StarterBotAuto_Mecanum extends OpMode {
     public void start() { }
 
     @Override
-    public void loop() {
-        switch (autonomousState) {
-            case DRIVING_BACK:
-                if (driveLinear(DRIVE_SPEED, -12, DistanceUnit.INCH, 1)) {
-                    resetDriveEncoders();
-                    autonomousState = AutonomousState.LAUNCH;
-                }
-                break;
-            case LAUNCH:
-                launch(true);
-                autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
-                break;
-
-            case WAIT_FOR_LAUNCH:
-                if (launch(false)) {
-                    shotsToFire -= 1;
-                    if (shotsToFire > 0) {
-                        autonomousState = AutonomousState.LAUNCH;
-                    } else {
-                        resetDriveEncoders();
-                        launcher.setVelocity(0);
-                        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
-                    }
-                }
-                break;
-
+     public void loop() {
+        switch(autonomousState){
             case DRIVING_AWAY_FROM_GOAL:
                 if (driveLinear(DRIVE_SPEED, -4, DistanceUnit.INCH, 1)) {
                     resetDriveEncoders();

@@ -98,6 +98,13 @@ public class StraferTeleOp extends LinearOpMode {
                 robot.flyWheel.setPower(0);
             }
 
+            if (gamepad2.left_bumper) {
+                robot.flipper.setPosition(-1);
+            }
+            else if (gamepad2.right_bumper) {
+                robot.flipper.setPosition(.33);
+            }
+
             telemetry.addData("Heading (deg)", "%.1f", robot.getHeadingDeg());
             telemetry.update();
         }

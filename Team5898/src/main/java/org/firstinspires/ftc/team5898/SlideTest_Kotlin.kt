@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import org.firstinspires.ftc.team5898.Constants.SlideConstants
+import kotlin.compareTo
+
 @TeleOp(name = "Slide Test (Kotlin)", group = "Test")
 class SlideTest_Kotlin : OpMode() {
 
@@ -18,13 +20,9 @@ class SlideTest_Kotlin : OpMode() {
     private var joystickYR: Double = 0.0
 
 
-    private var maxHeightL: Int = SlideConstants.maxheightL
-    private var maxHeightR: Int = SlideConstants.maxheightR
     private var slidePower: Double = SlideConstants.movePower
     private var holdPower: Double = SlideConstants.holdPower
     val panelsTelemetry = PanelsTelemetry.telemetry
-
-
 
 
     override fun init() {
@@ -43,22 +41,18 @@ class SlideTest_Kotlin : OpMode() {
     }
 
     override fun loop() {
-        maxHeightL = SlideConstants.maxheightL
-        maxHeightR = SlideConstants.maxheightR
+
         slidePower = SlideConstants.movePower
         holdPower = SlideConstants.holdPower
         slideLeft.targetPosition = slideLeftTarget
         slideRight.targetPosition = slideRightTarget
-        if(gamepad1.dpad_up){
+        if (gamepad1.dpad_up) {
             slideRightTarget += 10
+            slideLeftTarget -= 10
 
-        }else if(gamepad1.dpad_down){
+        } else if (gamepad1.dpad_down) {
             slideRightTarget -= 10
-        }else if(gamepad1.dpad_right) {
             slideLeftTarget += 10
-
-        }else if(gamepad1.dpad_left){
-            slideLeftTarget -=10
         }
 
         val leftPos = slideLeft.currentPosition
@@ -72,25 +66,25 @@ class SlideTest_Kotlin : OpMode() {
 
 
 
-        /*
-        if(slideLeftTarget!=slideLeftPosition){
+        if (leftError > 5) {
             slideLeft.targetPosition = slideLeftTarget
             slideLeft.mode = DcMotor.RunMode.RUN_TO_POSITION
-            slideLeft.power = 0.7
-        }else if(slideLeftTarget == slideLeftPosition && slideLeft.isBusy){
+            slideLeft.power = slidePower
+        } else {
             slideLeft.power = 0.0
             slideLeft.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         }
-        if(slideRightTarget != slideRightPosition){
+
+        if (rightError > 5) {
             slideRight.targetPosition = slideRightTarget
-            slideRight.power = 0.7
             slideRight.mode = DcMotor.RunMode.RUN_TO_POSITION
-        }else if(slideRightTarget == slideRightPosition && slideRight.isBusy){
+            slideRight.power = slidePower
+        } else {
             slideRight.power = 0.0
             slideRight.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         }
 
-         */
+
         telemetry.addData("Left Target/Pos", "$slideLeftTarget / $leftPos")
         telemetry.addData("Right Target/Pos", "$slideRightTarget / $rightPos")
         telemetry.addData("Left Power", slideLeft.power)

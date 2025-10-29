@@ -2,11 +2,13 @@ package org.firstinspires.ftc.team5898
 
 
 import com.bylazar.telemetry.PanelsTelemetry
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import org.firstinspires.ftc.team5898.Constants.SlideConstants
 
+@Disabled
 @TeleOp(name = "Slide Test", group = "Test")
 class slide_test_kt : OpMode() {
 
@@ -19,8 +21,7 @@ class slide_test_kt : OpMode() {
     private var joystickYR: Double = 0.0
 
 
-    private var maxHeightL: Int = SlideConstants.maxheightL
-    private var maxHeightR: Int = SlideConstants.maxheightR
+
     private var slidePower: Double = SlideConstants.movePower
     private var holdPower: Double = SlideConstants.holdPower
     val panelsTelemetry = PanelsTelemetry.telemetry
@@ -44,8 +45,7 @@ class slide_test_kt : OpMode() {
     }
 
     override fun loop() {
-        maxHeightL = SlideConstants.maxheightL
-        maxHeightR = SlideConstants.maxheightR
+
         slidePower = SlideConstants.movePower
         holdPower = SlideConstants.holdPower
 

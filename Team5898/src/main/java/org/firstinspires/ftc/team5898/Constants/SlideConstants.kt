@@ -7,14 +7,15 @@ import com.bylazar.configurables.annotations.Configurable
 object SlideConstants {
     @JvmField
     public var ErrorThreshold: Int = 5
-    @JvmField
-    public var maxheightL: Int = 4000
-    @JvmField
-    public var maxheightR: Int = 4000
+//    @JvmField
+//    public var maxheightL: Int = 4000
+//    @JvmField
+//    public var maxheightR: Int = 4000
     @JvmField
     public var movePower: Double = 0.8
     @JvmField
     public var holdPower: Double = 0.3
     @JvmField
-    public var Offset:Int = 10
+    //Offset in Encoder Ticks
+    public var Offset:Int = 20
 }

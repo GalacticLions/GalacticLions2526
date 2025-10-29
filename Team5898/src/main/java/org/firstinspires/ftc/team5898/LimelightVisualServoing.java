@@ -2,11 +2,13 @@ package org.firstinspires.ftc.team5898;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
+@Disabled
 @Autonomous(name = "Limelight Visual Servoing", group = "Limelight")
 public class LimelightVisualServoing extends OpMode {
     Limelight3A limelight;

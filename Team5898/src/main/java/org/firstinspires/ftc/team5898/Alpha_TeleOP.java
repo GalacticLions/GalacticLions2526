@@ -45,6 +45,10 @@ public class Alpha_TeleOP extends OpMode {
         leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
+        leftSlide.setTargetPosition(0);
+        leftSlide.setTargetPosition(0);
+
         leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -68,6 +72,8 @@ public class Alpha_TeleOP extends OpMode {
 
     @Override
     public void loop() {
+        leftSlide.setPower(.7);
+        leftSlide.setPower(.7);
         // Field-Centric Drive Code
         double y = -gamepad1.left_stick_y; // Forward/Backward (reversed)
         double x = gamepad1.left_stick_x * 1.1; // Strafe Left/Right (counteract imperfect strafing)
@@ -98,7 +104,16 @@ public class Alpha_TeleOP extends OpMode {
         frontRight.setPower(frontRightPower * 0.9);
         backRight.setPower(backRightPower * 0.9);
 
+        if (gamepad1.a){
+            visualServoing.visualServo();
+        }
 
+        if(gamepad2.left_trigger >0.5 && gamepad2.right_trigger > 0.5){
+            leftSlide.setTargetPosition(-3000);
+            rightSlide.setTargetPosition(-3000);
+            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
 //        // Telemetry
 //        telemetry.addData("Bot Heading", Math.toDegrees(botHeading));
 //        telemetry.addData("Left Stick Y", y);

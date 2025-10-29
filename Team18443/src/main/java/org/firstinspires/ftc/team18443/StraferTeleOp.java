@@ -27,12 +27,12 @@ public class StraferTeleOp extends LinearOpMode {
     public void runOpMode() {
 
 // -------------------------------------------------------------------------------------------------
-//    Define and Initialize the Hardware Map
+//    Hardware Setup and Initialization
 // -------------------------------------------------------------------------------------------------
 // Note: Device names, IMU orientation, motor directions, and any device-specific
 //       configurations are handled in RobotHardware.init()
 
-        RobotHardware robot = new RobotHardware(hardwareMap);
+        RobotHardware robot = new RobotHardware(this);
         robot.init();
         robot.resetYaw();
 
@@ -68,8 +68,8 @@ public class StraferTeleOp extends LinearOpMode {
             // Normalize motor power values
             robot.setDrivePowers(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
 
-            // Reset IMU yaw angle to zero manually by pressing the 'guide' button
-            // Note: The 'guide' button mapping may vary by controller
+            // Reset the IMU yaw angle to zero manually by pressing the 'guide' button
+            // Note: The 'guide' button mapping may differ between controller types
             if (gamepad1.guide) {
                 robot.resetYaw();
             }
@@ -86,9 +86,16 @@ public class StraferTeleOp extends LinearOpMode {
                 robot.conveyer.setPower(-1);
                 robot.intake.setPower(-1);
             }
+            else {
+                robot.conveyer.setPower(0);
+                robot.intake.setPower(0);
+            }
 
             if (gamepad2.x) {
                 robot.flyWheel.setPower(0.95);
+            }
+            else {
+                robot.flyWheel.setPower(0);
             }
 
             telemetry.addData("Heading (deg)", "%.1f", robot.getHeadingDeg());

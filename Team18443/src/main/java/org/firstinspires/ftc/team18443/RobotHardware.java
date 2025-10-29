@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.team18443;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -7,7 +8,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
@@ -60,12 +60,12 @@ public class RobotHardware {
                                                 (WHEEL_DIAMETER_INCHES * Math.PI);
     public double strafeComp = 1.10; // Strafe compensation factor (empirical)
 
-    // Hardware Map Reference
-    private final HardwareMap hardwareMap;
+    // LinearOpMode Library Reference
+    private final LinearOpMode opMode;
 
     // Constructor
-    public RobotHardware(HardwareMap hwMap) {
-        this.hardwareMap = hwMap;
+    public RobotHardware(LinearOpMode opMode) {
+        this.opMode = opMode;
     }
 
 // -------------------------------------------------------------------------------------------------
@@ -74,13 +74,13 @@ public class RobotHardware {
     
     public void init() {
         // Map motors by configuration names
-        frontLeft  = hardwareMap.get(DcMotorEx.class, "fl");
-        frontRight = hardwareMap.get(DcMotorEx.class, "fr");
-        backLeft   = hardwareMap.get(DcMotorEx.class, "bl");
-        backRight  = hardwareMap.get(DcMotorEx.class, "br");
-        flyWheel   = hardwareMap.get(DcMotorEx.class, "launcher");
-        conveyer   = hardwareMap.get(DcMotorEx.class, "belt");
-        intake     = hardwareMap.get(DcMotorEx.class, "intake");
+        frontLeft  = opMode.hardwareMap.get(DcMotorEx.class, "fl");
+        frontRight = opMode.hardwareMap.get(DcMotorEx.class, "fr");
+        backLeft   = opMode.hardwareMap.get(DcMotorEx.class, "bl");
+        backRight  = opMode.hardwareMap.get(DcMotorEx.class, "br");
+        flyWheel   = opMode.hardwareMap.get(DcMotorEx.class, "launcher");
+        conveyer   = opMode.hardwareMap.get(DcMotorEx.class, "belt");
+        intake     = opMode.hardwareMap.get(DcMotorEx.class, "intake");
 
         // Reverse one side of the motors for mecanum drive to ensure consistent forward movement
         // If the robot drives backwards, reverse the other side instead
@@ -98,14 +98,14 @@ public class RobotHardware {
         // backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Map servos by configuration names
-        flipper = hardwareMap.get(Servo.class, "flipper");
+        flipper = opMode.hardwareMap.get(Servo.class, "flipper");
 
         // Odometry setup (future)
         // odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
         // odo.resetPosAndIMU();  // Resets odometry and IMU to starting pose
 
         // IMU setup
-        imu = hardwareMap.get(IMU.class, "imu");
+        imu = opMode.hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
@@ -195,71 +195,11 @@ public class RobotHardware {
     // Autonomous
 
     /**
-     * Use to make the robot move forward a specified distance at a given speed
-     *
-     * @param inches The distance to move forward, in inches
-     * @param speed  The speed to travel (range: 0.0 to 1.0)
-     */
-    public void forward(double inches, double speed){
-        moveToPosition(inches, speed);
-    }
-
-    /**
-     * Use to make the robot move backward a specified distance at a given speed
-     *
-     * @param inches The distance to move backward, in inches
-     * @param speed  The speed to travel (range: 0.0 to 1.0)
-     */
-    public void backward(double inches, double speed){
-        moveToPosition(-inches, speed);
-    }
-
-    /**
-     * Use to make the robot rotate left by the specified number of degrees at a given speed
-     *
-     * @param degrees The angle to rotate left, in degrees
-     * @param speed   The speed of rotation (range: 0.0 to 1.0)
-     */
-    public void turnLeft(double degrees, double speed){
-        turnWithGyro(degrees, -speed);
-    }
-
-    /**
-     * Use to make the robot rotate right by the specified number of degrees at a given speed
-     *
-     * @param degrees The angle to rotate right, in degrees
-     * @param speed   The speed of rotation (range: 0.0 to 1.0)
-     */
-    public void turnRight(double degrees, double speed){
-        turnWithGyro(degrees, speed);
-    }
-
-    /**
-     * Use to make the robot strafe left by the specified distance at a given speed
-     *
-     * @param inches The distance to strafe left, in inches
-     * @param speed  The speed of strafing (range: 0.0 to 1.0)
-     */
-    public void strafeLeft(double inches, double speed){
-        strafeToPosition(-inches, speed);
-    }
-
-    /**
-     * Use to make the robot strafe right by the specified distance at a given speed
-     *
-     * @param inches The distance to strafe right, in inches
-     * @param speed  The speed of strafing (range: 0.0 to 1.0)
-     */
-    public void strafeRight(double inches, double speed){
-        strafeToPosition(inches, speed);
-    }
-
-    /*
      * This function's purpose is simply to drive forward or backward.
      * To drive backward, simply make the inches input negative
      */
     public void moveToPosition(double inches, double speed){
-        int move = (int)(Math.round(inches * COUNTS_PER_INCH * strafeComp));
+        int move = (int)(Math.round(inches * COUNTS_PER_INCH));
         // Set the target position and motor mode
         frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + move);
         frontRight.setTargetPosition(frontRight.getCurrentPosition() + move);
@@ -277,8 +217,9 @@ public class RobotHardware {
 
         // Wait until the motors reach their target position
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
-               backRight.isBusy()){
-
+               backRight.isBusy()) {
+            opMode.telemetry.addData("Busy...", "");
+            opMode.telemetry.update();
         }
 
         // Stop the motors
@@ -288,16 +229,99 @@ public class RobotHardware {
         backRight.setPower(0);
     }
 
-    public void turnWithGyro(double degrees, double speedDirection){
+    /**
+     * This function uses the Hub IMU Integrated Gyro to turn a precise number of degrees (+/- 5).
+     * Degrees should always be positive, make speedDirection negative to turn left.
+     */
+    public void turnWithGyro(double degrees, double speedDirection) {
         // Create an object to receive the IMU angles
-        YawPitchRollAngles robotOrientation;
-        robotOrientation = imu.getRobotYawPitchRollAngles();
-
+        YawPitchRollAngles robotOrientation = imu.getRobotYawPitchRollAngles();
         double yaw = robotOrientation.getYaw(AngleUnit.DEGREES);
 
+        // Determine first and second target angles
+        double first, second;
+
+        if (speedDirection > 0) { // turning right
+            first = (degrees > 10) ? (degrees - 10) + devertify(yaw) : devertify(yaw);
+            second = degrees + devertify(yaw);
+        }
+        else { // turning left
+            first = (degrees > 10) ? -(degrees - 10) + devertify(yaw) : devertify(yaw);
+            second = -degrees + devertify(yaw);
+        }
+
+        // Convert to normalized angles
+        double firstA = convertify(first - 5);
+        double firstB = convertify(first + 5);
+        double secondA = convertify(second - 5);
+        double secondB = convertify(second + 5);
+
+        turnWithEncoder(speedDirection);
+        // Wait until yaw is in first range
+        while (opMode.opModeIsActive()) {
+            yaw = convertify(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            boolean inRange = (Math.abs(firstA - firstB) < 11) ? (firstA < yaw && yaw < firstB)
+                              : ((firstA < yaw && yaw <= 180) || (-180 <= yaw && yaw < firstB));
+            if (inRange) break;
+        }
+
+        turnWithEncoder(speedDirection / 3);
+        // Wait until yaw is in second range
+        while (opMode.opModeIsActive()) {
+            yaw = convertify(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+            boolean inRange = (Math.abs(secondA - secondB) < 11) ? (secondA < yaw && yaw < secondB)
+                              : ((secondA < yaw && yaw <= 180) || (-180 <= yaw && yaw < secondB));
+            if (inRange) break;
+        }
+
+        // Stop the motors
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /*
+     * These functions are used in the turnWithGyro function to ensure inputs
+     * are interpreted properly and set the encoder mode and turn.
+     */
+    public double devertify(double degrees){
+        return (degrees < 0) ? degrees + 360 : degrees;
+    }
+    public double convertify(double degrees){
+        if(degrees > 360) {
+            degrees -= 360;
+        }
+        else if(degrees < -180) {
+            degrees += 360;
+        }
+        else if(degrees > 179) {
+            degrees = -(360 - degrees);
+        }
+        return degrees;
+    }
+    public void turnWithEncoder(double input){
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //
+        frontLeft.setPower(input);
+        frontRight.setPower(-input);
+        backLeft.setPower(input);
+        backRight.setPower(-input);
+    }
+
+    /**
      * This function uses the encoders to strafe left or right.
      * Negative input for inches results in left strafing
      */
@@ -320,8 +344,9 @@ public class RobotHardware {
 
         // Wait until the motors reach their target position
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
-               backRight.isBusy()){
-
+               backRight.isBusy()) {
+            opMode.telemetry.addData("Busy...", "");
+            opMode.telemetry.update();
         }
 
         // Stop the motors

@@ -6,22 +6,22 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 // ****************************************************************************
-//  Auto_StraferBase.java                                    GalacticLions2526
+//  Auto_BlueLeft.java                                       GalacticLions2526
 // ****************************************************************************
 //   Description:
-//      Text
+//      Autonomous routine for the BLUE alliance starting on the LEFT side
 //      The code is structured as a LinearOpMode
 //
 //   Usage:
-//      - Extend this class to create new autonomous OpModes
+//      - Deploy this OpMode as an Autonomous on the FTC Driver Station
 //
 // ****************************************************************************
 // This program is released under the BSD-3-Clause-Clear License
 // See LICENSE file in root of this repository
 // ****************************************************************************
 
-@Autonomous(name="Auto_StraferBase", group="Auto", preselectTeleOp ="Strafer Tele Op")
-public class Auto_StraferBase extends LinearOpMode {
+@Autonomous(name="Auto_BlueLeft", group="Auto", preselectTeleOp ="Strafer Tele Op")
+public class Auto_BlueLeft extends LinearOpMode {
 
     private RobotHardware robot;
 
@@ -46,7 +46,7 @@ public class Auto_StraferBase extends LinearOpMode {
 // -------------------------------------------------------------------------------------------------
         /*
          * This is where you will define the sequence of movements and actions
-         * that the robot performs during the Autonomous period
+         * that the robot performs during this Autonomous routine
          *
          * ===== HOW TO USE =====
          * - Call the desired function(s) in the order you want them to execute

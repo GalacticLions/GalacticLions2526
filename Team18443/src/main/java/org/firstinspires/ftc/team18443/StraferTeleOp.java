@@ -91,17 +91,17 @@ public class StraferTeleOp extends LinearOpMode {
                 robot.intake.setPower(0);
             }
 
-            if (gamepad2.x) {
-                robot.flyWheel.setPower(0.95);
+            if (gamepad2.right_trigger > 0.5) {
+                robot.flyWheel.setPower(0.55);
             }
-            else {
-                robot.flyWheel.setPower(0);
+            else if (gamepad2.left_trigger > 0.5) {
+                robot.flyWheel.setPower(0.0);
             }
 
-            if (gamepad2.left_bumper) {
-                robot.flipper.setPosition(-1);
+            if (gamepad2.a) {
+                robot.flipper.setPosition(.66);
             }
-            else if (gamepad2.right_bumper) {
+            else if (gamepad2.b) {
                 robot.flipper.setPosition(.33);
             }
 

@@ -59,6 +59,8 @@ public class RobotHardware {
     static final double COUNTS_PER_INCH       = (COUNTS_PER_ROTATION * DRIVE_GEAR_REDUCTION) /
                                                 (WHEEL_DIAMETER_INCHES * Math.PI);
     public double strafeComp = 1.10; // Strafe compensation factor (empirical)
+    public boolean motorToggled = false;
+    public boolean lastPress = false;
 
     // LinearOpMode Library Reference
     private final LinearOpMode opMode;

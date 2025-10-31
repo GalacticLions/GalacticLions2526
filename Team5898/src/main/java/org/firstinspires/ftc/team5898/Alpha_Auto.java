@@ -52,6 +52,7 @@ public class Alpha_Auto extends LinearOpMode{
         // wait for Start to be pressed
         waitForStart();
         initGyro();
+        back(5,0.5);
 
 
 

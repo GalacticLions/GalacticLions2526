@@ -6,11 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import org.firstinspires.ftc.team5898.Constants.SlideConstants
-import kotlin.compareTo
 
 @TeleOp(name = "Slide Test (Kotlin)", group = "Test")
 class SlideTest_Kotlin : OpMode() {
-
     private lateinit var slideLeft: DcMotor
     private lateinit var slideRight: DcMotor
     private var slideLeftTarget: Int = 0

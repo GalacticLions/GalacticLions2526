@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.team5898;
 
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -9,9 +10,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
+import org.firstinspires.ftc.team5898.Constants.SlideConstants;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
 @TeleOp(name="Alpha TeleOP", group="TeleOP")
@@ -21,14 +25,23 @@ public class Alpha_TeleOP extends OpMode {
     VisualServoing visualServoing;
     CRServo cannonLeft, cannonRight;
     IMU imu;
-    Double launchPower, intakePower;
-    Integer Offset, movePower, errorThreshold;
+    Integer Offset,  errorThreshold, slideLeftTarget, slideRightTarget,slideLeftPosition, slideRightPosition,leftError,rightError;
+    Double slidePower, LaunchPower,intakePower;
 
     @Override
     public void init() {
         //Constants Init
-        launchPower = CannonConstants.LaunchPower;
+        //Cannon Constants
+        LaunchPower = CannonConstants.LaunchPower;
         intakePower = CannonConstants.IntakePower;
+        Offset = SlideConstants.Offset;
+        //Slide Constants
+        slidePower = SlideConstants.movePower;
+        errorThreshold = SlideConstants.ErrorThreshold;
+        slideLeftPosition = leftSlide.getCurrentPosition();
+        slideRightPosition = leftSlide.getCurrentPosition();
+
+
         //Limelight Init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
@@ -52,17 +65,18 @@ public class Alpha_TeleOP extends OpMode {
         topLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
         bottomLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        leftSlide = hardwareMap.get(DcMotor.class,"LS");
+        rightSlide = hardwareMap.get(DcMotor.class,"RS");
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
-        leftSlide.setTargetPosition(0);
-        leftSlide.setTargetPosition(0);
-
+        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slideLeftTarget = 0;
+        slideRightTarget = SlideConstants.Offset;
+
+
 
         //Servo Init
         cannonLeft = hardwareMap.get(CRServo.class, "LC");
@@ -75,7 +89,7 @@ public class Alpha_TeleOP extends OpMode {
         //IMU Init for Field-Centric
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
 
@@ -89,8 +103,40 @@ public class Alpha_TeleOP extends OpMode {
 
     @Override
     public void loop() {
-//        leftSlide.setPower(.7);
-//        leftSlide.setPower(.7);
+        //Slide Control System
+        slideLeftPosition = leftSlide.getCurrentPosition();
+        slideRightPosition = leftSlide.getCurrentPosition();
+        leftSlide.setTargetPosition(slideLeftTarget);
+        rightSlide.setTargetPosition(slideRightTarget);
+        leftError = Math.abs(slideLeftTarget - slideLeftPosition);
+        rightError = slideRightTarget - slideRightPosition;
+
+        if (gamepad1.dpad_up) {
+            slideRightTarget += 10;
+            slideLeftTarget -= 10;
+
+        } else if (gamepad1.dpad_down) {
+            slideRightTarget -= 10;
+            slideLeftTarget += 10;
+        }
+        if (leftError >= 5) {
+            leftSlide.setTargetPosition(slideLeftTarget);
+            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftSlide.setPower(slidePower);
+        } else {
+            leftSlide.setPower(0.0);
+            leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
+        if (rightError >= 5) {
+            rightSlide.setTargetPosition(slideLeftTarget);
+            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightSlide.setPower(slidePower);
+        } else {
+            rightSlide.setPower(0.0);
+            rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
 
 
         //VisualServoing: gamepad1.a
@@ -98,23 +144,14 @@ public class Alpha_TeleOP extends OpMode {
             visualServoing.visualServo();
         }
 
-        //TODO: Slide System
-        /*
-        if(gamepad2.left_trigger >0.5 && gamepad2.right_trigger > 0.5){
-            leftSlide.setTargetPosition(-3000);
-            rightSlide.setTargetPosition(-3000);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
-        */
 
         //Cannon Control
         if (gamepad2.left_stick_y > 0) {
-            topLauncher.setPower(launchPower);
-            bottomLauncher.setPower(launchPower);
+            topLauncher.setPower(LaunchPower);
+            bottomLauncher.setPower(LaunchPower);
         } else if (gamepad2.left_stick_y < 0) {
-            topLauncher.setPower(-launchPower);
-            bottomLauncher.setPower(-launchPower);
+            topLauncher.setPower(-LaunchPower);
+            bottomLauncher.setPower(-LaunchPower);
         }
         if (gamepad2.right_stick_y > 0) {
             cannonLeft.setPower(intakePower);
@@ -123,6 +160,8 @@ public class Alpha_TeleOP extends OpMode {
             cannonLeft.setPower(-intakePower);
             cannonRight.setPower(-intakePower);
         }
+
+
 
         //===========================================
 
@@ -160,5 +199,7 @@ public class Alpha_TeleOP extends OpMode {
     @Override
     public void stop(){
         limelight.stop();
+        leftSlide.setPower(0);
+        rightSlide.setPower(0);
     }
 }

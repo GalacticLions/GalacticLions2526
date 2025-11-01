@@ -26,7 +26,7 @@ public class Alpha_TeleOP extends OpMode {
     CRServo cannonLeft, cannonRight;
     IMU imu;
     Integer Offset,  errorThreshold, slideLeftTarget, slideRightTarget,slideLeftPosition, slideRightPosition,leftError,rightError;
-    Double slidePower, LaunchPower,intakePower;
+    Double slidePower, LaunchPower,intakePower,LaunchPower_alt;
 
     @Override
     public void init() {
@@ -38,8 +38,8 @@ public class Alpha_TeleOP extends OpMode {
         //Slide Constants
         slidePower = SlideConstants.movePower;
         errorThreshold = SlideConstants.ErrorThreshold;
-        slideLeftPosition = leftSlide.getCurrentPosition();
-        slideRightPosition = leftSlide.getCurrentPosition();
+        LaunchPower_alt = CannonConstants.LaunchPower_Reduced;
+
 
 
         //Limelight Init
@@ -47,7 +47,7 @@ public class Alpha_TeleOP extends OpMode {
         limelight.pipelineSwitch(0);
         telemetry.setMsTransmissionInterval(11);
         limelight.setPollRateHz(90);
-        limelight.start();
+        limelight.stop();
 
         //Motors Init
         frontLeft = hardwareMap.get(DcMotor.class, "FL");
@@ -57,33 +57,34 @@ public class Alpha_TeleOP extends OpMode {
         leftSlide = hardwareMap.get(DcMotor.class, "LS");
         rightSlide = hardwareMap.get(DcMotor.class, "RS");
         topLauncher = hardwareMap.get(DcMotor.class, "TL");
-        bottomLauncher = hardwareMap.get(DcMotor.class, "BL");
+        bottomLauncher = hardwareMap.get(DcMotor.class, "BLa");
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
-        topLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
-        bottomLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
+        topLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
+        bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        leftSlide = hardwareMap.get(DcMotor.class,"LS");
-        rightSlide = hardwareMap.get(DcMotor.class,"RS");
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        slideLeftPosition = leftSlide.getCurrentPosition();
+//        slideRightPosition = leftSlide.getCurrentPosition();
         slideLeftTarget = 0;
-        slideRightTarget = SlideConstants.Offset;
+        slideRightTarget = 0;
+        cannonLeft = hardwareMap.get(CRServo.class, "LC");
+        cannonRight = hardwareMap.get(CRServo.class, "RC");
+        //TODO: Directions could be flipped for code below
+        cannonRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        cannonLeft.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
 
         //Servo Init
-        cannonLeft = hardwareMap.get(CRServo.class, "LC");
-        cannonRight = hardwareMap.get(CRServo.class, "RC");
-        //TODO: Directions could be flipped for code below
-        cannonRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        cannonLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
 
         //IMU Init for Field-Centric
@@ -105,11 +106,10 @@ public class Alpha_TeleOP extends OpMode {
     public void loop() {
         //Slide Control System
         slideLeftPosition = leftSlide.getCurrentPosition();
-        slideRightPosition = leftSlide.getCurrentPosition();
-        leftSlide.setTargetPosition(slideLeftTarget);
-        rightSlide.setTargetPosition(slideRightTarget);
+        slideRightPosition = rightSlide.getCurrentPosition();
+
         leftError = Math.abs(slideLeftTarget - slideLeftPosition);
-        rightError = slideRightTarget - slideRightPosition;
+        rightError = Math.abs(slideRightTarget - slideRightPosition) ;
 
         if (gamepad1.dpad_up) {
             slideRightTarget += 10;
@@ -119,7 +119,7 @@ public class Alpha_TeleOP extends OpMode {
             slideRightTarget -= 10;
             slideLeftTarget += 10;
         }
-        if (leftError >= 5) {
+        if (leftError >= 3) {
             leftSlide.setTargetPosition(slideLeftTarget);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             leftSlide.setPower(slidePower);
@@ -128,8 +128,8 @@ public class Alpha_TeleOP extends OpMode {
             leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
 
-        if (rightError >= 5) {
-            rightSlide.setTargetPosition(slideLeftTarget);
+        if (rightError >= 3) {
+            rightSlide.setTargetPosition(slideRightTarget);
             rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightSlide.setPower(slidePower);
         } else {
@@ -146,19 +146,27 @@ public class Alpha_TeleOP extends OpMode {
 
 
         //Cannon Control
-        if (gamepad2.left_stick_y > 0) {
-            topLauncher.setPower(LaunchPower);
+        if (gamepad2.left_stick_y > 0.3) {
+            topLauncher.setPower(-LaunchPower_alt);
             bottomLauncher.setPower(LaunchPower);
-        } else if (gamepad2.left_stick_y < 0) {
-            topLauncher.setPower(-LaunchPower);
+        } else if (gamepad2.left_stick_y < -0.3) {
+            topLauncher.setPower(LaunchPower_alt);
             bottomLauncher.setPower(-LaunchPower);
+        } else {
+            topLauncher.setPower(0);
+            bottomLauncher.setPower(0);
         }
-        if (gamepad2.right_stick_y > 0) {
+
+
+        if (gamepad2.right_stick_y > 0.3) {
             cannonLeft.setPower(intakePower);
             cannonRight.setPower(intakePower);
-        } else if (gamepad2.right_stick_y < 0) {
+        } else if (gamepad2.right_stick_y < -0.3) {
             cannonLeft.setPower(-intakePower);
             cannonRight.setPower(-intakePower);
+        }else {
+            cannonLeft.setPower(0);
+            cannonRight.setPower(0);
         }
 
 

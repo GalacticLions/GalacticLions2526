@@ -5,8 +5,10 @@ import com.bylazar.configurables.annotations.Configurable
 @Configurable
 object CannonConstants {
     @JvmField
-    public var IntakePower: Double = 0.8;
+    public var IntakePower: Double = 1.0;
     @JvmField
     public var LaunchPower: Double = 1.0;
+    @JvmField
+    public var LaunchPower_Reduced: Double = 0.8;
 
 }

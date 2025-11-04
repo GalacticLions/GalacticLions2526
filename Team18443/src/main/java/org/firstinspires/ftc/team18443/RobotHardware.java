@@ -5,7 +5,6 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -16,9 +15,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 // ****************************************************************************
 //   Description:
 //      Hardware abstraction class for the robot. This class is responsible for
-//      defining and initializing all hardware devices (motors, servos, etc.),
-//      providing a small API for common robot drive modes, and holding utility
-//      methods related to driving and orientation control.
+//      defining and initializing all hardware devices (motors, servos, etc.);
+//      providing a small API for common robot drive modes; and holding utility
+//      methods related to driving, orientation, and mechanism control.
 //
 //   Usage:
 //      - Instantiate RobotHardware with a HardwareMap in your OpMode
@@ -39,7 +38,7 @@ public class RobotHardware {
     public DcMotorEx frontLeft, backLeft, frontRight, backRight;
 
     // Mechanism motors for game-specific mechanisms
-    public DcMotorEx intake, flyWheel, conveyer;
+    public DcMotorEx intakeWheels, intakeConveyor, flywheel;
 
     // Servos for game-specific manipulators
     public Servo flipper;
@@ -52,15 +51,17 @@ public class RobotHardware {
     // Inertial Measurement Unit (IMU) for orientation sensing
     public IMU imu;
 
-    // Tunable Variables
+    // Tunable Variables and Constants
     static final double COUNTS_PER_ROTATION   = 537.7; // GoBILDA 312 RPM Yellow Jacket
     static final double WHEEL_DIAMETER_INCHES = 3.779; // GoBilda mecanum wheels
     static final double DRIVE_GEAR_REDUCTION  = 1.0; // No External Gearing
     static final double COUNTS_PER_INCH       = (COUNTS_PER_ROTATION * DRIVE_GEAR_REDUCTION) /
                                                 (WHEEL_DIAMETER_INCHES * Math.PI);
+    public final double FLYWHEEL_POWER_ON     = 0.75;
+    public final double FLYWHEEL_POWER_OFF    = 0.0;
+    public final double FLIPPER_UP            = 0.66;
+    public final double FLIPPER_DOWN          = 0.33;
     public double strafeComp = 1.10; // Strafe compensation factor (empirical)
-    public boolean motorToggled = false;
-    public boolean lastPress = false;
 
     // LinearOpMode Library Reference
     private final LinearOpMode opMode;
@@ -76,24 +77,24 @@ public class RobotHardware {
     
     public void init() {
         // Map motors by configuration names
-        frontLeft  = opMode.hardwareMap.get(DcMotorEx.class, "fl");
-        frontRight = opMode.hardwareMap.get(DcMotorEx.class, "fr");
-        backLeft   = opMode.hardwareMap.get(DcMotorEx.class, "bl");
-        backRight  = opMode.hardwareMap.get(DcMotorEx.class, "br");
-        flyWheel   = opMode.hardwareMap.get(DcMotorEx.class, "launcher");
-        conveyer   = opMode.hardwareMap.get(DcMotorEx.class, "belt");
-        intake     = opMode.hardwareMap.get(DcMotorEx.class, "intake");
+        frontLeft      = opMode.hardwareMap.get(DcMotorEx.class, "fl");
+        frontRight     = opMode.hardwareMap.get(DcMotorEx.class, "fr");
+        backLeft       = opMode.hardwareMap.get(DcMotorEx.class, "bl");
+        backRight      = opMode.hardwareMap.get(DcMotorEx.class, "br");
+        flywheel       = opMode.hardwareMap.get(DcMotorEx.class, "launcher");
+        intakeConveyor = opMode.hardwareMap.get(DcMotorEx.class, "belt");
+        intakeWheels   = opMode.hardwareMap.get(DcMotorEx.class, "intake");
 
         // Reverse one side of the motors for mecanum drive to ensure consistent forward movement
         // If the robot drives backwards, reverse the other side instead
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        // Set zero power behavior for motors to BRAKE for holding position
+        // Set zero power behavior for mechanism motors to BRAKE for precise control
         // Optionally apply BRAKE to the drivetrain for better control
-        flyWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        conveyer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeConveyor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeWheels.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -116,7 +117,7 @@ public class RobotHardware {
     }
 
 // -------------------------------------------------------------------------------------------------
-//    Methods for Driving & Orientation
+//    Methods for Driving, Orientation, and Mechanisms
 // -------------------------------------------------------------------------------------------------
 
     // TeleOp
@@ -225,10 +226,10 @@ public class RobotHardware {
         }
 
         // Stop the motors
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
+        frontLeft.setPower(0.0);
+        frontRight.setPower(0.0);
+        backLeft.setPower(0.0);
+        backRight.setPower(0.0);
     }
 
     /**
@@ -277,10 +278,10 @@ public class RobotHardware {
         }
 
         // Stop the motors
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
+        frontLeft.setPower(0.0);
+        frontRight.setPower(0.0);
+        backLeft.setPower(0.0);
+        backRight.setPower(0.0);
 
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -352,9 +353,68 @@ public class RobotHardware {
         }
 
         // Stop the motors
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
+        frontLeft.setPower(0.0);
+        frontRight.setPower(0.0);
+        backLeft.setPower(0.0);
+        backRight.setPower(0.0);
+    }
+
+    /**
+     *
+     */
+    public void setIntake(int ticks) {
+        // Set the ticks and motor mode
+        intakeConveyor.setTargetPosition(intakeConveyor.getCurrentPosition() + ticks);
+        intakeWheels.setTargetPosition(intakeWheels.getCurrentPosition() + ticks);
+        intakeConveyor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        intakeWheels.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        intakeConveyor.setPower(1.0);
+        intakeWheels.setPower(1.0);
+
+        while (intakeConveyor.isBusy() && intakeWheels.isBusy()) {
+            opMode.telemetry.addData("Busy...", "");
+            opMode.telemetry.update();
+        }
+
+        // Stop the motors
+        intakeConveyor.setPower(0.0);
+        intakeWheels.setPower(0.0);
+    }
+
+    /**
+     * Sets flywheel power based on predefined ON/OFF states
+     */
+    public void setFlywheelState(flywheelState state) {
+        switch (state) {
+            case ON:
+                flywheel.setPower(FLYWHEEL_POWER_ON);
+                break;
+
+            case OFF:
+                flywheel.setPower(FLYWHEEL_POWER_OFF);
+                break;
+        }
+    }
+    public enum flywheelState {
+        ON, OFF
+    }
+
+    /**
+     * Sets flipper position based on predefined UP/DOWN states
+     */
+    public void setFlipperState(flipperState state) {
+        switch (state) {
+            case UP:
+                flipper.setPosition(FLIPPER_UP);
+                break;
+
+            case DOWN:
+                flipper.setPosition(FLIPPER_DOWN);
+                break;
+        }
+    }
+    public enum flipperState {
+        UP, DOWN
     }
 }

@@ -20,7 +20,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 // See LICENSE file in root of this repository
 // ****************************************************************************
 
-@TeleOp(name="Strafer Tele Op", group="TeleOp")
+@TeleOp(name="StraferTeleOp", group="TeleOp")
 public class StraferTeleOp extends LinearOpMode {
 
     @Override
@@ -79,30 +79,30 @@ public class StraferTeleOp extends LinearOpMode {
 // -------------------------------------------------------------------------------------------------
 
             if (gamepad2.dpad_up) {
-                robot.conveyer.setPower(1);
-                robot.intake.setPower(1);
+                robot.intakeConveyor.setPower(1.0);
+                robot.intakeWheels.setPower(1.0);
             }
             else if (gamepad2.dpad_down) {
-                robot.conveyer.setPower(-1);
-                robot.intake.setPower(-1);
+                robot.intakeConveyor.setPower(-1.0);
+                robot.intakeWheels.setPower(-1.0);
             }
             else {
-                robot.conveyer.setPower(0);
-                robot.intake.setPower(0);
+                robot.intakeConveyor.setPower(0.0);
+                robot.intakeWheels.setPower(0.0);
             }
 
             if (gamepad2.right_trigger > 0.5) {
-                robot.flyWheel.setPower(0.55);
+                robot.flywheel.setPower(robot.FLYWHEEL_POWER_ON);
             }
             else if (gamepad2.left_trigger > 0.5) {
-                robot.flyWheel.setPower(0.0);
+                robot.flywheel.setPower(robot.FLYWHEEL_POWER_OFF);
             }
 
             if (gamepad2.a) {
-                robot.flipper.setPosition(.66);
+                robot.flipper.setPosition(robot.FLIPPER_UP);
             }
             else if (gamepad2.b) {
-                robot.flipper.setPosition(.33);
+                robot.flipper.setPosition(robot.FLIPPER_DOWN);
             }
 
             telemetry.addData("Heading (deg)", "%.1f", robot.getHeadingDeg());

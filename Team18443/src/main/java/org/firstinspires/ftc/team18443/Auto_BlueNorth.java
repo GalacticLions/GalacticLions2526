@@ -3,13 +3,16 @@ package org.firstinspires.ftc.team18443;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import static org.firstinspires.ftc.team18443.RobotHardware.flywheelState.*;
+import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 // ****************************************************************************
-//  Auto_BlueLeft.java                                       GalacticLions2526
+//  Auto_BlueNorth.java                                      GalacticLions2526
 // ****************************************************************************
 //   Description:
-//      Autonomous routine for the BLUE alliance starting on the LEFT side
+//      Autonomous routine for the BLUE alliance starting on the NORTH side
 //      The code is structured as a LinearOpMode
 //
 //   Usage:
@@ -20,8 +23,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 // See LICENSE file in root of this repository
 // ****************************************************************************
 
-@Autonomous(name="Auto_BlueLeft", group="Auto", preselectTeleOp ="Strafer Tele Op")
-public class Auto_BlueLeft extends LinearOpMode {
+@Autonomous(name="Auto_BlueNorth", group="Autonomous", preselectTeleOp ="StraferTeleOp")
+public class Auto_BlueNorth extends LinearOpMode {
 
     private RobotHardware robot;
 
@@ -66,7 +69,7 @@ public class Auto_BlueLeft extends LinearOpMode {
      * @param inches The distance to move forward, in inches
      * @param speed  The speed to travel (range: 0.0 to 1.0)
      */
-    public void forward(double inches, double speed){
+    public void forward(double inches, double speed) {
         robot.moveToPosition(inches, speed);
     }
 
@@ -76,7 +79,7 @@ public class Auto_BlueLeft extends LinearOpMode {
      * @param inches The distance to move backward, in inches
      * @param speed  The speed to travel (range: 0.0 to 1.0)
      */
-    public void backward(double inches, double speed){
+    public void backward(double inches, double speed) {
         robot.moveToPosition(-inches, speed);
     }
 
@@ -86,7 +89,7 @@ public class Auto_BlueLeft extends LinearOpMode {
      * @param degrees The angle to rotate left, in degrees
      * @param speed   The speed of rotation (range: 0.0 to 1.0)
      */
-    public void turnLeft(double degrees, double speed){
+    public void turnLeft(double degrees, double speed) {
         robot.turnWithGyro(degrees, -speed);
     }
 
@@ -96,7 +99,7 @@ public class Auto_BlueLeft extends LinearOpMode {
      * @param degrees The angle to rotate right, in degrees
      * @param speed   The speed of rotation (range: 0.0 to 1.0)
      */
-    public void turnRight(double degrees, double speed){
+    public void turnRight(double degrees, double speed) {
         robot.turnWithGyro(degrees, speed);
     }
 
@@ -106,7 +109,7 @@ public class Auto_BlueLeft extends LinearOpMode {
      * @param inches The distance to strafe left, in inches
      * @param speed  The speed of strafing (range: 0.0 to 1.0)
      */
-    public void strafeLeft(double inches, double speed){
+    public void strafeLeft(double inches, double speed) {
         robot.strafeToPosition(-inches, speed);
     }
 
@@ -116,7 +119,34 @@ public class Auto_BlueLeft extends LinearOpMode {
      * @param inches The distance to strafe right, in inches
      * @param speed  The speed of strafing (range: 0.0 to 1.0)
      */
-    public void strafeRight(double inches, double speed){
+    public void strafeRight(double inches, double speed) {
         robot.strafeToPosition(inches, speed);
+    }
+
+    /**
+     * Controls the intake system by the specified ticks
+     *
+     * @param ticks Number of ticks to move
+     */
+    public void intake(int ticks) {
+        robot.setIntake(ticks);
+    }
+
+    /**
+     * Controls the flywheel using the specified mode
+     *
+     * @param state Enum defining the flywheel state (ON and OFF)
+     */
+    public void flywheel(RobotHardware.flywheelState state) {
+        robot.setFlywheelState(state);
+    }
+
+    /**
+     * Controls the flipper using the specified state
+     *
+     * @param state Enum defining the flipper state (UP and DOWN)
+     */
+    public void flipper(RobotHardware.flipperState state) {
+        robot.setFlipperState(state);
     }
 }

@@ -64,67 +64,73 @@ public class Auto_RedSouth extends LinearOpMode {
     }
 
     /**
-     * Use to make the robot move forward a specified distance at a given speed
+     * Moves the robot forward a specified distance at a given speed
      *
-     * @param inches The distance to move forward, in inches
+     * @param inches The distance to move forward in inches
      * @param speed  The speed to travel (range: 0.0 to 1.0)
+     * @see RobotHardware#moveToPosition(double, double)
      */
     public void forward(double inches, double speed) {
         robot.moveToPosition(inches, speed);
     }
 
     /**
-     * Use to make the robot move backward a specified distance at a given speed
+     * Moves the robot backward a specified distance at a given speed
      *
-     * @param inches The distance to move backward, in inches
+     * @param inches The distance to move backward in inches
      * @param speed  The speed to travel (range: 0.0 to 1.0)
+     * @see RobotHardware#moveToPosition(double, double)
      */
     public void backward(double inches, double speed) {
         robot.moveToPosition(-inches, speed);
     }
 
     /**
-     * Use to make the robot rotate left by the specified number of degrees at a given speed
+     * Rotates the robot left by a specified number of degrees at a given speed
      *
-     * @param degrees The angle to rotate left, in degrees
+     * @param degrees The angle to rotate left in degrees
      * @param speed   The speed of rotation (range: 0.0 to 1.0)
+     * @see RobotHardware#turnWithGyro(double, double)
      */
     public void turnLeft(double degrees, double speed) {
         robot.turnWithGyro(degrees, -speed);
     }
 
     /**
-     * Use to make the robot rotate right by the specified number of degrees at a given speed
+     * Rotates the robot right by a specified number of degrees at a given speed
      *
-     * @param degrees The angle to rotate right, in degrees
+     * @param degrees The angle to rotate right in degrees
      * @param speed   The speed of rotation (range: 0.0 to 1.0)
+     * @see RobotHardware#turnWithGyro(double, double)
      */
     public void turnRight(double degrees, double speed) {
         robot.turnWithGyro(degrees, speed);
     }
 
     /**
-     * Use to make the robot strafe left by the specified distance at a given speed
+     * Strafes the robot left by a specified distance at a given speed
      *
-     * @param inches The distance to strafe left, in inches
+     * @param inches The distance to strafe left in inches
      * @param speed  The speed of strafing (range: 0.0 to 1.0)
+     * @see RobotHardware#strafeToPosition(double, double)
      */
     public void strafeLeft(double inches, double speed) {
         robot.strafeToPosition(-inches, speed);
     }
 
     /**
-     * Use to make the robot strafe right by the specified distance at a given speed
+     * Strafes the robot right by a specified distance at a given speed
      *
-     * @param inches The distance to strafe right, in inches
+     * @param inches The distance to strafe right in inches
      * @param speed  The speed of strafing (range: 0.0 to 1.0)
+     * @see RobotHardware#strafeToPosition(double, double)
      */
     public void strafeRight(double inches, double speed) {
         robot.strafeToPosition(inches, speed);
     }
 
     /**
-     * Controls the intake system by the specified ticks
+     * Moves the intake system by a specified number of ticks
      *
      * @param ticks Number of ticks to move
      */
@@ -133,9 +139,9 @@ public class Auto_RedSouth extends LinearOpMode {
     }
 
     /**
-     * Controls the flywheel using the specified mode
+     * Controls the flywheel by setting it to the specified state
      *
-     * @param state Enum defining the flywheel state (ON and OFF)
+     * @param state The desired flywheel state (HIGH, MID, or OFF)
      */
     public void flywheel(RobotHardware.flywheelState state) {
         robot.setFlywheelState(state);
@@ -144,7 +150,7 @@ public class Auto_RedSouth extends LinearOpMode {
     /**
      * Controls the flipper using the specified state
      *
-     * @param state Enum defining the flipper state (UP and DOWN)
+     * @param state The desired flipper state (UP and DOWN)
      */
     public void flipper(RobotHardware.flipperState state) {
         robot.setFlipperState(state);

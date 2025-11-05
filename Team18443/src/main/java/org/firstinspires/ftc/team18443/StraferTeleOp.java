@@ -29,8 +29,8 @@ public class StraferTeleOp extends LinearOpMode {
 // -------------------------------------------------------------------------------------------------
 //    Hardware Setup and Initialization
 // -------------------------------------------------------------------------------------------------
-// Note: Device names, IMU orientation, motor directions, and any device-specific
-//       configurations are handled in RobotHardware.init()
+//    Note: Device names, IMU orientation, motor directions, and any device-specific
+//          configurations are handled in RobotHardware.init()
 
         RobotHardware robot = new RobotHardware(this);
         robot.init();
@@ -91,8 +91,12 @@ public class StraferTeleOp extends LinearOpMode {
                 robot.intakeWheels.setPower(0.0);
             }
 
-            if (gamepad2.right_trigger > 0.5) {
-                robot.flywheel.setPower(robot.FLYWHEEL_POWER_ON);
+            if (gamepad2.right_trigger > 0.8) {
+                robot.flywheel.setPower(robot.FLYWHEEL_POWER_HIGH);
+            }
+            else if (gamepad2.right_trigger > 0.3) {
+                robot.flywheel.setPower(robot.FLYWHEEL_POWER_MID);
+
             }
             else if (gamepad2.left_trigger > 0.5) {
                 robot.flywheel.setPower(robot.FLYWHEEL_POWER_OFF);
@@ -105,7 +109,7 @@ public class StraferTeleOp extends LinearOpMode {
                 robot.flipper.setPosition(robot.FLIPPER_DOWN);
             }
 
-            telemetry.addData("Heading (deg)", "%.1f", robot.getHeadingDeg());
+            telemetry.addData("Heading (rad)", "%.1f", robot.getHeadingRad());
             telemetry.update();
         }
     }

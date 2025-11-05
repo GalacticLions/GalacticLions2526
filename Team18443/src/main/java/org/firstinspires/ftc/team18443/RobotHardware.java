@@ -20,8 +20,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 //      methods related to driving, orientation, and mechanism control.
 //
 //   Usage:
-//      - Instantiate RobotHardware with a HardwareMap in your OpMode
-//      - Call init() to initialize all hardware devices
+//      - Instantiate RobotHardware with a LinearOpMode reference
+//      - Call init() in runOpMode() before accessing any hardware
 //
 // ****************************************************************************
 // This program is released under the BSD-3-Clause-Clear License
@@ -31,16 +31,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 public class RobotHardware {
 
 // -------------------------------------------------------------------------------------------------
-//    Hardware Device & Variable Definitions
+//    Hardware Device Definitions
 // -------------------------------------------------------------------------------------------------
+//
+//    All physical devices used on the robot are declared here and initialized
+//    in init(). Each is referenced throughout TeleOp and Autonomous modes
 
-    // Drive motors for drive base
+    // Drive motors for the mecanum drive base
     public DcMotorEx frontLeft, backLeft, frontRight, backRight;
 
     // Mechanism motors for game-specific mechanisms
     public DcMotorEx intakeWheels, intakeConveyor, flywheel;
 
-    // Servos for game-specific manipulators
+    // Servos for game element manipulators
     public Servo flipper;
 
     // Odometry (future addition)
@@ -48,16 +51,25 @@ public class RobotHardware {
     // To use: instantiate with hardwareMap.get(GoBildaPinpointDriver.class, "odo");
     // Then read pose data via odo.getPosition() or odo.getHeadingRadians().
 
-    // Inertial Measurement Unit (IMU) for orientation sensing
+    // Inertial Measurement Unit (IMU) for orientation and field-centric control
     public IMU imu;
 
-    // Tunable Variables and Constants
-    static final double COUNTS_PER_ROTATION   = 537.7; // GoBILDA 312 RPM Yellow Jacket
+// -------------------------------------------------------------------------------------------------
+//    Tunable Constants
+// -------------------------------------------------------------------------------------------------
+//
+//    Encoder conversion factors, motion scaling values, and mechanism presets.
+//    Adjust these for calibration, tuning, or improved accuracy
+
+    // Encoder and motion parameters
+    static final double COUNTS_PER_ROTATION   = 537.7; // GoBilda 312 RPM Yellow Jacket
     static final double WHEEL_DIAMETER_INCHES = 3.779; // GoBilda mecanum wheels
-    static final double DRIVE_GEAR_REDUCTION  = 1.0; // No External Gearing
+    static final double DRIVE_GEAR_REDUCTION  = 1.0;   // 1:1 gear ratio
     static final double COUNTS_PER_INCH       = (COUNTS_PER_ROTATION * DRIVE_GEAR_REDUCTION) /
                                                 (WHEEL_DIAMETER_INCHES * Math.PI);
-    public final double FLYWHEEL_POWER_ON     = 0.75;
+    // Mechanism constants
+    public final double FLYWHEEL_POWER_HIGH   = 0.75;
+    public final double FLYWHEEL_POWER_MID    = 0.45;
     public final double FLYWHEEL_POWER_OFF    = 0.0;
     public final double FLIPPER_UP            = 0.66;
     public final double FLIPPER_DOWN          = 0.33;
@@ -74,7 +86,13 @@ public class RobotHardware {
 // -------------------------------------------------------------------------------------------------
 //    Initialization Setup
 // -------------------------------------------------------------------------------------------------
-    
+
+    /**
+     * Initializes all hardware devices and configures their directions,
+     * zero power behaviors, and IMU orientation
+     * <p>
+     * Must be called once in {@code runOpMode()} before accessing hardware
+     */
     public void init() {
         // Map motors by configuration names
         frontLeft      = opMode.hardwareMap.get(DcMotorEx.class, "fl");
@@ -85,13 +103,13 @@ public class RobotHardware {
         intakeConveyor = opMode.hardwareMap.get(DcMotorEx.class, "belt");
         intakeWheels   = opMode.hardwareMap.get(DcMotorEx.class, "intake");
 
-        // Reverse one side of the motors for mecanum drive to ensure consistent forward movement
-        // If the robot drives backwards, reverse the other side instead
+        // Reverse the left side motors so all wheels move the robot forward together
+        // (Swap sides if forward/backward controls are inverted)
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        // Set zero power behavior for mechanism motors to BRAKE for precise control
-        // Optionally apply BRAKE to the drivetrain for better control
+        // Apply BRAKE mode to mechanism motors for precise stopping
+        // (Optional: enable BRAKE on drive motors for more controlled deceleration)
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeConveyor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeWheels.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -107,23 +125,22 @@ public class RobotHardware {
         // odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
         // odo.resetPosAndIMU();  // Resets odometry and IMU to starting pose
 
-        // IMU setup
+        // Configure IMU mounting orientation relative to robot frame
         imu = opMode.hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                // By default, IMU assumes REV Hub is mounted with logo up
+                // and USB port facing forward
                 RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
-        // By default, IMU assumes REV Hub is mounted with logo up and USB port facing forward
         imu.initialize(parameters);
     }
 
 // -------------------------------------------------------------------------------------------------
-//    Methods for Driving, Orientation, and Mechanisms
+//    IMU and Orientation Helpers
 // -------------------------------------------------------------------------------------------------
 
-    // TeleOp
-
     /**
-     * Resets the IMU's yaw angle to zero
+     * Resets the IMU's yaw (heading) angle to zero
      */
     public void resetYaw() {
         if (imu != null) imu.resetYaw();
@@ -147,8 +164,12 @@ public class RobotHardware {
         return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
+// -------------------------------------------------------------------------------------------------
+//    TeleOp Drive Methods
+// -------------------------------------------------------------------------------------------------
+
     /**
-     * Sets the drive motor powers, normalizing values to keep them within [-1, 1]
+     * Sets raw drive motor powers with normalization so values remain within [-1, 1]
      *
      * @param fl The front left motor power
      * @param fr The front right motor power
@@ -195,11 +216,14 @@ public class RobotHardware {
         driveRobotCentric(rotX, rotY, rx);
     }
 
-    // Autonomous
+// -------------------------------------------------------------------------------------------------
+//     Autonomous Movement and Mechanism Control Methods
+// -------------------------------------------------------------------------------------------------
+//     These methods are intended for use in Autonomous OpModes only. Each method
+//     executes blocking motion sequences until completion before returning
 
     /**
-     * This function's purpose is simply to drive forward or backward.
-     * To drive backward, simply make the inches input negative
+     * Moves the robot forward or backward a specified distance using encoder targets
      */
     public void moveToPosition(double inches, double speed){
         int move = (int)(Math.round(inches * COUNTS_PER_INCH));
@@ -213,28 +237,27 @@ public class RobotHardware {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        frontLeft.setPower(speed);
-        frontRight.setPower(speed);
-        backLeft.setPower(speed);
-        backRight.setPower(speed);
+        setDrivePowers(speed, speed, speed, speed);
 
         // Wait until the motors reach their target position
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
                backRight.isBusy()) {
-            opMode.telemetry.addData("Busy...", "");
+            opMode.telemetry.addData("Drive", "Moving...");
             opMode.telemetry.update();
         }
 
-        // Stop the motors
-        frontLeft.setPower(0.0);
-        frontRight.setPower(0.0);
-        backLeft.setPower(0.0);
-        backRight.setPower(0.0);
+        // Stop motors
+        setDrivePowers(0, 0, 0, 0);
     }
 
     /**
-     * This function uses the Hub IMU Integrated Gyro to turn a precise number of degrees (+/- 5).
-     * Degrees should always be positive, make speedDirection negative to turn left.
+     * Rotates the robot by a specified angle using IMU-based yaw measurements
+     * <p>
+     * This method performs a two-phase rotation for improved accuracy:
+     * <ul>
+     *   <li>Phase 1: Coarse rotation to reach within ~10° of the target angle</li>
+     *   <li>Phase 2: Fine rotation for higher precision (±5° tolerance)</li>
+     * </ul>
      */
     public void turnWithGyro(double degrees, double speedDirection) {
         // Create an object to receive the IMU angles
@@ -253,14 +276,14 @@ public class RobotHardware {
             second = -degrees + devertify(yaw);
         }
 
-        // Convert to normalized angles
+        // Define angle tolerances
         double firstA = convertify(first - 5);
         double firstB = convertify(first + 5);
         double secondA = convertify(second - 5);
         double secondB = convertify(second + 5);
 
         turnWithEncoder(speedDirection);
-        // Wait until yaw is in first range
+        // Phase 1: Coarse turn
         while (opMode.opModeIsActive()) {
             yaw = convertify(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             boolean inRange = (Math.abs(firstA - firstB) < 11) ? (firstA < yaw && yaw < firstB)
@@ -269,7 +292,7 @@ public class RobotHardware {
         }
 
         turnWithEncoder(speedDirection / 3);
-        // Wait until yaw is in second range
+        // Phase 2: Fine adjustment
         while (opMode.opModeIsActive()) {
             yaw = convertify(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             boolean inRange = (Math.abs(secondA - secondB) < 11) ? (secondA < yaw && yaw < secondB)
@@ -277,12 +300,8 @@ public class RobotHardware {
             if (inRange) break;
         }
 
-        // Stop the motors
-        frontLeft.setPower(0.0);
-        frontRight.setPower(0.0);
-        backLeft.setPower(0.0);
-        backRight.setPower(0.0);
-
+        // Stop motors and reset encoders
+        setDrivePowers(0, 0, 0, 0);
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -294,8 +313,9 @@ public class RobotHardware {
     }
 
     /*
-     * These functions are used in the turnWithGyro function to ensure inputs
-     * are interpreted properly and set the encoder mode and turn.
+     * Angle normalization utilities:
+     *  - devertify(): converts negative angles into [0°, 360°]
+     *  - convertify(): constrains angles to [-180°, 180°] for comparison
      */
     public double devertify(double degrees){
         return (degrees < 0) ? degrees + 360 : degrees;
@@ -325,7 +345,7 @@ public class RobotHardware {
     }
 
     /**
-     * This function uses the encoders to strafe left or right.
+     * Strafes robot left or right using encoder targets.
      * Negative input for inches results in left strafing
      */
     public void strafeToPosition(double inches, double speed){
@@ -340,27 +360,21 @@ public class RobotHardware {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        frontLeft.setPower(speed);
-        frontRight.setPower(speed);
-        backLeft.setPower(speed);
-        backRight.setPower(speed);
+        setDrivePowers(speed, speed, speed, speed);
 
         // Wait until the motors reach their target position
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
                backRight.isBusy()) {
-            opMode.telemetry.addData("Busy...", "");
+            opMode.telemetry.addData("Drive", "Strafing...");
             opMode.telemetry.update();
         }
 
-        // Stop the motors
-        frontLeft.setPower(0.0);
-        frontRight.setPower(0.0);
-        backLeft.setPower(0.0);
-        backRight.setPower(0.0);
+        // Stop motors
+        setDrivePowers(0, 0, 0, 0);
     }
 
     /**
-     *
+     * Moves the intake system by a specified number of encoder ticks
      */
     public void setIntake(int ticks) {
         // Set the ticks and motor mode
@@ -373,7 +387,7 @@ public class RobotHardware {
         intakeWheels.setPower(1.0);
 
         while (intakeConveyor.isBusy() && intakeWheels.isBusy()) {
-            opMode.telemetry.addData("Busy...", "");
+            opMode.telemetry.addData("Intake", "Moving...");
             opMode.telemetry.update();
         }
 
@@ -383,12 +397,16 @@ public class RobotHardware {
     }
 
     /**
-     * Sets flywheel power based on predefined ON/OFF states
+     * Sets the flywheel to a predefined ON or OFF state
      */
     public void setFlywheelState(flywheelState state) {
         switch (state) {
-            case ON:
-                flywheel.setPower(FLYWHEEL_POWER_ON);
+            case HIGH:
+                flywheel.setPower(FLYWHEEL_POWER_HIGH);
+                break;
+
+            case MID:
+                flywheel.setPower(FLYWHEEL_POWER_MID);
                 break;
 
             case OFF:
@@ -397,7 +415,7 @@ public class RobotHardware {
         }
     }
     public enum flywheelState {
-        ON, OFF
+        HIGH, MID, OFF
     }
 
     /**

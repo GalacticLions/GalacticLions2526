@@ -35,7 +35,7 @@ public class Auto_RedSouth extends LinearOpMode {
 //    Hardware Setup and Initialization
 // -------------------------------------------------------------------------------------------------
 
-        RobotHardware robot = new RobotHardware(this);
+        robot = new RobotHardware(this);
         robot.init();
         robot.resetYaw();
 
@@ -141,7 +141,7 @@ public class Auto_RedSouth extends LinearOpMode {
     /**
      * Controls the flywheel by setting it to the specified state
      *
-     * @param state The desired flywheel state (HIGH, MID, or OFF)
+     * @param state The desired flywheel state (HIGH, MEDIUM, or OFF)
      */
     public void flywheel(RobotHardware.flywheelState state) {
         robot.setFlywheelState(state);

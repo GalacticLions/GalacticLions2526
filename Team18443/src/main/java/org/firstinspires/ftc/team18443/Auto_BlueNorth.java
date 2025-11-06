@@ -35,7 +35,7 @@ public class Auto_BlueNorth extends LinearOpMode {
 //    Hardware Setup and Initialization
 // -------------------------------------------------------------------------------------------------
 
-        RobotHardware robot = new RobotHardware(this);
+        robot = new RobotHardware(this);
         robot.init();
         robot.resetYaw();
 
@@ -61,6 +61,18 @@ public class Auto_BlueNorth extends LinearOpMode {
          * strafeLeft(12, 0.5);
          */
 
+        backward(5, 0.5);
+        flywheel(MEDIUM);
+        sleep(3000);
+        flipper(UP);
+        sleep(500);
+        flipper(DOWN);
+        sleep(500);
+        flywheel(OFF);
+
+        telemetry.addData("Auto Run", "Complete");
+        telemetry.update();
+        sleep(1000);  // Pause to display completion message
     }
 
     /**
@@ -141,7 +153,7 @@ public class Auto_BlueNorth extends LinearOpMode {
     /**
      * Controls the flywheel by setting it to the specified state
      *
-     * @param state The desired flywheel state (HIGH, MID, or OFF)
+     * @param state The desired flywheel state (HIGH, MEDIUM, or OFF)
      */
     public void flywheel(RobotHardware.flywheelState state) {
         robot.setFlywheelState(state);

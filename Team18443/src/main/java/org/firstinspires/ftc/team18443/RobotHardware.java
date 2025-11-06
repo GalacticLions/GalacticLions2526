@@ -69,7 +69,7 @@ public class RobotHardware {
                                                 (WHEEL_DIAMETER_INCHES * Math.PI);
     // Mechanism constants
     public final double FLYWHEEL_POWER_HIGH   = 0.75;
-    public final double FLYWHEEL_POWER_MID    = 0.45;
+    public final double FLYWHEEL_POWER_MEDIUM = 0.45;
     public final double FLYWHEEL_POWER_OFF    = 0.0;
     public final double FLIPPER_UP            = 0.66;
     public final double FLIPPER_DOWN          = 0.33;
@@ -241,7 +241,7 @@ public class RobotHardware {
 
         // Wait until the motors reach their target position
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
-               backRight.isBusy()) {
+                backRight.isBusy()) {
             opMode.telemetry.addData("Drive", "Moving...");
             opMode.telemetry.update();
         }
@@ -364,7 +364,7 @@ public class RobotHardware {
 
         // Wait until the motors reach their target position
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
-               backRight.isBusy()) {
+                backRight.isBusy()) {
             opMode.telemetry.addData("Drive", "Strafing...");
             opMode.telemetry.update();
         }
@@ -397,7 +397,7 @@ public class RobotHardware {
     }
 
     /**
-     * Sets the flywheel to a predefined ON or OFF state
+     * Sets the flywheel to a predefined HIGH, MED, or OFF state
      */
     public void setFlywheelState(flywheelState state) {
         switch (state) {
@@ -405,8 +405,8 @@ public class RobotHardware {
                 flywheel.setPower(FLYWHEEL_POWER_HIGH);
                 break;
 
-            case MID:
-                flywheel.setPower(FLYWHEEL_POWER_MID);
+            case MEDIUM:
+                flywheel.setPower(FLYWHEEL_POWER_MEDIUM);
                 break;
 
             case OFF:
@@ -415,7 +415,7 @@ public class RobotHardware {
         }
     }
     public enum flywheelState {
-        HIGH, MID, OFF
+        HIGH, MEDIUM, OFF
     }
 
     /**

@@ -14,10 +14,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 //  RobotHardware.java                                       GalacticLions2526
 // ****************************************************************************
 //   Description:
-//      Hardware abstraction class for the robot. This class is responsible for
-//      defining and initializing all hardware devices (motors, servos, etc.);
-//      providing a small API for common robot drive modes; and holding utility
-//      methods related to driving, orientation, and mechanism control.
+//      Hardware abstraction layer for the robot. This class defines and
+//      initializes all hardware components (motors, servos, sensors, etc.),
+//      provides an API for drive and mechanism control, and implements
+//      motion/utility methods for both TeleOp and Autonomous modes
 //
 //   Usage:
 //      - Instantiate RobotHardware with a LinearOpMode reference
@@ -38,7 +38,7 @@ public class RobotHardware {
 //    in init(). Each is referenced throughout TeleOp and Autonomous modes
 
     // Drive motors for the mecanum drive base
-    public DcMotorEx frontLeft, backLeft, frontRight, backRight;
+    public DcMotorEx frontLeft, frontRight, backLeft, backRight;
 
     // Mechanism motors for game-specific mechanisms
     public DcMotorEx intakeWheels, intakeConveyor, flywheel;
@@ -133,6 +133,9 @@ public class RobotHardware {
                 RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
         imu.initialize(parameters);
+
+        opMode.telemetry.addData(">", "Hardware Initialized");
+        opMode.telemetry.update();
     }
 
 // -------------------------------------------------------------------------------------------------

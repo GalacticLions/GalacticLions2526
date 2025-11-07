@@ -49,6 +49,15 @@ public class StraferTeleOp extends LinearOpMode {
 // -------------------------------------------------------------------------------------------------
 //    Primary Driver Controls (gamepad1)
 // -------------------------------------------------------------------------------------------------
+//
+//    +------------------------+-----------------------------------+
+//    | Control Input          | Action                            |
+//    +------------------------+-----------------------------------+
+//    | Left Stick Y           | Move forward/backward             |
+//    | Left Stick X           | Strafe left/right                 |
+//    | Right Stick X          | Rotate robot CW/CCW               |
+//    | Guide Button           | Reset IMU yaw to zero             |
+//    +------------------------+-----------------------------------+
 
             double y  = -gamepad1.left_stick_y;  // Forward/backward (negative because up is negative)
             double x  =  gamepad1.left_stick_x * robot.strafeComp; // Strafe left/right (scaled)
@@ -77,28 +86,48 @@ public class StraferTeleOp extends LinearOpMode {
 // -------------------------------------------------------------------------------------------------
 //    Secondary Driver Controls (gamepad2)
 // -------------------------------------------------------------------------------------------------
+//
+//    +------------------------+-----------------------------------+
+//    | Control Input          | Action                            |
+//    +------------------------+-----------------------------------+
+//    | D-Pad Up               | Run intake forward  (collect)     |
+//    | D-Pad Down             | Run intake backward (eject)       |
+//    | Right Trigger (> 0.8)  | Flywheel high power               |
+//    | Right Trigger (> 0.3)  | Flywheel medium power             |
+//    | Left Trigger  (> 0.5)  | Flywheel off                      |
+//    | A Button               | Flipper up                        |
+//    | B Button               | Flipper down                      |
+//    +------------------------+-----------------------------------+
 
+            // Control intake system (conveyor + wheels) using D-pad
             if (gamepad2.dpad_up) {
+                // Run intake forward to collect artifacts
                 robot.intakeConveyor.setPower(1.0);
                 robot.intakeWheels.setPower(1.0);
             }
             else if (gamepad2.dpad_down) {
+                // Run intake backward to eject artifacts
                 robot.intakeConveyor.setPower(-1.0);
                 robot.intakeWheels.setPower(-1.0);
             }
             else {
+                // Stop intake when no D-Pad button is pressed
                 robot.intakeConveyor.setPower(0.0);
                 robot.intakeWheels.setPower(0.0);
             }
 
+            // Control flywheel shooter using triggers
             if (gamepad2.right_trigger > 0.8) {
+                // High power shooting mode (fully pressed trigger)
                 robot.flywheel.setPower(robot.FLYWHEEL_POWER_HIGH);
             }
             else if (gamepad2.right_trigger > 0.3) {
+                // Medium power shooting mode (partially pressed trigger)
                 robot.flywheel.setPower(robot.FLYWHEEL_POWER_MEDIUM);
 
             }
             else if (gamepad2.left_trigger > 0.5) {
+                // Turn off flywheel when left trigger is pressed
                 robot.flywheel.setPower(robot.FLYWHEEL_POWER_OFF);
             }
 

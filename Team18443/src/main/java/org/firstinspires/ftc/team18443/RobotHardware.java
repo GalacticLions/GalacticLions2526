@@ -88,13 +88,13 @@ public class RobotHardware {
 // -------------------------------------------------------------------------------------------------
 
     /**
-     * Initializes all hardware devices and configures their directions,
+     * Initializes all hardware devices and configures motor directions,
      * zero power behaviors, and IMU orientation
      * <p>
      * Must be called once in {@code runOpMode()} before accessing hardware
      */
     public void init() {
-        // Map motors by configuration names
+        // Map motors by configuration names in the robot controller app
         frontLeft      = opMode.hardwareMap.get(DcMotorEx.class, "fl");
         frontRight     = opMode.hardwareMap.get(DcMotorEx.class, "fr");
         backLeft       = opMode.hardwareMap.get(DcMotorEx.class, "bl");
@@ -103,8 +103,8 @@ public class RobotHardware {
         intakeConveyor = opMode.hardwareMap.get(DcMotorEx.class, "belt");
         intakeWheels   = opMode.hardwareMap.get(DcMotorEx.class, "intake");
 
-        // Reverse the left side motors so all wheels move the robot forward together
-        // (Swap sides if forward/backward controls are inverted)
+        // Reverse left-side drive motors so positive power moves robot forward
+        // Swap these if your robot's wiring or gearboxes are mirrored
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
 
@@ -125,12 +125,12 @@ public class RobotHardware {
         // odo = hardwareMap.get(GoBildaPinpointDriver.class, "odo");
         // odo.resetPosAndIMU();  // Resets odometry and IMU to starting pose
 
-        // Configure IMU mounting orientation relative to robot frame
+        // Configure IMU mounting orientation to match physical mounting;
+        // incorrect orientation will affect field-centric driving
         imu = opMode.hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                // By default, IMU assumes REV Hub is mounted with logo up
-                // and USB port facing forward
-                RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
+                // Default assumption: logo up, USB port facing forward
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
         imu.initialize(parameters);
 
@@ -174,10 +174,10 @@ public class RobotHardware {
     /**
      * Sets raw drive motor powers with normalization so values remain within [-1, 1]
      *
-     * @param fl The front left motor power
-     * @param fr The front right motor power
-     * @param bl The back left motor power
-     * @param br The back right motor power
+     * @param fl Power for front-left motor
+     * @param fr Power for front-right motor
+     * @param bl Power for back-left motor
+     * @param br Power for back-right motor
      */
     public void setDrivePowers(double fl, double fr, double bl, double br) {
         double max = Math.max(1.0, Math.max(Math.abs(fl),
@@ -222,19 +222,22 @@ public class RobotHardware {
 // -------------------------------------------------------------------------------------------------
 //     Autonomous Movement and Mechanism Control Methods
 // -------------------------------------------------------------------------------------------------
-//     These methods are intended for use in Autonomous OpModes only. Each method
-//     executes blocking motion sequences until completion before returning
+//
+//     Methods for Autonomous OpModes. Execute blocking motion sequences
+//     until completion before returning
 
     /**
      * Moves the robot forward or backward a specified distance using encoder targets
      */
     public void moveToPosition(double inches, double speed){
+        // Determine new target position and pass to motor controller
         int move = (int)(Math.round(inches * COUNTS_PER_INCH));
-        // Set the target position and motor mode
         frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + move);
         frontRight.setTargetPosition(frontRight.getCurrentPosition() + move);
         backLeft.setTargetPosition(backLeft.getCurrentPosition() + move);
         backRight.setTargetPosition(backRight.getCurrentPosition() + move);
+
+        // Turn On RUN_TO_POSITION
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -242,7 +245,7 @@ public class RobotHardware {
 
         setDrivePowers(speed, speed, speed, speed);
 
-        // Wait until the motors reach their target position
+        // Loop until all motors have reached their targets
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
                 backRight.isBusy()) {
             opMode.telemetry.addData("Drive", "Moving...");
@@ -303,8 +306,10 @@ public class RobotHardware {
             if (inRange) break;
         }
 
-        // Stop motors and reset encoders
+        // Stop all motion
         setDrivePowers(0, 0, 0, 0);
+
+        // Turn off RUN_USING_ENCODER
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -352,12 +357,14 @@ public class RobotHardware {
      * Negative input for inches results in left strafing
      */
     public void strafeToPosition(double inches, double speed){
+        // Determine new target position and pass to motor controller
         int move = (int)(Math.round(inches * COUNTS_PER_INCH * strafeComp));
-        // Set the target position and motor mode
         frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + move);
         frontRight.setTargetPosition(frontRight.getCurrentPosition() - move);
         backLeft.setTargetPosition(backLeft.getCurrentPosition() - move);
         backRight.setTargetPosition(backRight.getCurrentPosition() + move);
+
+        // Turn On RUN_TO_POSITION
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -365,14 +372,14 @@ public class RobotHardware {
 
         setDrivePowers(speed, speed, speed, speed);
 
-        // Wait until the motors reach their target position
+        // Loop until all motors have reached their targets
         while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
                 backRight.isBusy()) {
             opMode.telemetry.addData("Drive", "Strafing...");
             opMode.telemetry.update();
         }
 
-        // Stop motors
+        // Stop all motion
         setDrivePowers(0, 0, 0, 0);
     }
 
@@ -389,12 +396,13 @@ public class RobotHardware {
         intakeConveyor.setPower(1.0);
         intakeWheels.setPower(1.0);
 
+        // Loop until all motors have reached their targets
         while (intakeConveyor.isBusy() && intakeWheels.isBusy()) {
             opMode.telemetry.addData("Intake", "Moving...");
             opMode.telemetry.update();
         }
 
-        // Stop the motors
+        // Stop all motion
         intakeConveyor.setPower(0.0);
         intakeWheels.setPower(0.0);
     }

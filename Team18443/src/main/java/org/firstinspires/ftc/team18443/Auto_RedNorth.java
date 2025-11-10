@@ -61,6 +61,18 @@ public class Auto_RedNorth extends LinearOpMode {
          * strafeLeft(12, 0.5);
          */
 
+        backward(5, 0.5);
+        flywheel(MEDIUM);
+        sleep(600);
+        flipper(UP);
+        sleep(500);
+        flipper(DOWN);
+        sleep(500);
+        flywheel(OFF);
+
+        telemetry.addData("Auto Run", "Complete");
+        telemetry.update();
+        sleep(1000);  // Pause to display completion message
     }
 
     /**

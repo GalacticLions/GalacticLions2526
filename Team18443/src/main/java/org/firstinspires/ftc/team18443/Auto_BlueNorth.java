@@ -61,9 +61,9 @@ public class Auto_BlueNorth extends LinearOpMode {
          * strafeLeft(12, 0.5);
          */
 
-        backward(5, 0.5);
+        backward(5, 0.2);
         flywheel(MEDIUM);
-        sleep(3000);
+        sleep(600);
         flipper(UP);
         sleep(500);
         flipper(DOWN);

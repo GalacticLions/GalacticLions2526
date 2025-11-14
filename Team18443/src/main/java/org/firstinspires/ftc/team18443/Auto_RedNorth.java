@@ -61,9 +61,10 @@ public class Auto_RedNorth extends LinearOpMode {
          * strafeLeft(12, 0.5);
          */
 
-        backward(5, 0.5);
+        backward(18, 0.5);
+        sleep(500);
         flywheel(MEDIUM);
-        sleep(600);
+        sleep(1000);
         flipper(UP);
         sleep(500);
         flipper(DOWN);

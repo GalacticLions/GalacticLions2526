@@ -61,6 +61,17 @@ public class Auto_RedSouth extends LinearOpMode {
          * strafeLeft(12, 0.5);
          */
 
+        flywheel(HIGH);
+        sleep(1000);
+        flipper(UP);
+        sleep(500);
+        flipper(DOWN);
+        sleep(500);
+        flywheel(OFF);
+
+        telemetry.addData("Auto Run", "Complete");
+        telemetry.update();
+        sleep(1000);  // Pause to display completion message
     }
 
     /**

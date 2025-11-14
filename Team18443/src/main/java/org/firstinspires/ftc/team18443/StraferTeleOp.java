@@ -9,8 +9,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //  StraferTeleOp.java                                       GalacticLions2526
 // ****************************************************************************
 //   Description:
-//      This OpMode executes a field-centric Teleop for a mecanum-drive robot.
-//      The code is structured as a LinearOpMode
+//      Field-centric Teleop for a mecanum-drive robot. In this mode, movement
+//      is relative to the field rather than its own orientation. Pushing
+//      forward always moves the robot away from the driver, regardless of its
+//      heading
+//
+//      Implemented as a LinearOpMode for straightforward, sequential execution
 //
 //   Usage:
 //      - Deploy this OpMode as a TeleOp on the FTC Driver Station
@@ -59,26 +63,16 @@ public class StraferTeleOp extends LinearOpMode {
 //    | Guide Button           | Reset IMU yaw to zero             |
 //    +------------------------+-----------------------------------+
 
-            double y  = -gamepad1.left_stick_y;  // Forward/backward (negative because up is negative)
-            double x  =  gamepad1.left_stick_x * robot.strafeComp; // Strafe left/right (scaled)
-            double rx =  gamepad1.right_stick_x; // Rotation
+            // Read joystick inputs and apply deadzone to prevent drift from minor stick movement
+            double y  = robot.applyJoystickDeadzone(-gamepad1.left_stick_y); // Forward/backward
+            double x  = robot.applyJoystickDeadzone(gamepad1.left_stick_x);  // Strafe left/right
+            double rx = robot.applyJoystickDeadzone(gamepad1.right_stick_x); // Rotation
 
-            // Convert field-relative joystick inputs (x,y) to robot-relative using IMU heading
-            double botHeading = robot.getHeadingRad();
-            double X = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-            double Y = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-            // Combine the joystick requests for each axis-motion
-            double frontLeftPower  = (Y + X + rx);
-            double frontRightPower = (Y - X - rx);
-            double backLeftPower   = (Y - X + rx);
-            double backRightPower  = (Y + X - rx);
-
-            // Normalize motor power values
-            robot.setDrivePowers(frontLeftPower, frontRightPower, backLeftPower, backRightPower);
+            // Drive the robot using field-centric control
+            robot.driveFieldCentric(x, y, rx);
 
             // Reset the IMU yaw angle to zero manually by pressing the 'guide' button
-            // Note: The 'guide' button mapping may differ between controller types
+            // Useful for correcting drift or re-aligning the robot to the field orientation
             if (gamepad1.guide) {
                 robot.resetYaw();
             }
@@ -132,10 +126,10 @@ public class StraferTeleOp extends LinearOpMode {
             }
 
             if (gamepad2.a) {
-                robot.flipper.setPosition(robot.FLIPPER_UP);
+                robot.flipper.setPosition(robot.FLIPPER_UP);   // Raise flipper
             }
             else if (gamepad2.b) {
-                robot.flipper.setPosition(robot.FLIPPER_DOWN);
+                robot.flipper.setPosition(robot.FLIPPER_DOWN); // Lower flipper
             }
 
             telemetry.addData("Heading (rad)", "%.1f", robot.getHeadingRad());

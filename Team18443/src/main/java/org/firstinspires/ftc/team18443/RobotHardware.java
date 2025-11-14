@@ -67,9 +67,10 @@ public class RobotHardware {
     static final double DRIVE_GEAR_REDUCTION  = 1.0;   // 1:1 gear ratio
     static final double COUNTS_PER_INCH       = (COUNTS_PER_ROTATION * DRIVE_GEAR_REDUCTION) /
                                                 (WHEEL_DIAMETER_INCHES * Math.PI);
+    static final double JOYSTICK_DEADZONE     = 0.1;
     // Mechanism constants
-    public final double FLYWHEEL_POWER_HIGH   = 0.75;
-    public final double FLYWHEEL_POWER_MEDIUM = 0.45;
+    public final double FLYWHEEL_POWER_HIGH   = 0.85;
+    public final double FLYWHEEL_POWER_MEDIUM = 0.55;
     public final double FLYWHEEL_POWER_OFF    = 0.0;
     public final double FLIPPER_UP            = 0.66;
     public final double FLIPPER_DOWN          = 0.33;
@@ -189,6 +190,26 @@ public class RobotHardware {
     }
 
     /**
+     * Applies a deadzone to joystick input to ignore small movements near zero
+     *
+     * @param input The raw joystick input value
+     * @return The adjusted joystick value after applying the deadzone and scaling
+     */
+    public double applyJoystickDeadzone(double input) {
+        if (Math.abs(input) < JOYSTICK_DEADZONE) {
+            return 0.0;
+        }
+        else {
+            if (input > 0.0) {
+                return (input - JOYSTICK_DEADZONE) / (1.0 - JOYSTICK_DEADZONE);
+            }
+            else {
+                return (input + JOYSTICK_DEADZONE) / (1.0 - JOYSTICK_DEADZONE);
+            }
+        }
+    }
+
+    /**
      * Robot-centric mecanum drive (controls relative to robot's orientation)
      *
      * @param x  Strafe (left/right)
@@ -232,8 +253,8 @@ public class RobotHardware {
     public void moveToPosition(double inches, double speed){
         // Determine new target position and pass to motor controller
         int move = (int)(Math.round(inches * COUNTS_PER_INCH));
-        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + move);
-        frontRight.setTargetPosition(frontRight.getCurrentPosition() + move);
+        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() - move);
+        frontRight.setTargetPosition(frontRight.getCurrentPosition() - move);
         backLeft.setTargetPosition(backLeft.getCurrentPosition() + move);
         backRight.setTargetPosition(backRight.getCurrentPosition() + move);
 

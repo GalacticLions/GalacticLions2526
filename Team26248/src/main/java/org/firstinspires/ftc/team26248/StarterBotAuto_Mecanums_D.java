@@ -14,9 +14,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@Autonomous(name="StarterBotAuto_Mecanum_B", group="StarterBot")
+@Autonomous(name="StarterBotAuto_Mecanum_D", group="StarterBot")
 // @Disabled
-public class StarterBotAuto_Mecanum_B extends OpMode {
+public class StarterBotAuto_Mecanums_D extends OpMode {
 
     // ============================
     // === LAUNCHER PARAMETERS ===
@@ -24,7 +24,7 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     final double FEED_TIME = 0.20;
     final double LAUNCHER_TARGET_VELOCITY = 1050;
     final double LAUNCHER_MIN_VELOCITY    = 950;
-    final double TIME_BETWEEN_SHOTS       = 5;
+    final double TIME_BETWEEN_SHOTS       = 3;
 
     // ============================
     // === DRIVE PARAMETERS     ===
@@ -37,7 +37,7 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     final double TRACK_WIDTH_MM = 404;
 
     // Strafing is less efficient (wheel geometry + scrub); tweak if needed (1.0–1.3 typical).
-    final double STRAFE_EFFICIENCY = 1.15;
+    final double STRAFE_EFFICIENCY = 1.10;
 
     int shotsToFire = 3;
     double robotRotationAngle = 45;
@@ -70,7 +70,12 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     private LaunchState launchState;
 
     private enum AutonomousState {
-        DRIVING_BACK,
+        GO_CLOSER,
+        ROTATE_MORE,
+        STRAFE_LEFT,
+        ROTATE_RIGHT,
+        GO_GO_MORE,
+        GO_MORE,
         LAUNCH,
         WAIT_FOR_LAUNCH,
         DRIVING_AWAY_FROM_GOAL,
@@ -87,7 +92,8 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
 
     @Override
     public void init() {
-        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
+
+        autonomousState = AutonomousState.GO_MORE;
         launchState = LaunchState.IDLE;
 
         // === Map hardware ===
@@ -134,7 +140,10 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
         telemetry.addData("Press X", "for BLUE");
         telemetry.addData("Press B", "for RED");
         telemetry.addData("Selected Alliance", alliance);
+      
     }
+
+
 
     @Override
     public void start() { }
@@ -142,15 +151,47 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     @Override
     public void loop() {
         switch (autonomousState) {
-            case DRIVING_AWAY_FROM_GOAL:
-                if (driveLinear(DRIVE_SPEED, -8, DistanceUnit.INCH, 1)) {
+
+            case GO_MORE:
+                if (driveLinear(DRIVE_SPEED, -15, DistanceUnit.INCH, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.ROTATE_RIGHT;
+                }
+                break;
+
+
+            case ROTATE_RIGHT:
+                robotRotationAngle = (alliance == Alliance.RED) ? 90: -90;
+
+                if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.GO_GO_MORE;
+                }
+                break;
+
+            case GO_GO_MORE:
+                if (driveLinear(DRIVE_SPEED, 36, DistanceUnit.INCH, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.ROTATE_MORE;
+                }
+                break;
+
+            case ROTATE_MORE:
+                robotRotationAngle = (alliance == Alliance.RED) ? -170: 170;
+                if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.GO_CLOSER;
+                }
+                break;
+
+            case GO_CLOSER:
+                if (driveLinear(DRIVE_SPEED, 24, DistanceUnit.INCH, 1)) {
                     resetDriveEncoders();
                     autonomousState = AutonomousState.LAUNCH;
                 }
+                break;
 
-            break;
-
-            case LAUNCH:
+                case LAUNCH:
                 launch(true);
                 autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
                 break;
@@ -163,12 +204,31 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
                     } else {
                         resetDriveEncoders();
                         launcher.setVelocity(0);
-                        autonomousState = AutonomousState.COMPLETE;
+                        autonomousState = AutonomousState.ROTATING;
                     }
                 }
                 break;
 
-            case COMPLETE:
+            case ROTATING:
+                robotRotationAngle = (alliance == Alliance.RED) ? 90 : -90;
+                robotRotationAngle = (alliance == Alliance.BLUE) ? -90: 90;
+                if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.DRIVING_OFF_LINE;
+                }
+                break;
+
+
+            case DRIVING_OFF_LINE:
+                if (driveLinear(DRIVE_SPEED, -84, DistanceUnit.INCH, 1)) {
+                    // Example: you could strafe to the side to park:
+                    // resetDriveEncoders();
+                    // autonomousState = AutonomousState.STRAFE_TO_PARK;
+                    autonomousState = AutonomousState.COMPLETE;
+                }
+                break;
+
+                case COMPLETE:
                 // Do nothing
                 break;
         }
@@ -244,7 +304,7 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
      * @return true once within tolerance for holdSeconds.
      */
     boolean driveLinear(double speed, double distance, DistanceUnit distanceUnit, double holdSeconds) {
-        final double TOLERANCE_MM = 10;
+        final double TOLERANCE_MM = 20;
 
         double targetTicks = distanceUnit.toMm(distance) * TICKS_PER_MM;
 
@@ -272,9 +332,9 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
         double tolTicks = TOLERANCE_MM * TICKS_PER_MM;
         boolean allClose =
                 Math.abs(flTgt - fl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
-                Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
+                        Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
 
         if (!allClose) driveTimer.reset();
         return driveTimer.seconds() > holdSeconds;
@@ -312,9 +372,9 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
         double tolTicks = TOLERANCE_MM * TICKS_PER_MM;
         boolean allClose =
                 Math.abs(flTgt - fl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
-                Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
+                        Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
 
         if (!allClose) driveTimer.reset();
         return driveTimer.seconds() > holdSeconds;
@@ -354,9 +414,9 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
         double tolTicks = TOLERANCE_MM * TICKS_PER_MM;
         boolean allClose =
                 Math.abs(flTgt - fl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
-                Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
+                        Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
 
         if (!allClose) driveTimer.reset();
         return driveTimer.seconds() > holdSeconds;

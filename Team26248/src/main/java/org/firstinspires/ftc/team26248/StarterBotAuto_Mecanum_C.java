@@ -14,16 +14,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@Autonomous(name="StarterBotAuto_Mecanum_B", group="StarterBot")
+@Autonomous(name="StarterBotAuto_Mecanum_C", group="StarterBot")
 // @Disabled
-public class StarterBotAuto_Mecanum_B extends OpMode {
+public class StarterBotAuto_Mecanum_C extends OpMode {
 
     // ============================
     // === LAUNCHER PARAMETERS ===
     // ============================
     final double FEED_TIME = 0.20;
-    final double LAUNCHER_TARGET_VELOCITY = 1050;
-    final double LAUNCHER_MIN_VELOCITY    = 950;
+    final double LAUNCHER_TARGET_VELOCITY = 1150;
+    final double LAUNCHER_MIN_VELOCITY    = 1050;
     final double TIME_BETWEEN_SHOTS       = 5;
 
     // ============================
@@ -37,7 +37,7 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     final double TRACK_WIDTH_MM = 404;
 
     // Strafing is less efficient (wheel geometry + scrub); tweak if needed (1.0–1.3 typical).
-    final double STRAFE_EFFICIENCY = 1.15;
+    final double STRAFE_EFFICIENCY = 1.10;
 
     int shotsToFire = 3;
     double robotRotationAngle = 45;
@@ -70,7 +70,10 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     private LaunchState launchState;
 
     private enum AutonomousState {
-        DRIVING_BACK,
+        STRAFE_RIGHT,
+        ROTATE_RIGHT,
+        GO_GO_MORE,
+        GO_MORE,
         LAUNCH,
         WAIT_FOR_LAUNCH,
         DRIVING_AWAY_FROM_GOAL,
@@ -87,7 +90,8 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
 
     @Override
     public void init() {
-        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
+
+        autonomousState = AutonomousState.GO_MORE;
         launchState = LaunchState.IDLE;
 
         // === Map hardware ===
@@ -142,13 +146,30 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
     @Override
     public void loop() {
         switch (autonomousState) {
-            case DRIVING_AWAY_FROM_GOAL:
-                if (driveLinear(DRIVE_SPEED, -8, DistanceUnit.INCH, 1)) {
+
+            case GO_MORE:
+                if (driveLinear(DRIVE_SPEED, 96, DistanceUnit.INCH, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.ROTATE_RIGHT;
+                }
+                break;
+
+            case ROTATE_RIGHT:
+                robotRotationAngle = (alliance == Alliance.RED) ? -90: 90;
+                robotRotationAngle = (alliance == Alliance.BLUE) ? 90: -90;
+            if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.GO_GO_MORE;
+                }
+                break;
+
+            case GO_GO_MORE:
+                if (driveLinear(DRIVE_SPEED, 12, DistanceUnit.INCH, 1)) {
                     resetDriveEncoders();
                     autonomousState = AutonomousState.LAUNCH;
                 }
+                break;
 
-            break;
 
             case LAUNCH:
                 launch(true);
@@ -163,10 +184,44 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
                     } else {
                         resetDriveEncoders();
                         launcher.setVelocity(0);
-                        autonomousState = AutonomousState.COMPLETE;
+                        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
                     }
                 }
                 break;
+
+            case DRIVING_AWAY_FROM_GOAL:
+                if (driveLinear(DRIVE_SPEED, -4, DistanceUnit.INCH, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.ROTATING;
+                }
+                break;
+
+            case ROTATING:
+                robotRotationAngle = (alliance == Alliance.RED) ? 90 : -90;
+                robotRotationAngle = (alliance == Alliance.BLUE) ? -90: 90;
+                if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
+                    resetDriveEncoders();
+                    autonomousState = AutonomousState.DRIVING_OFF_LINE;
+                }
+                break;
+
+            case DRIVING_OFF_LINE:
+                if (driveLinear(DRIVE_SPEED, -36, DistanceUnit.INCH, 1)) {
+                    // Example: you could strafe to the side to park:
+                    // resetDriveEncoders();
+                    // autonomousState = AutonomousState.STRAFE_TO_PARK;
+                    autonomousState = AutonomousState.COMPLETE;
+                }
+                break;
+
+
+            case STRAFE_RIGHT:
+                // Positive distance = strafe right, negative = strafe left
+                if (strafe(DRIVE_SPEED, 12, DistanceUnit.INCH, 1)) {
+                    autonomousState = AutonomousState.COMPLETE;
+                }
+                break;  
+
 
             case COMPLETE:
                 // Do nothing
@@ -244,7 +299,7 @@ public class StarterBotAuto_Mecanum_B extends OpMode {
      * @return true once within tolerance for holdSeconds.
      */
     boolean driveLinear(double speed, double distance, DistanceUnit distanceUnit, double holdSeconds) {
-        final double TOLERANCE_MM = 10;
+        final double TOLERANCE_MM = 20;
 
         double targetTicks = distanceUnit.toMm(distance) * TICKS_PER_MM;
 

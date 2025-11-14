@@ -29,15 +29,15 @@ public class StarterBotAuto_Mecanum extends OpMode {
     // ============================
     // === DRIVE PARAMETERS     ===
     // ============================
-    final double DRIVE_SPEED      = 0.5;
-    final double ROTATE_SPEED     = 0.2;
+    final double DRIVE_SPEED      = 1;
+    final double ROTATE_SPEED     = 0.5;
     final double WHEEL_DIAMETER_MM = 96;
     final double ENCODER_TICKS_PER_REV = 537.7;
     final double TICKS_PER_MM = (ENCODER_TICKS_PER_REV / (WHEEL_DIAMETER_MM * Math.PI));
     final double TRACK_WIDTH_MM = 404;
 
     // Strafing is less efficient (wheel geometry + scrub); tweak if needed (1.0–1.3 typical).
-    final double STRAFE_EFFICIENCY = 1.10;
+    final double STRAFE_EFFICIENCY = 1.15;
 
     int shotsToFire = 3;
     double robotRotationAngle = 45;
@@ -79,6 +79,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
         // Example: add a strafe step if desired
         // STRAFE_TO_PARK,
         COMPLETE
+
     }
     private AutonomousState autonomousState;
 
@@ -87,7 +88,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
 
     @Override
     public void init() {
-        autonomousState = AutonomousState.DRIVING_BACK;
+        autonomousState = AutonomousState.DRIVING_AWAY_FROM_GOAL;
         launchState = LaunchState.IDLE;
 
         // === Map hardware ===
@@ -140,17 +141,37 @@ public class StarterBotAuto_Mecanum extends OpMode {
     public void start() { }
 
     @Override
-     public void loop() {
-        switch(autonomousState){
+    public void loop() {
+        switch (autonomousState) {
             case DRIVING_AWAY_FROM_GOAL:
-                if (driveLinear(DRIVE_SPEED, -4, DistanceUnit.INCH, 1)) {
+                if (driveLinear(DRIVE_SPEED, -12, DistanceUnit.INCH, 1)) {
                     resetDriveEncoders();
-                    autonomousState = AutonomousState.ROTATING;
+                    autonomousState = AutonomousState.LAUNCH;
+                }
+
+                break;
+
+            case LAUNCH:
+                launch(true);
+                autonomousState = AutonomousState.WAIT_FOR_LAUNCH;
+                break;
+
+            case WAIT_FOR_LAUNCH:
+                if (launch(false)) {
+                    shotsToFire -= 1;
+                    if (shotsToFire > 0) {
+                        autonomousState = AutonomousState.LAUNCH;
+                    } else {
+                        resetDriveEncoders();
+                        launcher.setVelocity(0);
+                        autonomousState = AutonomousState.ROTATING;
+                    }
                 }
                 break;
 
             case ROTATING:
-                robotRotationAngle = (alliance == Alliance.RED) ? 90 : -90;
+                robotRotationAngle = (alliance == StarterBotAuto_Mecanum.Alliance.RED) ? 90 : -90;
+                robotRotationAngle = (alliance == StarterBotAuto_Mecanum.Alliance.BLUE) ? -90: 90;
                 if (rotate(ROTATE_SPEED, robotRotationAngle, AngleUnit.DEGREES, 1)) {
                     resetDriveEncoders();
                     autonomousState = AutonomousState.DRIVING_OFF_LINE;
@@ -158,22 +179,13 @@ public class StarterBotAuto_Mecanum extends OpMode {
                 break;
 
             case DRIVING_OFF_LINE:
-                if (driveLinear(DRIVE_SPEED, -36, DistanceUnit.INCH, 1)) {
+                if (driveLinear(DRIVE_SPEED, 18, DistanceUnit.INCH, 1)) {
                     // Example: you could strafe to the side to park:
                     // resetDriveEncoders();
                     // autonomousState = AutonomousState.STRAFE_TO_PARK;
-                    autonomousState = AutonomousState.COMPLETE;
+                    autonomousState = StarterBotAuto_Mecanum.AutonomousState.COMPLETE;
                 }
                 break;
-
-            /*
-            case STRAFE_TO_PARK:
-                // Positive distance = strafe right, negative = strafe left
-                if (strafe(DRIVE_SPEED, 12, DistanceUnit.INCH, 1)) {
-                    autonomousState = AutonomousState.COMPLETE;
-                }
-                break;
-            */
 
             case COMPLETE:
                 // Do nothing
@@ -251,7 +263,7 @@ public class StarterBotAuto_Mecanum extends OpMode {
      * @return true once within tolerance for holdSeconds.
      */
     boolean driveLinear(double speed, double distance, DistanceUnit distanceUnit, double holdSeconds) {
-        final double TOLERANCE_MM = 20;
+        final double TOLERANCE_MM = 10;
 
         double targetTicks = distanceUnit.toMm(distance) * TICKS_PER_MM;
 
@@ -279,9 +291,9 @@ public class StarterBotAuto_Mecanum extends OpMode {
         double tolTicks = TOLERANCE_MM * TICKS_PER_MM;
         boolean allClose =
                 Math.abs(flTgt - fl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
-                Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
+                        Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
 
         if (!allClose) driveTimer.reset();
         return driveTimer.seconds() > holdSeconds;
@@ -319,9 +331,9 @@ public class StarterBotAuto_Mecanum extends OpMode {
         double tolTicks = TOLERANCE_MM * TICKS_PER_MM;
         boolean allClose =
                 Math.abs(flTgt - fl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
-                Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
+                        Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
 
         if (!allClose) driveTimer.reset();
         return driveTimer.seconds() > holdSeconds;
@@ -361,9 +373,9 @@ public class StarterBotAuto_Mecanum extends OpMode {
         double tolTicks = TOLERANCE_MM * TICKS_PER_MM;
         boolean allClose =
                 Math.abs(flTgt - fl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
-                Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
-                Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
+                        Math.abs(frTgt - fr.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(blTgt - bl.getCurrentPosition()) <= tolTicks &&
+                        Math.abs(brTgt - br.getCurrentPosition()) <= tolTicks;
 
         if (!allClose) driveTimer.reset();
         return driveTimer.seconds() > holdSeconds;

@@ -28,17 +28,19 @@ public class Alpha_TeleOP extends OpMode {
     Integer Offset,  errorThreshold, slideLeftTarget, slideRightTarget,slideLeftPosition, slideRightPosition,leftError,rightError;
     Double slidePower, LaunchPower,intakePower,LaunchPower_alt;
 
+
+
     @Override
     public void init() {
         //Constants Init
         //Cannon Constants
-        LaunchPower = CannonConstants.LaunchPower;
+        LaunchPower = 1.0;
         intakePower = CannonConstants.IntakePower;
         Offset = SlideConstants.Offset;
         //Slide Constants
         slidePower = SlideConstants.movePower;
         errorThreshold = SlideConstants.ErrorThreshold;
-        LaunchPower_alt = CannonConstants.LaunchPower_Reduced;
+        LaunchPower_alt = 0.8;
 
 
 
@@ -114,11 +116,8 @@ public class Alpha_TeleOP extends OpMode {
         if (gamepad1.dpad_up) {
             slideRightTarget += 10;
             slideLeftTarget -= 10;
-
-        } else if (gamepad1.dpad_down) {
-            slideRightTarget -= 10;
-            slideLeftTarget += 10;
         }
+
         if (leftError >= 3) {
             leftSlide.setTargetPosition(slideLeftTarget);
             leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -196,12 +195,18 @@ public class Alpha_TeleOP extends OpMode {
         double backLeftPower = (rotY - rotX + rx) / denominator;
         double frontRightPower = (rotY - rotX - rx) / denominator;
         double backRightPower = (rotY + rotX - rx) / denominator;
-
-        // Set motor powers (adjust multiplier as needed)
-        frontLeft.setPower(frontLeftPower * 0.9);
-        backLeft.setPower(backLeftPower * 0.9);
-        frontRight.setPower(frontRightPower * 0.9);
-        backRight.setPower(backRightPower * 0.9);
+        if(!gamepad1.left_bumper) {
+            // Set motor powers (adjust multiplier as needed)
+            frontLeft.setPower(frontLeftPower * 0.9);
+            backLeft.setPower(backLeftPower * 0.9);
+            frontRight.setPower(frontRightPower * 0.9);
+            backRight.setPower(backRightPower * 0.9);
+        } else if (gamepad1.left_bumper) {
+            frontLeft.setPower(frontLeftPower * 0.5);
+            backLeft.setPower(backLeftPower * 0.5);
+            frontRight.setPower(frontRightPower * 0.5);
+            backRight.setPower(backRightPower * 0.5);
+        }
 
     }
     @Override

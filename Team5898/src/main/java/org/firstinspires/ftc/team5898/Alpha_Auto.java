@@ -46,6 +46,7 @@ public class Alpha_Auto extends LinearOpMode {
     double intakePower=CannonConstants.IntakePower;
     IMU imu;
     Limelight3A limelight;
+    String side_switch;
     VisualServoing visualServoing = new VisualServoing(limelight, frontLeft, frontRight, backRight, backLeft, telemetry);
 
 
@@ -79,31 +80,51 @@ public class Alpha_Auto extends LinearOpMode {
         backRight.setDirection(DcMotor.Direction.FORWARD);
         visualServoing = new VisualServoing(limelight, frontLeft, frontRight, backRight, backLeft, telemetry);
         // wait for Start to be pressed
+        while(!isStarted()){
+            telemetry.addLine("Press A for blue, press B for red (Gamepad 1)");
+            telemetry.update();
+            if(side_switch==null) {
+                if (gamepad1.a) {
+                    side_switch = "blue";
+                    telemetry.addLine("You picked blue");
+                    telemetry.update();
+                } else if (gamepad1.b) {
+                    side_switch = "red";
+                    telemetry.addLine("You picked red");
+                    telemetry.update();
+                }
+            }
+            else{
+                telemetry.addData("Alliance selected:",side_switch);
+                telemetry.update();
+                break;
+            }
+        }
         waitForStart();
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setTargetPosition(0);
-        leftSlide.setTargetPosition(0);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setPower(0.3);
-        leftSlide.setPower(0.3);
-        sleep(500);
         initGyro();
-        back(51,.6);
+        back(48,0.6);
         sleep(1000);
         topLauncher.setPower(LaunchPower_alt);
         bottomLauncher.setPower(-LaunchPower);
         sleep(500);
         cannonLeft.setPower(-intakePower);
         cannonRight.setPower(-intakePower);
-        sleep(7000);
+        sleep(6500);
         topLauncher.setPower(0);
         bottomLauncher.setPower(0);
         cannonLeft.setPower(0);
         cannonRight.setPower(0);
         sleep(500);
-        strafeRight(20, 1);
+        if ("blue".equals(side_switch)) {
+            strafeLeft(28, 1);
+        }
+        if ("red".equals(side_switch)){
+            strafeRight(28, 1);
+        }
+        sleep(500);
+        stop();
 
     }
 

@@ -114,10 +114,10 @@ public class RobotHardware {
         flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeConveyor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeWheels.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        // frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        // frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        // backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        // backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Map servos by configuration names
         flipper = opMode.hardwareMap.get(Servo.class, "flipper");
@@ -253,8 +253,8 @@ public class RobotHardware {
     public void moveToPosition(double inches, double speed){
         // Determine new target position and pass to motor controller
         int move = (int)(Math.round(inches * COUNTS_PER_INCH));
-        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() - move);
-        frontRight.setTargetPosition(frontRight.getCurrentPosition() - move);
+        frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + move);
+        frontRight.setTargetPosition(frontRight.getCurrentPosition() + move);
         backLeft.setTargetPosition(backLeft.getCurrentPosition() + move);
         backRight.setTargetPosition(backRight.getCurrentPosition() + move);
 
@@ -264,16 +264,33 @@ public class RobotHardware {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        setDrivePowers(speed, speed, speed, speed);
+        double kp = 0.05;
 
         // Loop until all motors have reached their targets
-        while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
-                backRight.isBusy()) {
+        while (opMode.opModeIsActive() && frontLeft.isBusy() || frontRight.isBusy()
+                || backLeft.isBusy() || backRight.isBusy()) {
+            // Calculate average positions
+            int leftPos  = (frontLeft.getCurrentPosition() + backLeft.getCurrentPosition()) / 2;
+            int rightPos = (frontRight.getCurrentPosition() + backRight.getCurrentPosition()) / 2;
+            int error = leftPos - rightPos;
+
+            // Apply proportional correction to motor powers
+            double leftPower = speed - (error * kp);
+            double rightPower = speed + (error * kp);
+
+            // Clamp powers to prevent stalling or exceeding max speed
+            leftPower = Math.max(0.1, Math.abs(leftPower)) * Math.signum(leftPower);
+            rightPower = Math.max(0.1, Math.abs(rightPower)) * Math.signum(rightPower);
+
+            setDrivePowers(leftPower, rightPower, leftPower, rightPower);
+
             opMode.telemetry.addData("Drive", "Moving...");
             opMode.telemetry.update();
+
+            opMode.sleep(20);
         }
 
-        // Stop motors
+        // Stop all motion
         setDrivePowers(0, 0, 0, 0);
     }
 
@@ -285,6 +302,9 @@ public class RobotHardware {
      *   <li>Phase 1: Coarse rotation to reach within ~10° of the target angle</li>
      *   <li>Phase 2: Fine rotation for higher precision (±5° tolerance)</li>
      * </ul>
+     *
+     * @param degrees -
+     * @param speedDirection -
      */
     public void turnWithGyro(double degrees, double speedDirection) {
         // Create an object to receive the IMU angles
@@ -394,10 +414,12 @@ public class RobotHardware {
         setDrivePowers(speed, speed, speed, speed);
 
         // Loop until all motors have reached their targets
-        while (frontLeft.isBusy() && frontRight.isBusy() && backLeft.isBusy() &&
-                backRight.isBusy()) {
+        while (opMode.opModeIsActive() && frontLeft.isBusy() || frontRight.isBusy()
+                || backLeft.isBusy() || backRight.isBusy()) {
             opMode.telemetry.addData("Drive", "Strafing...");
             opMode.telemetry.update();
+
+            opMode.sleep(20);
         }
 
         // Stop all motion
@@ -418,9 +440,12 @@ public class RobotHardware {
         intakeWheels.setPower(1.0);
 
         // Loop until all motors have reached their targets
-        while (intakeConveyor.isBusy() && intakeWheels.isBusy()) {
+        while (opMode.opModeIsActive() && intakeConveyor.isBusy() ||
+                intakeWheels.isBusy()) {
             opMode.telemetry.addData("Intake", "Moving...");
             opMode.telemetry.update();
+
+            opMode.sleep(20);
         }
 
         // Stop all motion

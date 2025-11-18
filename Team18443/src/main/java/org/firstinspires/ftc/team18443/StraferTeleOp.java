@@ -86,9 +86,8 @@ public class StraferTeleOp extends LinearOpMode {
 //    +------------------------+-----------------------------------+
 //    | D-Pad Up               | Run intake forward  (collect)     |
 //    | D-Pad Down             | Run intake backward (eject)       |
-//    | Right Trigger (> 0.8)  | Flywheel high power               |
-//    | Right Trigger (> 0.3)  | Flywheel medium power             |
-//    | Left Trigger  (> 0.5)  | Flywheel off                      |
+//    | Left Stick Y  (> 0.3)  | Flywheel high power               |
+//    | Left Stick Y  (< -0.3) | Flywheel medium power             |
 //    | A Button               | Flipper up                        |
 //    | B Button               | Flipper down                      |
 //    +------------------------+-----------------------------------+
@@ -110,18 +109,17 @@ public class StraferTeleOp extends LinearOpMode {
                 robot.intakeWheels.setPower(0.0);
             }
 
-            // Control flywheel shooter using triggers
-            if (gamepad2.right_trigger > 0.8) {
-                // High power shooting mode (fully pressed trigger)
+            // Control flywheel shooter using analog sticks
+            if (gamepad2.right_stick_y > 0.3) {
+                // High power shooting mode
                 robot.flywheel.setPower(robot.FLYWHEEL_POWER_HIGH);
             }
-            else if (gamepad2.right_trigger > 0.3) {
-                // Medium power shooting mode (partially pressed trigger)
+            else if (gamepad2.right_stick_y < -0.3) {
+                // Medium power shooting mode
                 robot.flywheel.setPower(robot.FLYWHEEL_POWER_MEDIUM);
-
             }
-            else if (gamepad2.left_trigger > 0.5) {
-                // Turn off flywheel when left trigger is pressed
+            else {
+                // Turn off flywheel
                 robot.flywheel.setPower(robot.FLYWHEEL_POWER_OFF);
             }
 

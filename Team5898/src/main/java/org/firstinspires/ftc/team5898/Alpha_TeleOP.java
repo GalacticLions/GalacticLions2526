@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -197,10 +198,10 @@ public class Alpha_TeleOP extends OpMode {
         double backRightPower = (rotY + rotX - rx) / denominator;
         if(!gamepad1.left_bumper) {
             // Set motor powers (adjust multiplier as needed)
-            frontLeft.setPower(frontLeftPower * 0.9);
-            backLeft.setPower(backLeftPower * 0.9);
-            frontRight.setPower(frontRightPower * 0.9);
-            backRight.setPower(backRightPower * 0.9);
+            frontLeft.setPower(frontLeftPower);
+            backLeft.setPower(backLeftPower);
+            frontRight.setPower(frontRightPower);
+            backRight.setPower(backRightPower);
         } else if (gamepad1.left_bumper) {
             frontLeft.setPower(frontLeftPower * 0.5);
             backLeft.setPower(backLeftPower * 0.5);

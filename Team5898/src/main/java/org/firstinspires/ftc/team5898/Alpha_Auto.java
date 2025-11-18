@@ -130,7 +130,7 @@ public class Alpha_Auto extends LinearOpMode {
 
     /**
      * Use to make the robot go forward a number of inches
-     * 
+     *
      * @param inches distance to travel in inches
      * @param speed  has a range of [0,1]
      */
@@ -140,7 +140,7 @@ public class Alpha_Auto extends LinearOpMode {
 
     /**
      * Use to make the robot go backward a number of inches
-     * 
+     *
      * @param inches distance to travel in inches
      * @param speed  has a range of [0,1]
      */
@@ -150,7 +150,7 @@ public class Alpha_Auto extends LinearOpMode {
 
     /**
      * Rotate the robot left
-     * 
+     *
      * @param degrees the amount of degrees to rotate
      * @param speed   has a range of [0,1]
      */
@@ -160,7 +160,7 @@ public class Alpha_Auto extends LinearOpMode {
 
     /**
      * Rotate the robot right
-     * 
+     *
      * @param degrees the amount of degrees to rotate
      * @param speed   has a range of [0,1]
      */
@@ -170,7 +170,7 @@ public class Alpha_Auto extends LinearOpMode {
 
     /**
      * Strafe left
-     * 
+     *
      * @param inches the distance in inches to strafe
      * @param speed  has a range of [0,1]
      */
@@ -180,7 +180,7 @@ public class Alpha_Auto extends LinearOpMode {
 
     /**
      * Strafe right
-     * 
+     *
      * @param inches the distance in inches to strafe
      * @param speed  has a range of [0,1]
      */
@@ -296,7 +296,7 @@ public class Alpha_Auto extends LinearOpMode {
                 telemetry.update();
             }
             while (!((seconda < yaw && yaw < 180) || (-180 < yaw && yaw < secondb)) && opModeIsActive()) {// within
-                                                                                                          // range?
+                // range?
                 robotOrientation = imu.getRobotYawPitchRollAngles();
                 yaw = robotOrientation.getYaw(AngleUnit.DEGREES); // make this negative?
                 telemetry.addData("Position", yaw);

@@ -1,16 +1,9 @@
 package org.firstinspires.ftc.team18443;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-
-import static org.firstinspires.ftc.team18443.RobotHardware.flywheelState.*;
-import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-// ****************************************************************************
+// ============================================================================
 //  Auto_StraferBase.java                                    GalacticLions2526
-// ****************************************************************************
+// ============================================================================
+//
 //   Description:
 //      Text
 //      The code is structured as a LinearOpMode
@@ -18,10 +11,18 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //   Usage:
 //      - Extend this class to create new autonomous OpModes
 //
-// ****************************************************************************
+// ============================================================================
 // This program is released under the BSD-3-Clause-Clear License
 // See LICENSE file in root of this repository
-// ****************************************************************************
+// ============================================================================
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
+import static org.firstinspires.ftc.team18443.RobotHardware.flywheelState.*;
+import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Autonomous(name="Auto_StraferBase", group="Autonomous", preselectTeleOp ="StraferTeleOp")
 public class Auto_StraferBase extends LinearOpMode {

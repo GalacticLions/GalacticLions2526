@@ -1,16 +1,9 @@
 package org.firstinspires.ftc.team18443;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import static org.firstinspires.ftc.team18443.RobotHardware.flywheelState.*;
-import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-// ****************************************************************************
+// ============================================================================
 //  Auto_BlueSouth.java                                      GalacticLions2526
-// ****************************************************************************
+// ============================================================================
+//
 //   Description:
 //      Autonomous routine for the BLUE alliance starting on the SOUTH side
 //      The code is structured as a LinearOpMode
@@ -18,10 +11,18 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //   Usage:
 //      - Deploy this OpMode as an Autonomous on the FTC Driver Station
 //
-// ****************************************************************************
+// ============================================================================
 // This program is released under the BSD-3-Clause-Clear License
 // See LICENSE file in root of this repository
-// ****************************************************************************
+// ============================================================================
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import static org.firstinspires.ftc.team18443.RobotHardware.flywheelState.*;
+import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Autonomous(name="Auto_BlueSouth", group="Autonomous", preselectTeleOp ="StraferTeleOp")
 public class Auto_BlueSouth extends LinearOpMode {
@@ -61,12 +62,17 @@ public class Auto_BlueSouth extends LinearOpMode {
          * strafeLeft(12, 0.5);
          */
 
+        forward(10, 0.5);
+        turnLeft(25, 0.3);
+
+        // Fire artifact
         flywheel(HIGH);
         sleep(1000);
         flipper(UP);
         sleep(500);
         flipper(DOWN);
         sleep(500);
+
         flywheel(OFF);
 
         telemetry.addData("Auto Run", "Complete");

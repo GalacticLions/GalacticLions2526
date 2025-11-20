@@ -1,18 +1,9 @@
 package org.firstinspires.ftc.team18443;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.IMU;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
-// ****************************************************************************
+// ============================================================================
 //  RobotHardware.java                                       GalacticLions2526
-// ****************************************************************************
+// ============================================================================
+//
 //   Description:
 //      Hardware abstraction layer for the robot. This class defines and
 //      initializes all hardware components (motors, servos, sensors, etc.),
@@ -23,10 +14,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 //      - Instantiate RobotHardware with a LinearOpMode reference
 //      - Call init() in runOpMode() before accessing any hardware
 //
-// ****************************************************************************
+// ============================================================================
 // This program is released under the BSD-3-Clause-Clear License
 // See LICENSE file in root of this repository
-// ****************************************************************************
+// ============================================================================
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.IMU;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 public class RobotHardware {
 
@@ -267,8 +268,8 @@ public class RobotHardware {
         double kp = 0.05;
 
         // Loop until all motors have reached their targets
-        while (opMode.opModeIsActive() && frontLeft.isBusy() || frontRight.isBusy()
-                || backLeft.isBusy() || backRight.isBusy()) {
+        while (opMode.opModeIsActive() && (frontLeft.isBusy() || frontRight.isBusy()
+                || backLeft.isBusy() || backRight.isBusy())) {
             // Calculate average positions
             int leftPos  = (frontLeft.getCurrentPosition() + backLeft.getCurrentPosition()) / 2;
             int rightPos = (frontRight.getCurrentPosition() + backRight.getCurrentPosition()) / 2;
@@ -414,8 +415,8 @@ public class RobotHardware {
         setDrivePowers(speed, speed, speed, speed);
 
         // Loop until all motors have reached their targets
-        while (opMode.opModeIsActive() && frontLeft.isBusy() || frontRight.isBusy()
-                || backLeft.isBusy() || backRight.isBusy()) {
+        while (opMode.opModeIsActive() && (frontLeft.isBusy() || frontRight.isBusy()
+                || backLeft.isBusy() || backRight.isBusy())) {
             opMode.telemetry.addData("Drive", "Strafing...");
             opMode.telemetry.update();
 
@@ -440,8 +441,8 @@ public class RobotHardware {
         intakeWheels.setPower(1.0);
 
         // Loop until all motors have reached their targets
-        while (opMode.opModeIsActive() && intakeConveyor.isBusy() ||
-                intakeWheels.isBusy()) {
+        while (opMode.opModeIsActive() && (intakeConveyor.isBusy() ||
+                intakeWheels.isBusy())) {
             opMode.telemetry.addData("Intake", "Moving...");
             opMode.telemetry.update();
 

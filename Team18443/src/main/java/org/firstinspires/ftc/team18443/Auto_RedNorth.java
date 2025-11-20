@@ -1,16 +1,9 @@
 package org.firstinspires.ftc.team18443;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import static org.firstinspires.ftc.team18443.RobotHardware.flywheelState.*;
-import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-// ****************************************************************************
+// ============================================================================
 //  Auto_RedNorth.java                                       GalacticLions2526
-// ****************************************************************************
+// ============================================================================
+//
 //   Description:
 //      Autonomous routine for the RED alliance starting on the NORTH side
 //      The code is structured as a LinearOpMode
@@ -18,10 +11,18 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //   Usage:
 //      - Deploy this OpMode as an Autonomous on the FTC Driver Station
 //
-// ****************************************************************************
+// ============================================================================
 // This program is released under the BSD-3-Clause-Clear License
 // See LICENSE file in root of this repository
-// ****************************************************************************
+// ============================================================================
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import static org.firstinspires.ftc.team18443.RobotHardware.flywheelState.*;
+import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Autonomous(name="Auto_RedNorth", group="Autonomous", preselectTeleOp ="StraferTeleOp")
 public class Auto_RedNorth extends LinearOpMode {

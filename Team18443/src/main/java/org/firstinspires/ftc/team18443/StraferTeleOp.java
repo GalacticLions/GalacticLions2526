@@ -1,13 +1,9 @@
 package org.firstinspires.ftc.team18443;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-// ****************************************************************************
+// ============================================================================
 //  StraferTeleOp.java                                       GalacticLions2526
-// ****************************************************************************
+// ============================================================================
+//
 //   Description:
 //      Field-centric Teleop for a mecanum-drive robot. In this mode, movement
 //      is relative to the field rather than its own orientation. Pushing
@@ -19,10 +15,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 //   Usage:
 //      - Deploy this OpMode as a TeleOp on the FTC Driver Station
 //
-// ****************************************************************************
+// ============================================================================
 // This program is released under the BSD-3-Clause-Clear License
 // See LICENSE file in root of this repository
-// ****************************************************************************
+// ============================================================================
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @TeleOp(name="StraferTeleOp", group="TeleOp")
 public class StraferTeleOp extends LinearOpMode {

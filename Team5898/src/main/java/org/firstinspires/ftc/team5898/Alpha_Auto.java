@@ -4,21 +4,25 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
+import org.firstinspires.ftc.team5898.Constants.SlideConstants;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
 @Autonomous(name = "Alpha Auto", group = "Alpha", preselectTeleOp = "Alpha TeleOP")
 public class Alpha_Auto extends LinearOpMode {
     // variable declaration & setup
-    DcMotor frontLeft, frontRight, backLeft, backRight,topLauncher,bottomLauncher,leftSlide,rightSlide;
+    DcMotor frontLeft, frontRight, backLeft, backRight,leftSlide,rightSlide;
+    DcMotorEx topLauncher, bottomLauncher;
     CRServo cannonRight, cannonLeft;
 
     // motor counts per rotation (ticks/pulses per rotation)
@@ -42,44 +46,96 @@ public class Alpha_Auto extends LinearOpMode {
     double strafeBias = 0.9;// change to adjust only strafing movement
     //
     double conversion = cpi * bias;
-    double LaunchPower_alt = CannonConstants.LaunchPower_Reduced,LaunchPower = CannonConstants.LaunchPower;
-    double intakePower=CannonConstants.IntakePower;
+    final double LaunchVelocity_alt = 1750.0,LaunchVelocity = 2050.0;
+    double intakePower = CannonConstants.IntakePower;
     IMU imu;
     Limelight3A limelight;
     String side_switch;
-    VisualServoing visualServoing = new VisualServoing(limelight, frontLeft, frontRight, backRight, backLeft, telemetry);
+    CRServo frontServo, backLeftServo, backRightServo;
+
+    double LAUNCH_VELOCITY, LAUNCH_VELOCITY_ALT;
+
+    VisualServoing visualServoing;
 
 
     @Override
     public void runOpMode() {
+        //Constants Init
+        //Cannon Constants
+        intakePower = CannonConstants.IntakePower;
+
+        // Set target velocities in Ticks Per Second. These are example values and will need tuning.
+        LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+        LAUNCH_VELOCITY_ALT = CannonConstants.LAUNCH_VELOCITY_ALT;
+
+
+        //Limelight Init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        telemetry.setMsTransmissionInterval(11);
+        limelight.setPollRateHz(90);
+        limelight.start();
+
+        //Motors Init
         frontLeft = hardwareMap.get(DcMotor.class, "FL");
         frontRight = hardwareMap.get(DcMotor.class, "FR");
         backLeft = hardwareMap.get(DcMotor.class, "BL");
         backRight = hardwareMap.get(DcMotor.class, "BR");
-        topLauncher = hardwareMap.get(DcMotor.class,"TL");
-        bottomLauncher = hardwareMap.get(DcMotor.class,"BLa");
-        cannonLeft = hardwareMap.get(CRServo.class, "LC");
-        cannonRight = hardwareMap.get(CRServo.class, "RC");
         leftSlide = hardwareMap.get(DcMotor.class, "LS");
         rightSlide = hardwareMap.get(DcMotor.class, "RS");
+        topLauncher = hardwareMap.get(DcMotorEx.class, "TLauncher");
+        bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLauncher");
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontRight.setDirection(DcMotor.Direction.FORWARD);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
+
+        topLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
+        bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        // Set motors to use encoders for velocity control. This is a crucial step.
+        topLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Improved PIDF coefficients for more stable velocity control
+        // P: Proportional gain - increased for faster response
+        // I: Integral gain - added to eliminate steady-state error
+        // D: Derivative gain - added to reduce overshoot and oscillation
+        // F: Feed-forward gain - tuned for velocity control
+        // Tune these values based on your motor's behavior:
+        // - If oscillating: decrease P, increase D
+        // - If slow to reach target: increase P, increase F
+        // - If steady-state error: increase I (start small, like 0.1-0.5)
+
+        //TODO: Tune PID for new Robot
+        topLauncher.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER,
+                new PIDFCoefficients(250, 0.6, 21, 15));
+        bottomLauncher.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER,
+                new PIDFCoefficients(250, 0.6, 21, 15));
+
+        // Set zero power behavior to FLOAT for launchers (reduces resistance)
+        topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bottomLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontServo = hardwareMap.get(CRServo.class, "IntServo");
+        backLeftServo = hardwareMap.get(CRServo.class, "LServo");
+        backRightServo = hardwareMap.get(CRServo.class, "RServo");
+
         //TODO: Directions could be flipped for code below
-        topLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
-        bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
-        cannonRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        cannonLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        frontLeft.setDirection(DcMotor.Direction.REVERSE);
-        backLeft.setDirection(DcMotor.Direction.REVERSE);
-        frontRight.setDirection(DcMotor.Direction.FORWARD);
-        backRight.setDirection(DcMotor.Direction.FORWARD);
+        frontServo.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
+
         visualServoing = new VisualServoing(limelight, frontLeft, frontRight, backRight, backLeft, telemetry);
+
         // wait for Start to be pressed
+        //TODO: for new robot
         while(!isStarted()){
             telemetry.addLine("Press A for blue, press B for red (Gamepad 1)");
             telemetry.update();
@@ -103,27 +159,29 @@ public class Alpha_Auto extends LinearOpMode {
         waitForStart();
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        initGyro();
-        back(48,0.6);
-        sleep(1000);
-        topLauncher.setPower(LaunchPower_alt);
-        bottomLauncher.setPower(-LaunchPower);
-        sleep(500);
-        cannonLeft.setPower(-intakePower);
-        cannonRight.setPower(-intakePower);
-        sleep(6500);
-        topLauncher.setPower(0);
-        bottomLauncher.setPower(0);
-        cannonLeft.setPower(0);
-        cannonRight.setPower(0);
-        sleep(500);
-        if ("blue".equals(side_switch)) {
-            strafeLeft(28, 1);
-        }
-        if ("red".equals(side_switch)){
-            strafeRight(28, 1);
-        }
-        sleep(500);
+//        initGyro();
+//        back(49,0.6);
+//        sleep(1000);
+//        strafeLeft(1.2,0.3);
+//        sleep(500);
+//        topLauncher.setVelocity(LaunchVelocity_alt);
+//        bottomLauncher.setPower(-LaunchVelocity);
+//        sleep(500);
+//        cannonLeft.setPower(-intakePower);
+//        cannonRight.setPower(-intakePower);
+//        sleep(6500);
+//        topLauncher.setPower(0);
+//        bottomLauncher.setPower(0);
+//        cannonLeft.setPower(0);
+//        cannonRight.setPower(0);
+//        sleep(500);
+//        if ("blue".equals(side_switch)) {
+//            strafeLeft(28, 1);
+//        }
+//        if ("red".equals(side_switch)){
+//            strafeRight(28, 1);
+//        }
+//        sleep(500);
         stop();
 
     }

@@ -87,8 +87,9 @@ public class StraferTeleOp extends LinearOpMode {
 //    +------------------------+-----------------------------------+
 //    | D-Pad Up               | Run intake forward  (collect)     |
 //    | D-Pad Down             | Run intake backward (eject)       |
-//    | Left Stick Y  (> 0.3)  | Flywheel high power               |
-//    | Left Stick Y  (< -0.3) | Flywheel medium power             |
+//    | Right Trigger (> 0.8)  | Flywheel high power               |
+//    | Right Trigger (> 0.3)  | Flywheel medium power             |
+//    | Left Trigger  (> 0.5)  | Flywheel off                      |
 //    | A Button               | Flipper up                        |
 //    | B Button               | Flipper down                      |
 //    +------------------------+-----------------------------------+
@@ -110,19 +111,37 @@ public class StraferTeleOp extends LinearOpMode {
                 robot.intakeWheels.setPower(0.0);
             }
 
-            // Control flywheel shooter using analog sticks
-            if (gamepad2.right_stick_y > 0.3) {
+            // Control flywheel shooter using triggers
+            double targetVelocity;
+
+            if (gamepad2.right_trigger > 0.5) {
                 // High power shooting mode
-                robot.flywheel.setPower(robot.FLYWHEEL_POWER_HIGH);
+                targetVelocity = robot.FLYWHEEL_VEL_HIGH;
             }
-            else if (gamepad2.right_stick_y < -0.3) {
+            else if (gamepad2.left_trigger > 0.5) {
                 // Medium power shooting mode
-                robot.flywheel.setPower(robot.FLYWHEEL_POWER_MEDIUM);
+                targetVelocity = robot.FLYWHEEL_VEL_MEDIUM;
             }
             else {
-                // Turn off flywheel
-                robot.flywheel.setPower(robot.FLYWHEEL_POWER_OFF);
+                // Turn off flywheel when no trigger is pressed
+                targetVelocity = robot.FLYWHEEL_VEL_OFF;
             }
+
+            double currentVelocity = robot.flywheel.getVelocity();
+            double kpUp   = 0.05;
+            double kpDown = 0.1;
+
+            double error = targetVelocity - currentVelocity;
+
+            if (error > 0) {
+                // Ramp up
+                currentVelocity += kpUp * error;
+            }
+            else if (error < 0) {
+                // Ramp down
+                currentVelocity += kpDown * error;
+            }
+            robot.flywheel.setVelocity(currentVelocity);
 
             if (gamepad2.a) {
                 robot.flipper.setPosition(robot.FLIPPER_UP);   // Raise flipper

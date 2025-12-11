@@ -70,11 +70,11 @@ public class RobotHardware {
                                                 (WHEEL_DIAMETER_INCHES * Math.PI);
     static final double JOYSTICK_DEADZONE     = 0.1;
     // Mechanism constants
-    public final double FLYWHEEL_POWER_HIGH   = 0.85;
-    public final double FLYWHEEL_POWER_MEDIUM = 0.55;
-    public final double FLYWHEEL_POWER_OFF    = 0.0;
-    public final double FLIPPER_UP            = 0.66;
-    public final double FLIPPER_DOWN          = 0.33;
+    public final double FLYWHEEL_VEL_HIGH   = 1800.0;
+    public final double FLYWHEEL_VEL_MEDIUM = 1500.0;
+    public final double FLYWHEEL_VEL_OFF    = 0.0;
+    public final double FLIPPER_UP          = 0.66;
+    public final double FLIPPER_DOWN        = 0.33;
     public double strafeComp = 1.10; // Strafe compensation factor (empirical)
 
     // LinearOpMode Library Reference
@@ -119,6 +119,8 @@ public class RobotHardware {
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Map servos by configuration names
         flipper = opMode.hardwareMap.get(Servo.class, "flipper");
@@ -273,14 +275,14 @@ public class RobotHardware {
             // Calculate average positions
             int leftPos  = (frontLeft.getCurrentPosition() + backLeft.getCurrentPosition()) / 2;
             int rightPos = (frontRight.getCurrentPosition() + backRight.getCurrentPosition()) / 2;
-            int error = leftPos - rightPos;
+            int error    = leftPos - rightPos;
 
             // Apply proportional correction to motor powers
-            double leftPower = speed - (error * kp);
+            double leftPower  = speed - (error * kp);
             double rightPower = speed + (error * kp);
 
             // Clamp powers to prevent stalling or exceeding max speed
-            leftPower = Math.max(0.1, Math.abs(leftPower)) * Math.signum(leftPower);
+            leftPower  = Math.max(0.1, Math.abs(leftPower)) * Math.signum(leftPower);
             rightPower = Math.max(0.1, Math.abs(rightPower)) * Math.signum(rightPower);
 
             setDrivePowers(leftPower, rightPower, leftPower, rightPower);
@@ -316,17 +318,17 @@ public class RobotHardware {
         double first, second;
 
         if (speedDirection > 0) { // turning right
-            first = (degrees > 10) ? (degrees - 10) + devertify(yaw) : devertify(yaw);
+            first  = (degrees > 10) ? (degrees - 10) + devertify(yaw) : devertify(yaw);
             second = degrees + devertify(yaw);
         }
         else { // turning left
-            first = (degrees > 10) ? -(degrees - 10) + devertify(yaw) : devertify(yaw);
+            first  = (degrees > 10) ? -(degrees - 10) + devertify(yaw) : devertify(yaw);
             second = -degrees + devertify(yaw);
         }
 
         // Define angle tolerances
-        double firstA = convertify(first - 5);
-        double firstB = convertify(first + 5);
+        double firstA  = convertify(first - 5);
+        double firstB  = convertify(first + 5);
         double secondA = convertify(second - 5);
         double secondB = convertify(second + 5);
 
@@ -460,15 +462,15 @@ public class RobotHardware {
     public void setFlywheelState(flywheelState state) {
         switch (state) {
             case HIGH:
-                flywheel.setPower(FLYWHEEL_POWER_HIGH);
+                flywheel.setVelocity(FLYWHEEL_VEL_HIGH);
                 break;
 
             case MEDIUM:
-                flywheel.setPower(FLYWHEEL_POWER_MEDIUM);
+                flywheel.setVelocity(FLYWHEEL_VEL_MEDIUM);
                 break;
 
             case OFF:
-                flywheel.setPower(FLYWHEEL_POWER_OFF);
+                flywheel.setVelocity(FLYWHEEL_VEL_OFF);
                 break;
         }
     }

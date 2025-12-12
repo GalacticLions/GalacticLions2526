@@ -83,6 +83,7 @@ public class Beta_TeleOP_PID extends OpMode {
         bottomLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         topLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bottomLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         // Improved PIDF coefficients for more stable velocity control
         // P: Proportional gain - increased for faster response
         // I: Integral gain - added to eliminate steady-state error
@@ -94,8 +95,8 @@ public class Beta_TeleOP_PID extends OpMode {
         // - If steady-state error: increase I (start small, like 0.1-0.5)
 
         //TODO: Tune PID for new Robot
-        topLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 25));
-        bottomLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300,0,0,25));
+        topLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
+        bottomLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
 
         // Set zero power behavior to FLOAT for launchers (reduces resistance)
         topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);

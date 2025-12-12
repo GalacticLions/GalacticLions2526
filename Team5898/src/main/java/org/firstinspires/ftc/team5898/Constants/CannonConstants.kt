@@ -13,7 +13,7 @@ object CannonConstants {
     @JvmField
     public var I: Double = 0.0;
     @JvmField
-    public var D:Double = 0.0;
+    public var D:Double = 0.2;
     @JvmField
-    public var F: Int = 10;
+    public var F: Int = 15;
 }

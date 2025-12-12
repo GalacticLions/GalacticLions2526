@@ -66,7 +66,6 @@ public class Alpha_Auto extends LinearOpMode {
 
         // Set target velocities in Ticks Per Second. These are example values and will need tuning.
         LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
-        LAUNCH_VELOCITY_ALT = CannonConstants.LAUNCH_VELOCITY_ALT;
 
 
         //Limelight Init

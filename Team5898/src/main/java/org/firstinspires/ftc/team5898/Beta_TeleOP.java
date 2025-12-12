@@ -6,18 +6,16 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.Constants.SlideConstants;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
-@TeleOp(name="Alpha TeleOP PID Test", group="TeleOP")
-public class Alpha_TeleOP_PID extends OpMode {
+@TeleOp(name="Beta TeleOP", group="TeleOP")
+public class Beta_TeleOP extends OpMode {
     Limelight3A limelight;
     DcMotor frontLeft, frontRight, backLeft, backRight, leftSlide, rightSlide;
     DcMotor topLauncher, bottomLauncher;
@@ -40,9 +38,9 @@ public class Alpha_TeleOP_PID extends OpMode {
         slidePower = SlideConstants.movePower;
         errorThreshold = SlideConstants.ErrorThreshold;
 
+
         // Set target velocities in Ticks Per Second. These are example values and will need tuning.
         LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
-        LAUNCH_VELOCITY_ALT = CannonConstants.LAUNCH_VELOCITY_ALT;
 
 
         //Limelight Init
@@ -72,18 +70,6 @@ public class Alpha_TeleOP_PID extends OpMode {
         // Set motors to use encoders for velocity control. This is a crucial step.
         topLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bottomLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Improved PIDF coefficients for more stable velocity control
-        // P: Proportional gain - increased for faster response
-        // I: Integral gain - added to eliminate steady-state error
-        // D: Derivative gain - added to reduce overshoot and oscillation
-        // F: Feed-forward gain - tuned for velocity control
-        // Tune these values based on your motor's behavior:
-        // - If oscillating: decrease P, increase D
-        // - If slow to reach target: increase P, increase F
-        // - If steady-state error: increase I (start small, like 0.1-0.5)
-
-        //TODO: Tune PID for new Robot
 
         // Set zero power behavior to FLOAT for launchers (reduces resistance)
         topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -215,6 +201,7 @@ public class Alpha_TeleOP_PID extends OpMode {
             double y = -gamepad1.left_stick_y; // Forward/Backward (reversed)
             double x = gamepad1.left_stick_x * 1.1; // Strafe Left/Right (counteract imperfect strafing)
             double rx = gamepad1.right_stick_x; // Rotation
+
 
             // Reset IMU yaw with guide button
             if (gamepad1.guide) {

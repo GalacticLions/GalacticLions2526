@@ -7,12 +7,13 @@ object CannonConstants {
     @JvmField
     public var IntakePower: Double = 1.0;
     @JvmField
-    public var LaunchPower: Double = 0.9;
+    public var LAUNCH_VELOCITY = 1100.0;
     @JvmField
-    public var LaunchPower_Reduced: Double = 0.7;
+    public var P: Int = 300;
     @JvmField
-    public var LAUNCH_VELOCITY = 1500.0;
+    public var I: Double = 0.0;
     @JvmField
-    public var LAUNCH_VELOCITY_ALT = 1950.0;
-
+    public var D:Double = 0.0;
+    @JvmField
+    public var F: Int = 10;
 }

@@ -117,31 +117,18 @@ public class StraferTeleOp extends LinearOpMode {
             if (gamepad2.right_trigger > 0.5) {
                 // High power shooting mode
                 targetVelocity = robot.FLYWHEEL_VEL_HIGH;
-            }
-            else if (gamepad2.left_trigger > 0.5) {
+            } else if (gamepad2.left_trigger > 0.5) {
                 // Medium power shooting mode
                 targetVelocity = robot.FLYWHEEL_VEL_MEDIUM;
-            }
-            else {
+            } else {
                 // Turn off flywheel when no trigger is pressed
                 targetVelocity = robot.FLYWHEEL_VEL_OFF;
             }
 
-            double currentVelocity = robot.flywheel.getVelocity();
-            double kpUp   = 0.05;
-            double kpDown = 0.1;
+            // Apply ramp to the current velocity
+            double vel = robot.applyRampToVelocity(robot.flywheel.getVelocity(), targetVelocity);
 
-            double error = targetVelocity - currentVelocity;
-
-            if (error > 0) {
-                // Ramp up
-                currentVelocity += kpUp * error;
-            }
-            else if (error < 0) {
-                // Ramp down
-                currentVelocity += kpDown * error;
-            }
-            robot.flywheel.setVelocity(currentVelocity);
+            robot.flywheel.setVelocity(vel);
 
             if (gamepad2.a) {
                 robot.flipper.setPosition(robot.FLIPPER_UP);   // Raise flipper

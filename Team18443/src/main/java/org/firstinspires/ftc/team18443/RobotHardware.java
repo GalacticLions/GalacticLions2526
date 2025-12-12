@@ -172,7 +172,7 @@ public class RobotHardware {
     }
 
 // -------------------------------------------------------------------------------------------------
-//    TeleOp Drive Methods
+//    Utility / General-Purpose Methods
 // -------------------------------------------------------------------------------------------------
 
     /**
@@ -191,6 +191,26 @@ public class RobotHardware {
         backLeft.setPower(bl / max);
         backRight.setPower(br / max);
     }
+
+    public double applyRampToVelocity(double currentVelocity, double targetVelocity) {
+        double kpUp   = 0.05;
+        double kpDown = 0.1;
+
+        double error = targetVelocity - currentVelocity;
+
+        if (error > 0) {
+            // Ramp up
+            currentVelocity += kpUp * error;
+        } else if (error < 0) {
+            // Ramp down
+            currentVelocity += kpDown * error;
+        }
+        return currentVelocity;
+    }
+
+// -------------------------------------------------------------------------------------------------
+//    TeleOp Drive Methods
+// -------------------------------------------------------------------------------------------------
 
     /**
      * Applies a deadzone to joystick input to ignore small movements near zero
@@ -460,19 +480,26 @@ public class RobotHardware {
      * Sets the flywheel to a predefined HIGH, MED, or OFF state
      */
     public void setFlywheelState(flywheelState state) {
+        double targetVelocity = 0;
+
         switch (state) {
             case HIGH:
-                flywheel.setVelocity(FLYWHEEL_VEL_HIGH);
+                targetVelocity = FLYWHEEL_VEL_HIGH;
                 break;
 
             case MEDIUM:
-                flywheel.setVelocity(FLYWHEEL_VEL_MEDIUM);
+                targetVelocity = FLYWHEEL_VEL_MEDIUM;
                 break;
 
             case OFF:
-                flywheel.setVelocity(FLYWHEEL_VEL_OFF);
+                targetVelocity = FLYWHEEL_VEL_OFF;
                 break;
         }
+
+        // Apply ramp to the current velocity
+        double adjustedVelocity = applyRampToVelocity(flywheel.getVelocity(), targetVelocity);
+
+        flywheel.setVelocity(adjustedVelocity);
     }
     public enum flywheelState {
         HIGH, MEDIUM, OFF

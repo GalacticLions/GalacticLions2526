@@ -17,8 +17,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
-@Autonomous(name = "Beta Auto", group = "Beta", preselectTeleOp = "Beta TeleOP (PID)")
-public class Beta_Auto extends LinearOpMode {
+@Autonomous(name = "Beta Auto (Just shoots three and moves away)", group = "Beta", preselectTeleOp = "Beta TeleOP (PID)")
+public class Beta_Auto_Simple extends LinearOpMode {
     // variable declaration & setup
     DcMotor frontLeft, frontRight, backLeft, backRight,leftSlide,rightSlide;
     DcMotorEx topLauncher, bottomLauncher;
@@ -45,7 +45,7 @@ public class Beta_Auto extends LinearOpMode {
     double strafeBias = 0.9;// change to adjust only strafing movement
     //
     double conversion = cpi * bias;
-    final double LaunchVelocity = CannonConstants.LAUNCH_VELOCITY;
+    final double LaunchVelocity = 1050;
     double intakePower = CannonConstants.IntakePower;
     IMU imu;
     Limelight3A limelight;
@@ -161,8 +161,7 @@ public class Beta_Auto extends LinearOpMode {
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         initGyro();
-        backAndStartLauncher(33,.6);
-        quickAlign(3);
+        backAndStartLauncher(24,.6);
         sleep(500);
         quickAlign(2);
         setServoPower(1);
@@ -173,17 +172,10 @@ public class Beta_Auto extends LinearOpMode {
         sleep(500);
 
         if("red".equals(side_switch)) {
-            turnRight(-40, .5);
-            sleep(500);
-            strafeRight(24.5, 0.5);
-            setServoPower(1);
-            forward(40,.05);
-        }else if("blue".equals(side_switch)){
-            turnLeft(-40, .5);
-            sleep(500);
             strafeLeft(24.5, 0.5);
-            setServoPower(1);
-            forward(40, .05);
+        }else if("blue".equals(side_switch)){
+            strafeRight(24.5, 0.5);
+
         }
         sleep(500);
         stop();

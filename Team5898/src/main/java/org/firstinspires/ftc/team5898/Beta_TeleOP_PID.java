@@ -102,12 +102,12 @@ public class Beta_TeleOP_PID extends OpMode {
         topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bottomLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slideLeftTarget = 0;
         slideRightTarget = 0;
         frontServo = hardwareMap.get(CRServo.class, "IntServo");
@@ -150,10 +150,10 @@ public class Beta_TeleOP_PID extends OpMode {
         leftError = Math.abs(slideLeftTarget - slideLeftPosition);
         rightError = Math.abs(slideRightTarget - slideRightPosition) ;
 
-        if (gamepad1.dpad_up) {
-            slideRightTarget += 10;
-            slideLeftTarget -= 10;
-        }
+//        if (gamepad1.dpad_up) {
+//            slideRightTarget -= 10;
+//            slideLeftTarget += 10;
+//        }
 
         if (leftError >= 3) {
             leftSlide.setTargetPosition(slideLeftTarget);

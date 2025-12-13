@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.team5898;
 
 import com.qualcomm.hardware.bosch.BHI260IMU;
+import com.qualcomm.hardware.bosch.BNO055IMUNew;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -26,7 +27,7 @@ public class LimelightLocalization extends OpMode
     @Override
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        imu = hardwareMap.get(BHI260IMU.class,"imu");
+        imu = hardwareMap.get(BNO055IMUNew.class,"imu");
         imuParameters = new IMU.Parameters(
                 new RevHubOrientationOnRobot(
                         RevHubOrientationOnRobot.LogoFacingDirection.UP,

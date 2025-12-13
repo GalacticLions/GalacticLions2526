@@ -2,6 +2,7 @@ package org.firstinspires.ftc.team5898;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.Constants.SlideConstants;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
+@Disabled
 @TeleOp(name="Beta TeleOP", group="TeleOP")
 public class Beta_TeleOP extends OpMode {
     Limelight3A limelight;
@@ -118,11 +120,11 @@ public class Beta_TeleOP extends OpMode {
 
         leftError = Math.abs(slideLeftTarget - slideLeftPosition);
         rightError = Math.abs(slideRightTarget - slideRightPosition) ;
-
-        if (gamepad1.dpad_up) {
-            slideRightTarget += 10;
-            slideLeftTarget -= 10;
-        }
+//
+//        if (gamepad1.dpad_up) {
+//            slideRightTarget += 10;
+//            slideLeftTarget -= 10;
+//        }
 
         if (leftError >= 3) {
             leftSlide.setTargetPosition(slideLeftTarget);

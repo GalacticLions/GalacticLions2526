@@ -6,9 +6,12 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.Set;
+
 @Configurable
 public class VisualServoing {
     // Horizontal (tx) alignment - turning left/right
+    private static final int[] ALLOWED_TAG_IDS = {20, 24};
     public static final double Kp_HEADING = 0.02; // Proportional gain for horizontal alignment
     public static final double MIN_COMMAND_HEADING = 0.10;
     public static final double HEADING_THRESHOLD = 0.80; // Horizontal offset threshold (degrees)

@@ -12,10 +12,10 @@ object SlideConstants {
 //    @JvmField
 //    public var maxheightR: Int = 4000
     @JvmField
-    public var movePower: Double = 0.8
+    public var movePower: Double = 0.7
     @JvmField
     public var holdPower: Double = 0.3
     @JvmField
     //Offset in Encoder Ticks
-    public var Offset:Int = 20
+    public var Offset:Int = 0
 }

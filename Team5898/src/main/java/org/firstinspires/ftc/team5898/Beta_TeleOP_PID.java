@@ -27,11 +27,11 @@ public class Beta_TeleOP_PID extends OpMode {
     Integer Offset,  errorThreshold, slideLeftTarget, slideRightTarget,slideLeftPosition, slideRightPosition,leftError,rightError;
     Double slidePower, intakePower;
 
-    Double LAUNCH_VELOCITY, LAUNCH_VELOCITY_ALT;
-    int P;
-    Double I;
-    Double D;
-    Integer F;
+    Double LAUNCH_VELOCITY;
+    int kP;
+    Double kI;
+    Double kD;
+    Integer kF;
 
 
     @Override
@@ -44,10 +44,10 @@ public class Beta_TeleOP_PID extends OpMode {
         slidePower = SlideConstants.movePower;
         errorThreshold = SlideConstants.ErrorThreshold;
 
-        P = CannonConstants.P;
-        I = CannonConstants.I;
-        D = CannonConstants.D;
-        F = CannonConstants.F;
+        kP = CannonConstants.kP;
+        kI = CannonConstants.kI;
+        kD = CannonConstants.kD;
+        kF = CannonConstants.kF;
 
 
 
@@ -95,8 +95,8 @@ public class Beta_TeleOP_PID extends OpMode {
         // - If steady-state error: increase I (start small, like 0.1-0.5)
 
         //TODO: Tune PID for new Robot
-        topLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
-        bottomLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(P, I, D, F));
+        topLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
+        bottomLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
 
         // Set zero power behavior to FLOAT for launchers (reduces resistance)
         topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -138,10 +138,10 @@ public class Beta_TeleOP_PID extends OpMode {
 
     @Override
     public void loop() {
-        P = CannonConstants.P;
-        I = CannonConstants.I;
-        D = CannonConstants.D;
-        F = CannonConstants.F;
+        kP = CannonConstants.kP;
+        kI = CannonConstants.kI;
+        kD = CannonConstants.kD;
+        kF = CannonConstants.kF;
 
         //Slide Control System
         slideLeftPosition = leftSlide.getCurrentPosition();

@@ -9,11 +9,11 @@ object CannonConstants {
     @JvmField
     public var LAUNCH_VELOCITY = 1100.0;
     @JvmField
-    public var P: Int = 300;
+    public var kP: Int = 300;
     @JvmField
-    public var I: Double = 0.0;
+    public var kI: Double = 0.0;
     @JvmField
-    public var D:Double = 0.2;
+    public var kD:Double = 0.2;
     @JvmField
-    public var F: Int = 15;
+    public var kF: Int = 15;
 }

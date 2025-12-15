@@ -56,10 +56,10 @@ public class Beta_Auto_Simple extends LinearOpMode {
 
     VisualServoing visualServoing;
 
-    Integer P = CannonConstants.P;
-    Double I = CannonConstants.I;
-    Double D = CannonConstants.D;
-    Integer F = CannonConstants.F;
+    Integer P = CannonConstants.kP;
+    Double I = CannonConstants.kI;
+    Double D = CannonConstants.kD;
+    Integer F = CannonConstants.kF;
 
     @Override
     public void runOpMode() {

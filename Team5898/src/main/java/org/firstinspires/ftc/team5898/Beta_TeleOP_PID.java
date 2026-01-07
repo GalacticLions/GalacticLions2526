@@ -22,7 +22,8 @@ public class Beta_TeleOP_PID extends OpMode {
     DcMotor frontLeft, frontRight, backLeft, backRight, leftSlide, rightSlide;
     DcMotorEx topLauncher, bottomLauncher;
     VisualServoing visualServoing;
-    CRServo frontServo, backLeftServo, backRightServo;
+    CRServo backLeftServo, backRightServo;
+    DcMotor frontIntake;
     IMU imu;
     Integer Offset,  errorThreshold, slideLeftTarget, slideRightTarget,slideLeftPosition, slideRightPosition,leftError,rightError;
     Double slidePower, intakePower;
@@ -70,6 +71,7 @@ public class Beta_TeleOP_PID extends OpMode {
         rightSlide = hardwareMap.get(DcMotor.class, "RS");
         topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
         bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
+        frontIntake = hardwareMap.get(DcMotor.class, "fi");
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -110,12 +112,11 @@ public class Beta_TeleOP_PID extends OpMode {
 //        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slideLeftTarget = 0;
         slideRightTarget = 0;
-        frontServo = hardwareMap.get(CRServo.class, "IntServo");
         backLeftServo = hardwareMap.get(CRServo.class, "LServo");
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
 
         //TODO: Directions could be flipped for code below
-        frontServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontIntake.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -200,15 +201,15 @@ public class Beta_TeleOP_PID extends OpMode {
         if (gamepad2.right_stick_y > 0.3) {
             backLeftServo.setPower(intakePower);
             backRightServo.setPower(intakePower);
-            frontServo.setPower(intakePower);
+            frontIntake.setPower(intakePower);
         } else if (gamepad2.right_stick_y < -0.3) {
             backLeftServo.setPower(-intakePower);
             backRightServo.setPower(-intakePower);
-            frontServo.setPower(-intakePower);
+            frontIntake.setPower(-intakePower);
         }else {
             backLeftServo.setPower(0);
             backRightServo.setPower(0);
-            frontServo.setPower(0);
+            frontIntake.setPower(0);
         }
 
 
@@ -262,3 +263,4 @@ public class Beta_TeleOP_PID extends OpMode {
         rightSlide.setPower(0);
     }
 }
+

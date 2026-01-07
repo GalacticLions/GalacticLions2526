@@ -20,7 +20,7 @@ import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 @Autonomous(name = "Beta Auto", group = "Beta", preselectTeleOp = "Beta TeleOP (PID)")
 public class Beta_Auto extends LinearOpMode {
     // variable declaration & setup
-    DcMotor frontLeft, frontRight, backLeft, backRight,leftSlide,rightSlide;
+    DcMotor frontLeft, frontRight, backLeft, backRight,leftSlide,rightSlide, frontIntake;
     DcMotorEx topLauncher, bottomLauncher;
 
 
@@ -50,7 +50,7 @@ public class Beta_Auto extends LinearOpMode {
     IMU imu;
     Limelight3A limelight;
     String side_switch;
-    CRServo frontServo, backLeftServo, backRightServo;
+    CRServo backLeftServo, backRightServo;
 
     double LAUNCH_VELOCITY;
 
@@ -125,11 +125,11 @@ public class Beta_Auto extends LinearOpMode {
         leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontServo = hardwareMap.get(CRServo.class, "IntServo");
+        frontIntake = hardwareMap.get(DcMotor.class, "Intake");
         backLeftServo = hardwareMap.get(CRServo.class, "LServo");
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
 
-        frontServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontIntake.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -190,7 +190,7 @@ public class Beta_Auto extends LinearOpMode {
 
     }
     public void setServoPower(double power){
-        frontServo.setPower(power);
+        frontIntake.setPower(power);
         backLeftServo.setPower(power);
         backRightServo.setPower(power);
     }

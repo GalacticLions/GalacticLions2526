@@ -29,6 +29,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+import androidx.annotation.*;
+
 public class RobotHardware {
 
 // -------------------------------------------------------------------------------------------------
@@ -71,7 +73,7 @@ public class RobotHardware {
     static final double JOYSTICK_DEADZONE     = 0.1;
     // Mechanism constants
     public final double FLYWHEEL_VEL_HIGH   = 1800.0;
-    public final double FLYWHEEL_VEL_MEDIUM = 1500.0;
+    public final double FLYWHEEL_VEL_MEDIUM = 1350.0;
     public final double FLYWHEEL_VEL_OFF    = 0.0;
     public final double FLIPPER_UP          = 0.66;
     public final double FLIPPER_DOWN        = 0.33;
@@ -81,7 +83,7 @@ public class RobotHardware {
     private final LinearOpMode opMode;
 
     // Constructor
-    public RobotHardware(LinearOpMode opMode) {
+    public RobotHardware(@NonNull LinearOpMode opMode) {
         this.opMode = opMode;
     }
 
@@ -109,6 +111,11 @@ public class RobotHardware {
         // Swap these if your robot's wiring or gearboxes are mirrored
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
+
+        // Reverse the intake motors so that positive power runs the
+        // intake in the intended direction
+        intakeConveyor.setDirection(DcMotor.Direction.REVERSE);
+        intakeWheels.setDirection(DcMotor.Direction.REVERSE);
 
         // Apply BRAKE mode to mechanism motors for precise stopping
         // (Optional: enable BRAKE on drive motors for more controlled deceleration)
@@ -192,9 +199,18 @@ public class RobotHardware {
         backRight.setPower(br / max);
     }
 
+    /**
+     * Applies a ramping adjustment to the current velocity to smoothly
+     * approach the target velocity
+     *
+     * @param currentVelocity The current velocity value
+     * @param targetVelocity  The desired target velocity to approach
+     * @return The new velocity after applying the ramp adjustment
+     */
+    @CheckResult
     public double applyRampToVelocity(double currentVelocity, double targetVelocity) {
-        double kpUp   = 0.05;
-        double kpDown = 0.1;
+        double kpUp   = 0.1;
+        double kpDown = 0.2;
 
         double error = targetVelocity - currentVelocity;
 
@@ -208,16 +224,13 @@ public class RobotHardware {
         return currentVelocity;
     }
 
-// -------------------------------------------------------------------------------------------------
-//    TeleOp Drive Methods
-// -------------------------------------------------------------------------------------------------
-
     /**
      * Applies a deadzone to joystick input to ignore small movements near zero
      *
      * @param input The raw joystick input value
      * @return The adjusted joystick value after applying the deadzone and scaling
      */
+    @CheckResult
     public double applyJoystickDeadzone(double input) {
         if (Math.abs(input) < JOYSTICK_DEADZONE) {
             return 0.0;
@@ -231,6 +244,10 @@ public class RobotHardware {
             }
         }
     }
+
+// -------------------------------------------------------------------------------------------------
+//    TeleOp Drive Methods
+// -------------------------------------------------------------------------------------------------
 
     /**
      * Robot-centric mecanum drive (controls relative to robot's orientation)
@@ -273,7 +290,8 @@ public class RobotHardware {
     /**
      * Moves the robot forward or backward a specified distance using encoder targets
      */
-    public void moveToPosition(double inches, double speed){
+    @WorkerThread
+    public void moveToPosition(double inches, double speed) {
         // Determine new target position and pass to motor controller
         int move = (int)(Math.round(inches * COUNTS_PER_INCH));
         frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + move);
@@ -287,26 +305,12 @@ public class RobotHardware {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        double kp = 0.05;
+        double power = Math.abs(speed);
+        setDrivePowers(power, power, power, power);
 
         // Loop until all motors have reached their targets
-        while (opMode.opModeIsActive() && (frontLeft.isBusy() || frontRight.isBusy()
-                || backLeft.isBusy() || backRight.isBusy())) {
-            // Calculate average positions
-            int leftPos  = (frontLeft.getCurrentPosition() + backLeft.getCurrentPosition()) / 2;
-            int rightPos = (frontRight.getCurrentPosition() + backRight.getCurrentPosition()) / 2;
-            int error    = leftPos - rightPos;
-
-            // Apply proportional correction to motor powers
-            double leftPower  = speed - (error * kp);
-            double rightPower = speed + (error * kp);
-
-            // Clamp powers to prevent stalling or exceeding max speed
-            leftPower  = Math.max(0.1, Math.abs(leftPower)) * Math.signum(leftPower);
-            rightPower = Math.max(0.1, Math.abs(rightPower)) * Math.signum(rightPower);
-
-            setDrivePowers(leftPower, rightPower, leftPower, rightPower);
-
+        while (opMode.opModeIsActive() && (frontLeft.isBusy() && frontRight.isBusy()
+                && backLeft.isBusy() && backRight.isBusy())) {
             opMode.telemetry.addData("Drive", "Moving...");
             opMode.telemetry.update();
 
@@ -329,6 +333,7 @@ public class RobotHardware {
      * @param degrees -
      * @param speedDirection -
      */
+    @WorkerThread
     public void turnWithGyro(double degrees, double speedDirection) {
         // Create an object to receive the IMU angles
         YawPitchRollAngles robotOrientation = imu.getRobotYawPitchRollAngles();
@@ -357,7 +362,7 @@ public class RobotHardware {
         while (opMode.opModeIsActive()) {
             yaw = convertify(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             boolean inRange = (Math.abs(firstA - firstB) < 11) ? (firstA < yaw && yaw < firstB)
-                              : ((firstA < yaw && yaw <= 180) || (-180 <= yaw && yaw < firstB));
+                              : ((firstA < yaw && yaw <= 180) && (-180 <= yaw && yaw < firstB));
             if (inRange) break;
         }
 
@@ -366,7 +371,7 @@ public class RobotHardware {
         while (opMode.opModeIsActive()) {
             yaw = convertify(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
             boolean inRange = (Math.abs(secondA - secondB) < 11) ? (secondA < yaw && yaw < secondB)
-                              : ((secondA < yaw && yaw <= 180) || (-180 <= yaw && yaw < secondB));
+                              : ((secondA < yaw && yaw <= 180) && (-180 <= yaw && yaw < secondB));
             if (inRange) break;
         }
 
@@ -420,7 +425,8 @@ public class RobotHardware {
      * Strafes robot left or right using encoder targets.
      * Negative input for inches results in left strafing
      */
-    public void strafeToPosition(double inches, double speed){
+    @WorkerThread
+    public void strafeToPosition(double inches, double speed) {
         // Determine new target position and pass to motor controller
         int move = (int)(Math.round(inches * COUNTS_PER_INCH * strafeComp));
         frontLeft.setTargetPosition(frontLeft.getCurrentPosition() + move);
@@ -434,11 +440,12 @@ public class RobotHardware {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        setDrivePowers(speed, speed, speed, speed);
+        double power = Math.abs(speed);
+        setDrivePowers(power, power, power, power);
 
         // Loop until all motors have reached their targets
-        while (opMode.opModeIsActive() && (frontLeft.isBusy() || frontRight.isBusy()
-                || backLeft.isBusy() || backRight.isBusy())) {
+        while (opMode.opModeIsActive() && (frontLeft.isBusy() && frontRight.isBusy()
+                && backLeft.isBusy() && backRight.isBusy())) {
             opMode.telemetry.addData("Drive", "Strafing...");
             opMode.telemetry.update();
 
@@ -452,19 +459,22 @@ public class RobotHardware {
     /**
      * Moves the intake system by a specified number of encoder ticks
      */
+    @WorkerThread
     public void setIntake(int ticks) {
         // Set the ticks and motor mode
-        intakeConveyor.setTargetPosition(intakeConveyor.getCurrentPosition() + ticks);
-        intakeWheels.setTargetPosition(intakeWheels.getCurrentPosition() + ticks);
-        intakeConveyor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeWheels.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        int first  =  intakeConveyor.getCurrentPosition();
+        int second = intakeWheels.getCurrentPosition();
+
+        intakeConveyor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intakeWheels.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         intakeConveyor.setPower(1.0);
         intakeWheels.setPower(1.0);
 
         // Loop until all motors have reached their targets
-        while (opMode.opModeIsActive() && (intakeConveyor.isBusy() ||
-                intakeWheels.isBusy())) {
+        while (opMode.opModeIsActive()
+                && Math.abs(intakeConveyor.getCurrentPosition() - first) < ticks
+                && Math.abs(intakeWheels.getCurrentPosition() - second) < ticks) {
             opMode.telemetry.addData("Intake", "Moving...");
             opMode.telemetry.update();
 
@@ -477,9 +487,10 @@ public class RobotHardware {
     }
 
     /**
-     * Sets the flywheel to a predefined HIGH, MED, or OFF state
+     * Sets the flywheel to a predefined HIGH, MEDIUM, or OFF state
      */
-    public void setFlywheelState(flywheelState state) {
+    @WorkerThread
+    public void setFlywheelState(@NonNull flywheelState state) {
         double targetVelocity = 0;
 
         switch (state) {
@@ -497,9 +508,12 @@ public class RobotHardware {
         }
 
         // Apply ramp to the current velocity
-        double adjustedVelocity = applyRampToVelocity(flywheel.getVelocity(), targetVelocity);
+        while (Math.abs(flywheel.getVelocity() - targetVelocity) > 5) {
+            double adjustedVelocity = applyRampToVelocity(flywheel.getVelocity(), targetVelocity);
 
-        flywheel.setVelocity(adjustedVelocity);
+            flywheel.setVelocity(adjustedVelocity);
+            opMode.sleep(20);
+        }
     }
     public enum flywheelState {
         HIGH, MEDIUM, OFF
@@ -508,7 +522,7 @@ public class RobotHardware {
     /**
      * Sets flipper position based on predefined UP/DOWN states
      */
-    public void setFlipperState(flipperState state) {
+    public void setFlipperState(@NonNull flipperState state) {
         switch (state) {
             case UP:
                 flipper.setPosition(FLIPPER_UP);

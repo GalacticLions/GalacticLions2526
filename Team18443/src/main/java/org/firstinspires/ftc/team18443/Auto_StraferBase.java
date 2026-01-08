@@ -24,6 +24,8 @@ import static org.firstinspires.ftc.team18443.RobotHardware.flipperState.*;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import androidx.annotation.*;
+
 @Autonomous(name="Auto_StraferBase", group="Autonomous", preselectTeleOp ="StraferTeleOp")
 public class Auto_StraferBase extends LinearOpMode {
 
@@ -71,7 +73,7 @@ public class Auto_StraferBase extends LinearOpMode {
      * @param speed  The speed to travel (range: 0.0 to 1.0)
      * @see RobotHardware#moveToPosition(double, double)
      */
-    public void forward(double inches, double speed) {
+    public void forward(double inches, @FloatRange(from=0.0, to=1.0) double speed) {
         robot.moveToPosition(inches, speed);
     }
 
@@ -82,7 +84,7 @@ public class Auto_StraferBase extends LinearOpMode {
      * @param speed  The speed to travel (range: 0.0 to 1.0)
      * @see RobotHardware#moveToPosition(double, double)
      */
-    public void backward(double inches, double speed) {
+    public void backward(double inches, @FloatRange(from=0.0, to=1.0) double speed) {
         robot.moveToPosition(-inches, speed);
     }
 
@@ -93,7 +95,7 @@ public class Auto_StraferBase extends LinearOpMode {
      * @param speed   The speed of rotation (range: 0.0 to 1.0)
      * @see RobotHardware#turnWithGyro(double, double)
      */
-    public void turnLeft(double degrees, double speed) {
+    public void turnLeft(double degrees, @FloatRange(from=0.0, to=1.0) double speed) {
         robot.turnWithGyro(degrees, -speed);
     }
 
@@ -104,7 +106,7 @@ public class Auto_StraferBase extends LinearOpMode {
      * @param speed   The speed of rotation (range: 0.0 to 1.0)
      * @see RobotHardware#turnWithGyro(double, double)
      */
-    public void turnRight(double degrees, double speed) {
+    public void turnRight(double degrees, @FloatRange(from=0.0, to=1.0) double speed) {
         robot.turnWithGyro(degrees, speed);
     }
 
@@ -115,7 +117,7 @@ public class Auto_StraferBase extends LinearOpMode {
      * @param speed  The speed of strafing (range: 0.0 to 1.0)
      * @see RobotHardware#strafeToPosition(double, double)
      */
-    public void strafeLeft(double inches, double speed) {
+    public void strafeLeft(double inches, @FloatRange(from=0.0, to=1.0) double speed) {
         robot.strafeToPosition(-inches, speed);
     }
 
@@ -126,7 +128,7 @@ public class Auto_StraferBase extends LinearOpMode {
      * @param speed  The speed of strafing (range: 0.0 to 1.0)
      * @see RobotHardware#strafeToPosition(double, double)
      */
-    public void strafeRight(double inches, double speed) {
+    public void strafeRight(double inches, @FloatRange(from=0.0, to=1.0) double speed) {
         robot.strafeToPosition(inches, speed);
     }
 
@@ -144,7 +146,7 @@ public class Auto_StraferBase extends LinearOpMode {
      *
      * @param state The desired flywheel state (HIGH, MEDIUM, or OFF)
      */
-    public void flywheel(RobotHardware.flywheelState state) {
+    public void flywheel(@NonNull RobotHardware.flywheelState state) {
         robot.setFlywheelState(state);
     }
 
@@ -153,7 +155,7 @@ public class Auto_StraferBase extends LinearOpMode {
      *
      * @param state The desired flipper state (UP and DOWN)
      */
-    public void flipper(RobotHardware.flipperState state) {
+    public void flipper(@NonNull RobotHardware.flipperState state) {
         robot.setFlipperState(state);
     }
 }

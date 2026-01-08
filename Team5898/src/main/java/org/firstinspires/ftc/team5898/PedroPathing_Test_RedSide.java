@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
-@Autonomous(name = "Pedro Alpha Auto")
+@Autonomous(name = "PedroPathing Red")
 public class PedroPathing_Test_RedSide extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;

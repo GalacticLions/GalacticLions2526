@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
-@Autonomous(name = "Pedro Alpha Auto")
+@Autonomous(name = "PedroPathing Blue")
 public class PedroPathing_Test_BlueSide extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;

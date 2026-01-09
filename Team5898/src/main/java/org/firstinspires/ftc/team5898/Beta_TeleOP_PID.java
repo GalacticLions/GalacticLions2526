@@ -42,8 +42,8 @@ public class Beta_TeleOP_PID extends OpMode {
         intakePower = CannonConstants.IntakePower;
         Offset = SlideConstants.Offset;
         //Slide Constants
-        slidePower = SlideConstants.movePower;
-        errorThreshold = SlideConstants.ErrorThreshold;
+        // slidePower = SlideConstants.movePower;
+        // errorThreshold = SlideConstants.ErrorThreshold;
 
         kP = CannonConstants.kP;
         kI = CannonConstants.kI;
@@ -67,11 +67,11 @@ public class Beta_TeleOP_PID extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "FR");
         backLeft = hardwareMap.get(DcMotor.class, "BL");
         backRight = hardwareMap.get(DcMotor.class, "BR");
-        leftSlide = hardwareMap.get(DcMotor.class, "LS");
-        rightSlide = hardwareMap.get(DcMotor.class, "RS");
+        // leftSlide = hardwareMap.get(DcMotor.class, "LS");
+        // rightSlide = hardwareMap.get(DcMotor.class, "RS");
         topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
         bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
-        frontIntake = hardwareMap.get(DcMotor.class, "fi");
+        frontIntake = hardwareMap.get(DcMotor.class, "Intake");
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
@@ -110,8 +110,8 @@ public class Beta_TeleOP_PID extends OpMode {
 //        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //        leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slideLeftTarget = 0;
-        slideRightTarget = 0;
+        // slideLeftTarget = 0;
+        // slideRightTarget = 0;
         backLeftServo = hardwareMap.get(CRServo.class, "LServo");
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
 
@@ -145,34 +145,34 @@ public class Beta_TeleOP_PID extends OpMode {
         kF = CannonConstants.kF;
 
         //Slide Control System
-        slideLeftPosition = leftSlide.getCurrentPosition();
-        slideRightPosition = rightSlide.getCurrentPosition();
+        // slideLeftPosition = leftSlide.getCurrentPosition();
+        // slideRightPosition = rightSlide.getCurrentPosition();
 
-        leftError = Math.abs(slideLeftTarget - slideLeftPosition);
-        rightError = Math.abs(slideRightTarget - slideRightPosition) ;
+        // leftError = Math.abs(slideLeftTarget - slideLeftPosition);
+        // rightError = Math.abs(slideRightTarget - slideRightPosition) ;
 
 //        if (gamepad1.dpad_up) {
 //            slideRightTarget -= 10;
 //            slideLeftTarget += 10;
 //        }
 
-        if (leftError >= 3) {
-            leftSlide.setTargetPosition(slideLeftTarget);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(slidePower);
-        } else {
-            leftSlide.setPower(0.0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-
-        if (rightError >= 3) {
-            rightSlide.setTargetPosition(slideRightTarget);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setPower(slidePower);
-        } else {
-            rightSlide.setPower(0.0);
-            rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
+//        if (leftError >= 3) {
+//            leftSlide.setTargetPosition(slideLeftTarget);
+//            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            leftSlide.setPower(slidePower);
+//        } else {
+//            leftSlide.setPower(0.0);
+//            leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        }
+//
+//        if (rightError >= 3) {
+//            rightSlide.setTargetPosition(slideRightTarget);
+//            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            rightSlide.setPower(slidePower);
+//        } else {
+//            rightSlide.setPower(0.0);
+//            rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        }
 
 
 

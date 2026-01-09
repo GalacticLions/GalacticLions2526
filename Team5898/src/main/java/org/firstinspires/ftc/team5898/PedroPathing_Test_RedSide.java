@@ -60,13 +60,13 @@ public class PedroPathing_Test_RedSide extends OpMode {
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(122, 125, Math.toRadians(40));
-    private final Pose shootPose = new Pose(95.5, 100, Math.toRadians(45));
+    private final Pose startPose = new Pose(122, 126, Math.toRadians(37));
+    private final Pose shootPose = new Pose(95, 100, Math.toRadians(45));
     private final Pose firstRowPose = new Pose(102, 84, Math.toRadians(0));
     private final Pose firstGrabPose = new Pose(129, 84, Math.toRadians(0));
     private final Pose secondRowPose = new Pose(102, 59, Math.toRadians(0));
     private final Pose secondGrabPose = new Pose(135, 59, Math.toRadians(0));
-    private final Pose thirdRowPose = new Pose(42, 35, Math.toRadians(0));
+    private final Pose thirdRowPose = new Pose(102, 35, Math.toRadians(0));
     private final Pose thirdGrabPose = new Pose(135, 35, Math.toRadians(0));
 
     private final Pose endPose = new Pose(96, 126, Math.toRadians(0));

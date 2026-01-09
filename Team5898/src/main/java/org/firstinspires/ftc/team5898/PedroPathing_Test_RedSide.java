@@ -348,7 +348,7 @@ public class PedroPathing_Test_RedSide extends OpMode {
         backLeftServo = hardwareMap.get(CRServo.class, "LServo");
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
 
-        frontIntake.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontIntake.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
 

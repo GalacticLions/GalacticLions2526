@@ -7,12 +7,31 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
 @Autonomous(name = "PedroPathing Blue")
 public class PedroPathing_Test_BlueSide extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
+
+    // Flywheel hardware
+    private DcMotorEx topLauncher, bottomLauncher;
+    private DcMotor frontIntake;
+    private CRServo backLeftServo, backRightServo;
+
+    // Flywheel constants
+    private final double LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+    private final double INTAKE_POWER = CannonConstants.IntakePower;
+    private final Integer P = CannonConstants.kP;
+    private final Double I = CannonConstants.kI;
+    private final Double D = CannonConstants.kD;
+    private final Integer F = CannonConstants.kF;
 
     public enum PathState {
     // START POSITION - END POSITION
@@ -114,8 +133,20 @@ public class PedroPathing_Test_BlueSide extends OpMode {
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
             case SHOOT_PRELOAD:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
-                    // TODO ADD FLYWHEEL LOGIC
+                // Start launchers when entering this state
+                if (pathTimer.getElapsedTimeSeconds() < 0.1) {
+                    startLaunchers();
+                    telemetry.addLine("Spooling up launchers...");
+                }
+                // Wait for launchers to reach speed, then fire
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5) {
+                    setIntakePower(INTAKE_POWER);
+                    telemetry.addLine("Firing preload!");
+                }
+                // After firing, move to next path
+                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                    stopLaunchers();
+                    setIntakePower(0);
                     follower.followPath(driveShootPosRow1Pos, true);
                     setPathState(PathState.DRIVE_SHOOTPOS_FIRSTROW);
                 }
@@ -126,6 +157,8 @@ public class PedroPathing_Test_BlueSide extends OpMode {
                 setPathState(PathState.DRIVE_FIRSTROW_GRABROW1);
                 break;
             case DRIVE_FIRSTROW_GRABROW1:
+                // Start intake to grab sample
+                setIntakePower(INTAKE_POWER);
                 follower.followPath(driveRow1PosGrab1Pos, true);
                 setPathState(PathState.DRIVE_GRABROW1_SHOOTPOS);
                 break;
@@ -134,8 +167,20 @@ public class PedroPathing_Test_BlueSide extends OpMode {
                 setPathState(PathState.SHOOT_ROW1);
                 break;
             case SHOOT_ROW1:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
-                    // TODO ADD FLYWHEEL LOGIC
+                // Start launchers when entering this state
+                if (pathTimer.getElapsedTimeSeconds() < 0.1) {
+                    startLaunchers();
+                    telemetry.addLine("Spooling up launchers...");
+                }
+                // Wait for launchers to reach speed, then fire
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5) {
+                    setIntakePower(INTAKE_POWER);
+                    telemetry.addLine("Firing row 1 sample!");
+                }
+                // After firing, move to next path
+                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                    stopLaunchers();
+                    setIntakePower(0);
                     follower.followPath(driveShootPosRow2Pos, true);
                     setPathState(PathState.DRIVE_SHOOTPOS_SECONDROW);
                 }
@@ -146,16 +191,30 @@ public class PedroPathing_Test_BlueSide extends OpMode {
                 setPathState(PathState.DRIVE_SECONDROW_GRABROW2);
                 break;
             case DRIVE_SECONDROW_GRABROW2:
+                // Start intake to grab sample
+                setIntakePower(INTAKE_POWER);
                 follower.followPath(driveRow2PosGrab2Pos, true);
                 setPathState(PathState.DRIVE_GRABROW2_SHOOTPOS);
                 break;
             case DRIVE_GRABROW2_SHOOTPOS:
                 follower.followPath(driveGrab2PosShootPos, true);
-                setPathState(PathState.SHOOT_PRELOAD);
+                setPathState(PathState.SHOOT_ROW2);
                 break;
             case SHOOT_ROW2:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
-                    // TODO ADD FLYWHEEL LOGIC
+                // Start launchers when entering this state
+                if (pathTimer.getElapsedTimeSeconds() < 0.1) {
+                    startLaunchers();
+                    telemetry.addLine("Spooling up launchers...");
+                }
+                // Wait for launchers to reach speed, then fire
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5) {
+                    setIntakePower(INTAKE_POWER);
+                    telemetry.addLine("Firing row 2 sample!");
+                }
+                // After firing, move to next path
+                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                    stopLaunchers();
+                    setIntakePower(0);
                     follower.followPath(driveShootPosRow3Pos, true);
                     setPathState(PathState.DRIVE_SHOOTPOS_THIRDROW);
                 }
@@ -166,6 +225,8 @@ public class PedroPathing_Test_BlueSide extends OpMode {
                 setPathState(PathState.DRIVE_THIRDROW_GRABROW3);
                 break;
             case DRIVE_THIRDROW_GRABROW3:
+                // Start intake to grab sample
+                setIntakePower(INTAKE_POWER);
                 follower.followPath(driveRow3PosGrab3Pos, true);
                 setPathState(PathState.DRIVE_GRABROW3_SHOOTPOS);
                 break;
@@ -174,8 +235,20 @@ public class PedroPathing_Test_BlueSide extends OpMode {
                 setPathState(PathState.SHOOT_ROW3);
                 break;
             case SHOOT_ROW3:
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
-                    // TODO ADD FLYWHEEL LOGIC
+                // Start launchers when entering this state
+                if (pathTimer.getElapsedTimeSeconds() < 0.1) {
+                    startLaunchers();
+                    telemetry.addLine("Spooling up launchers...");
+                }
+                // Wait for launchers to reach speed, then fire
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5) {
+                    setIntakePower(INTAKE_POWER);
+                    telemetry.addLine("Firing row 3 sample!");
+                }
+                // After firing, move to end position
+                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                    stopLaunchers();
+                    setIntakePower(0);
                     follower.followPath(driveShootPosEndPos, true);
                     setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
                 }
@@ -204,7 +277,35 @@ public class PedroPathing_Test_BlueSide extends OpMode {
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
-        // TODO ADD IN ANY OTHER INIT MECHANISMS
+
+        // Initialize flywheel motors
+        topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
+        bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
+        topLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
+        bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        // Set motors to use encoders for velocity control
+        topLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Set PIDF coefficients for velocity control
+        topLauncher.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER,
+                new PIDFCoefficients(P, I, D, F));
+        bottomLauncher.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER,
+                new PIDFCoefficients(P, I, D, F));
+
+        // Set zero power behavior to FLOAT for launchers (reduces resistance)
+        topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bottomLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        // Initialize intake system
+        frontIntake = hardwareMap.get(DcMotor.class, "Intake");
+        backLeftServo = hardwareMap.get(CRServo.class, "LServo");
+        backRightServo = hardwareMap.get(CRServo.class, "RServo");
+
+        frontIntake.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
         buildPaths();
         follower.setPose(startPose);
@@ -213,6 +314,43 @@ public class PedroPathing_Test_BlueSide extends OpMode {
     public void start() {
         opModeTimer.resetTimer();
         setPathState(pathState);
+    }
+
+    /**
+     * Start the flywheel launchers at the configured velocity
+     */
+    private void startLaunchers() {
+        topLauncher.setVelocity(-LAUNCH_VELOCITY);
+        bottomLauncher.setVelocity(-LAUNCH_VELOCITY);
+    }
+
+    /**
+     * Stop the flywheel launchers
+     */
+    private void stopLaunchers() {
+        topLauncher.setPower(0);
+        bottomLauncher.setPower(0);
+    }
+
+    /**
+     * Set power to intake system (front motor and back servos)
+     * @param power Power value for intake system
+     */
+    private void setIntakePower(double power) {
+        frontIntake.setPower(power);
+        backLeftServo.setPower(power);
+        backRightServo.setPower(power);
+    }
+
+    /**
+     * Fire the launcher by running intake to feed samples
+     * @param durationSeconds How long to run the intake
+     */
+    private void fireLauncher(double durationSeconds) {
+        setIntakePower(INTAKE_POWER);
+        // In a real scenario, you'd use a timer here
+        // For now, this method just starts the intake
+        // The calling code should handle timing
     }
 
     @Override

@@ -16,7 +16,7 @@ import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
 @Autonomous(name = "PedroPathing Red")
-public class PedroPathing_Test_RedSide extends OpMode {
+public class PedroPathing_RedSide_Alt extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 

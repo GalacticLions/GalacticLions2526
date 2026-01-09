@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
-@Autonomous(name = "PedroPathing Red")
+@Autonomous(name = "PedroPathing Red Alt")
 public class PedroPathing_RedSide_Alt extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -142,186 +142,186 @@ public class PedroPathing_RedSide_Alt extends OpMode {
                     setPathState(PathState.SHOOT_PRELOAD);
                 }
                 break;
-            case SHOOT_PRELOAD:
-                // Start launchers once when entering this state
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    telemetry.addLine("Spooling up launchers...");
-                }
-                // Wait for launchers to reach speed, then fire
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing preload!");
-                }
-                // After firing, move to next state
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_FIRSTROW);
-                }
-                break;
-            case DRIVE_SHOOTPOS_FIRSTROW:
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    follower.followPath(driveShootPosRow1Pos, true);
-                }
-                if (!follower.isBusy()) {
-                    setPathState(PathState.DRIVE_FIRSTROW_GRABROW1);
-                }
-                break;
-            case DRIVE_FIRSTROW_GRABROW1:
-                // Start intake to grab sample
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    setIntakePower(INTAKE_POWER);
-                    follower.followPath(driveRow1PosGrab1Pos, true);
-                }
-                if (!follower.isBusy()) {
-                    setIntakePower(0);
-                    setPathState(PathState.DRIVE_GRABROW1_SHOOTPOS);
-                }
-                break;
-            case DRIVE_GRABROW1_SHOOTPOS:
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    follower.followPath(driveGrab1PosShootPos, true);
-                }
-                if (!follower.isBusy()) {
-                    setPathState(PathState.SHOOT_ROW1);
-                }
-                break;
-            case SHOOT_ROW1:
-                // Start launchers once when entering this state
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    telemetry.addLine("Spooling up launchers...");
-                }
-                // Wait for launchers to reach speed, then fire
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing row 1 sample!");
-                }
-                // After firing, move to next state
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_SECONDROW);
-                }
-                break;
-
-            case DRIVE_SHOOTPOS_SECONDROW:
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    follower.followPath(driveShootPosRow2Pos, true);
-                }
-                if (!follower.isBusy()) {
-                    setPathState(PathState.DRIVE_SECONDROW_GRABROW2);
-                }
-                break;
-            case DRIVE_SECONDROW_GRABROW2:
-                // Start intake to grab sample
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    setIntakePower(INTAKE_POWER);
-                    follower.followPath(driveRow2PosGrab2Pos, true);
-                }
-                if (!follower.isBusy()) {
-                    setIntakePower(0);
-                    setPathState(PathState.DRIVE_GRABROW2_SHOOTPOS);
-                }
-                break;
-            case DRIVE_GRABROW2_SHOOTPOS:
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    follower.followPath(driveGrab2PosShootPos, true);
-                }
-                if (!follower.isBusy()) {
-                    setPathState(PathState.SHOOT_ROW2);
-                }
-                break;
-            case SHOOT_ROW2:
-                // Start launchers once when entering this state
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    telemetry.addLine("Spooling up launchers...");
-                }
-                // Wait for launchers to reach speed, then fire
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing row 2 sample!");
-                }
-                // After firing, move to next state
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_THIRDROW);
-                }
-                break;
-
-            case DRIVE_SHOOTPOS_THIRDROW:
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    follower.followPath(driveShootPosRow3Pos, true);
-                }
-                if (!follower.isBusy()) {
-                    setPathState(PathState.DRIVE_THIRDROW_GRABROW3);
-                }
-                break;
-            case DRIVE_THIRDROW_GRABROW3:
-                // Start intake to grab sample
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    setIntakePower(INTAKE_POWER);
-                    follower.followPath(driveRow3PosGrab3Pos, true);
-                }
-                if (!follower.isBusy()) {
-                    setIntakePower(0);
-                    setPathState(PathState.DRIVE_GRABROW3_SHOOTPOS);
-                }
-                break;
-            case DRIVE_GRABROW3_SHOOTPOS:
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    follower.followPath(driveGrab3PosShootPos, true);
-                }
-                if (!follower.isBusy()) {
-                    setPathState(PathState.SHOOT_ROW3);
-                }
-                break;
-            case SHOOT_ROW3:
-                // Start launchers once when entering this state
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    telemetry.addLine("Spooling up launchers...");
-                }
-                // Wait for launchers to reach speed, then fire
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing row 3 sample!");
-                }
-                // After firing, move to end position
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
-                }
-                break;
-
-            case DRIVE_SHOOTPOS_ENDPOS:
-                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
-                    follower.followPath(driveShootPosEndPos, true);
-                }
-                if (!follower.isBusy()) {
-                    telemetry.addLine("Done All Paths");
-                }
-                break;
+//            case SHOOT_PRELOAD:
+//                // Start launchers once when entering this state
+//                if (!launchersStarted) {
+//                    startLaunchers();
+//                    launchersStarted = true;
+//                    telemetry.addLine("Spooling up launchers...");
+//                }
+//                // Wait for launchers to reach speed, then fire
+//                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
+//                    setIntakePower(INTAKE_POWER);
+//                    intakeStarted = true;
+//                    telemetry.addLine("Firing preload!");
+//                }
+//                // After firing, move to next state
+//                if (pathTimer.getElapsedTimeSeconds() > 3) {
+//                    stopLaunchers();
+//                    setIntakePower(0);
+//                    launchersStarted = false;
+//                    intakeStarted = false;
+//                    setPathState(PathState.DRIVE_SHOOTPOS_FIRSTROW);
+//                }
+//                break;
+//            case DRIVE_SHOOTPOS_FIRSTROW:
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    follower.followPath(driveShootPosRow1Pos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setPathState(PathState.DRIVE_FIRSTROW_GRABROW1);
+//                }
+//                break;
+//            case DRIVE_FIRSTROW_GRABROW1:
+//                // Start intake to grab sample
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    setIntakePower(INTAKE_POWER);
+//                    follower.followPath(driveRow1PosGrab1Pos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setIntakePower(0);
+//                    setPathState(PathState.DRIVE_GRABROW1_SHOOTPOS);
+//                }
+//                break;
+//            case DRIVE_GRABROW1_SHOOTPOS:
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    follower.followPath(driveGrab1PosShootPos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setPathState(PathState.SHOOT_ROW1);
+//                }
+//                break;
+//            case SHOOT_ROW1:
+//                // Start launchers once when entering this state
+//                if (!launchersStarted) {
+//                    startLaunchers();
+//                    launchersStarted = true;
+//                    telemetry.addLine("Spooling up launchers...");
+//                }
+//                // Wait for launchers to reach speed, then fire
+//                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
+//                    setIntakePower(INTAKE_POWER);
+//                    intakeStarted = true;
+//                    telemetry.addLine("Firing row 1 sample!");
+//                }
+//                // After firing, move to next state
+//                if (pathTimer.getElapsedTimeSeconds() > 3) {
+//                    stopLaunchers();
+//                    setIntakePower(0);
+//                    launchersStarted = false;
+//                    intakeStarted = false;
+//                    setPathState(PathState.DRIVE_SHOOTPOS_SECONDROW);
+//                }
+//                break;
+//
+//            case DRIVE_SHOOTPOS_SECONDROW:
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    follower.followPath(driveShootPosRow2Pos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setPathState(PathState.DRIVE_SECONDROW_GRABROW2);
+//                }
+//                break;
+//            case DRIVE_SECONDROW_GRABROW2:
+//                // Start intake to grab sample
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    setIntakePower(INTAKE_POWER);
+//                    follower.followPath(driveRow2PosGrab2Pos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setIntakePower(0);
+//                    setPathState(PathState.DRIVE_GRABROW2_SHOOTPOS);
+//                }
+//                break;
+//            case DRIVE_GRABROW2_SHOOTPOS:
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    follower.followPath(driveGrab2PosShootPos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setPathState(PathState.SHOOT_ROW2);
+//                }
+//                break;
+//            case SHOOT_ROW2:
+//                // Start launchers once when entering this state
+//                if (!launchersStarted) {
+//                    startLaunchers();
+//                    launchersStarted = true;
+//                    telemetry.addLine("Spooling up launchers...");
+//                }
+//                // Wait for launchers to reach speed, then fire
+//                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
+//                    setIntakePower(INTAKE_POWER);
+//                    intakeStarted = true;
+//                    telemetry.addLine("Firing row 2 sample!");
+//                }
+//                // After firing, move to next state
+//                if (pathTimer.getElapsedTimeSeconds() > 3) {
+//                    stopLaunchers();
+//                    setIntakePower(0);
+//                    launchersStarted = false;
+//                    intakeStarted = false;
+//                    setPathState(PathState.DRIVE_SHOOTPOS_THIRDROW);
+//                }
+//                break;
+//
+//            case DRIVE_SHOOTPOS_THIRDROW:
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    follower.followPath(driveShootPosRow3Pos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setPathState(PathState.DRIVE_THIRDROW_GRABROW3);
+//                }
+//                break;
+//            case DRIVE_THIRDROW_GRABROW3:
+//                // Start intake to grab sample
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    setIntakePower(INTAKE_POWER);
+//                    follower.followPath(driveRow3PosGrab3Pos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setIntakePower(0);
+//                    setPathState(PathState.DRIVE_GRABROW3_SHOOTPOS);
+//                }
+//                break;
+//            case DRIVE_GRABROW3_SHOOTPOS:
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    follower.followPath(driveGrab3PosShootPos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    setPathState(PathState.SHOOT_ROW3);
+//                }
+//                break;
+//            case SHOOT_ROW3:
+//                // Start launchers once when entering this state
+//                if (!launchersStarted) {
+//                    startLaunchers();
+//                    launchersStarted = true;
+//                    telemetry.addLine("Spooling up launchers...");
+//                }
+//                // Wait for launchers to reach speed, then fire
+//                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
+//                    setIntakePower(INTAKE_POWER);
+//                    intakeStarted = true;
+//                    telemetry.addLine("Firing row 3 sample!");
+//                }
+//                // After firing, move to end position
+//                if (pathTimer.getElapsedTimeSeconds() > 3) {
+//                    stopLaunchers();
+//                    setIntakePower(0);
+//                    launchersStarted = false;
+//                    intakeStarted = false;
+//                    setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
+//                }
+//                break;
+//
+//            case DRIVE_SHOOTPOS_ENDPOS:
+//                if (pathTimer.getElapsedTimeSeconds() < 0.05) {
+//                    follower.followPath(driveShootPosEndPos, true);
+//                }
+//                if (!follower.isBusy()) {
+//                    telemetry.addLine("Done All Paths");
+//                }
+//                break;
             default:
                 telemetry.addLine("No State Commanded");
                 break;

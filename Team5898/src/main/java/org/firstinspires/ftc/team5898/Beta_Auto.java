@@ -83,8 +83,8 @@ public class Beta_Auto extends LinearOpMode {
         frontRight = hardwareMap.get(DcMotor.class, "FR");
         backLeft = hardwareMap.get(DcMotor.class, "BL");
         backRight = hardwareMap.get(DcMotor.class, "BR");
-        leftSlide = hardwareMap.get(DcMotor.class, "LS");
-        rightSlide = hardwareMap.get(DcMotor.class, "RS");
+//        leftSlide = hardwareMap.get(DcMotor.class, "LS");
+//        rightSlide = hardwareMap.get(DcMotor.class, "RS");
         topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
         bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -119,17 +119,17 @@ public class Beta_Auto extends LinearOpMode {
         topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bottomLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontIntake = hardwareMap.get(DcMotor.class, "Intake");
         backLeftServo = hardwareMap.get(CRServo.class, "LServo");
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
 
-        frontIntake.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontIntake.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -158,11 +158,10 @@ public class Beta_Auto extends LinearOpMode {
             }
         }
         waitForStart();
-        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         initGyro();
         backAndStartLauncher(33,.6);
-        quickAlign(3);
         sleep(500);
         quickAlign(2);
         setServoPower(1);
@@ -175,17 +174,48 @@ public class Beta_Auto extends LinearOpMode {
         if("red".equals(side_switch)) {
             turnRight(-40, .5);
             sleep(500);
-            strafeRight(24.5, 0.5);
+            strafeRight(25, 0.5);
             setServoPower(1);
-            forward(40,.05);
+            forward(37,.3);
+            sleep(100);
+            setServoPower(0);
+            back(35,.5);
+            strafeLeft(24.5, 0.5);
+            turnLeft(-40,.5);
+            sleep(500);
+            setServoPower(-.1);
+            sleep(50);
+            topLauncher.setVelocity(-LAUNCH_VELOCITY);
+            bottomLauncher.setPower(-LAUNCH_VELOCITY);
+            forward(5,.5);
+            quickAlign(1);
+            setServoPower(1);
+            sleep(5000);
+            strafeLeft(15, 1);
+
         }else if("blue".equals(side_switch)){
             turnLeft(-40, .5);
             sleep(500);
             strafeLeft(24.5, 0.5);
             setServoPower(1);
-            forward(40, .05);
+            forward(40, .5);
+            sleep(100);
+            setServoPower(0);
+            back(35,.5);
+            strafeRight(24.5, 0.5);
+            turnRight(-40,.5);
+            sleep(500);
+            setServoPower(-.1);
+            sleep(50);
+            topLauncher.setVelocity(-LAUNCH_VELOCITY);
+            bottomLauncher.setPower(-LAUNCH_VELOCITY);
+            forward(5,.5);
+            quickAlign(1);
+            setServoPower(1);
+            sleep(5000);
+            strafeRight(15, 1);
         }
-        sleep(500);
+        sleep(1000);
         stop();
 
     }

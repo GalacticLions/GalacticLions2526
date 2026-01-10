@@ -116,7 +116,7 @@ public class Beta_TeleOP_PID extends OpMode {
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
 
         //TODO: Directions could be flipped for code below
-        frontIntake.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontIntake.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
 

@@ -26,7 +26,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
     private CRServo backLeftServo, backRightServo;
 
     // Flywheel constants
-    private final double LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+    private final double LAUNCH_VELOCITY = 1220;
     private final double INTAKE_POWER = CannonConstants.IntakePower;
     private final Integer P = CannonConstants.kP;
     private final Double I = CannonConstants.kI;
@@ -66,14 +66,14 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
     PathState pathState;
 
     private final Pose startPose = new Pose(22, 126, Math.toRadians(143));
-    private final Pose shootPose = new Pose(48, 100, Math.toRadians(135));
-    private final Pose firstRowPose = new Pose(42, 84, Math.toRadians(180));
-    private final Pose firstGrabPose = new Pose(15, 84, Math.toRadians(180));
-    private final Pose secondRowPose = new Pose(42, 59, Math.toRadians(180));
-    private final Pose secondGrabPose = new Pose(9, 59, Math.toRadians(180));
-    private final Pose thirdRowPose = new Pose(42, 35, Math.toRadians(180));
-    private final Pose thirdGrabPose = new Pose(9, 35, Math.toRadians(180));
-    private final Pose endPose = new Pose(48, 126, Math.toRadians(180));
+    private final Pose shootPose = new Pose(46, 102, Math.toRadians(135));
+    private final Pose firstRowPose = new Pose(62, 64, Math.toRadians(180));
+    private final Pose firstGrabPose = new Pose(55, 64, Math.toRadians(180));
+    private final Pose secondRowPose = new Pose(62, 39, Math.toRadians(180));
+    private final Pose secondGrabPose = new Pose(49, 39, Math.toRadians(180));
+    private final Pose thirdRowPose = new Pose(62, 15, Math.toRadians(180));
+    private final Pose thirdGrabPose = new Pose(49, 15, Math.toRadians(180));
+    private final Pose endPose = new Pose(68, 126, Math.toRadians(180));
 
     private PathChain driveStartPosShootPos, driveShootPosEndPos;
     private PathChain driveShootPosRow1Pos, driveRow1PosGrab1Pos, driveGrab1PosShootPos;
@@ -152,7 +152,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                     telemetry.addLine("Firing preload!");
                 }
 
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                if (pathTimer.getElapsedTimeSeconds() > 7) {
                     stopLaunchers();
                     setIntakePower(0);
                     launchersStarted = false;
@@ -198,7 +198,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                     telemetry.addLine("Firing row 1 sample!");
                 }
 
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                if (pathTimer.getElapsedTimeSeconds() > 7) {
                     stopLaunchers();
                     setIntakePower(0);
                     launchersStarted = false;
@@ -244,7 +244,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                     telemetry.addLine("Firing row 2 sample!");
                 }
 
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                if (pathTimer.getElapsedTimeSeconds() > 7) {
                     stopLaunchers();
                     setIntakePower(0);
                     launchersStarted = false;
@@ -290,7 +290,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                     telemetry.addLine("Firing row 3 sample!");
                 }
 
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                if (pathTimer.getElapsedTimeSeconds() > 7) {
                     stopLaunchers();
                     setIntakePower(0);
                     launchersStarted = false;

@@ -199,13 +199,13 @@ public class Beta_TeleOP_PID extends OpMode {
 
 
         if (gamepad2.right_stick_y > 0.3) {
-            backLeftServo.setPower(intakePower);
-            backRightServo.setPower(intakePower);
-            frontIntake.setPower(intakePower);
-        } else if (gamepad2.right_stick_y < -0.3) {
             backLeftServo.setPower(-intakePower);
             backRightServo.setPower(-intakePower);
             frontIntake.setPower(-intakePower);
+        } else if (gamepad2.right_stick_y < -0.3) {
+            backLeftServo.setPower(intakePower);
+            backRightServo.setPower(intakePower);
+            frontIntake.setPower(.7);
         }else {
             backLeftServo.setPower(0);
             backRightServo.setPower(0);

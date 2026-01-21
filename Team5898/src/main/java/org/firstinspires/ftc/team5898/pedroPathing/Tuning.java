@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.team5898.pedroPathing;
 
 import static org.firstinspires.ftc.team5898.pedroPathing.Tuning.changes;
-import static org.firstinspires.ftc.team5898.pedroPathing.Tuning.draw;
 import static org.firstinspires.ftc.team5898.pedroPathing.Tuning.drawOnlyCurrent;
+import static org.firstinspires.ftc.team5898.pedroPathing.Tuning.draw;
 import static org.firstinspires.ftc.team5898.pedroPathing.Tuning.follower;
 import static org.firstinspires.ftc.team5898.pedroPathing.Tuning.stopRobot;
 import static org.firstinspires.ftc.team5898.pedroPathing.Tuning.telemetryM;
@@ -15,16 +15,13 @@ import com.bylazar.field.PanelsField;
 import com.bylazar.field.Style;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.ErrorCalculator;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.math.Vector;
-import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
+import com.pedropathing.geometry.*;
+import com.pedropathing.math.*;
+import com.pedropathing.paths.*;
 import com.pedropathing.telemetry.SelectableOpMode;
-import com.pedropathing.util.PoseHistory;
+import com.pedropathing.util.*;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -333,7 +330,7 @@ class TurnTuner extends OpMode {
  */
 class ForwardVelocityTuner extends OpMode {
     private final ArrayList<Double> velocities = new ArrayList<>();
-    public static double DISTANCE = 72;
+    public static double DISTANCE = 48;
     public static double RECORD_NUMBER = 10;
 
     private boolean end;
@@ -440,7 +437,7 @@ class ForwardVelocityTuner extends OpMode {
 class LateralVelocityTuner extends OpMode {
     private final ArrayList<Double> velocities = new ArrayList<>();
 
-    public static double DISTANCE = 72;
+    public static double DISTANCE = 48;
     public static double RECORD_NUMBER = 10;
 
     private boolean end;

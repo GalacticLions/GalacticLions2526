@@ -36,6 +36,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
     // State flags to prevent repeated calls
     private boolean launchersStarted = false;
     private boolean intakeStarted = false;
+    private boolean shootSequenceStarted = false;
 
     public enum PathState {
         // START POSITION - END POSITION
@@ -64,7 +65,37 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
     }
 
     PathState pathState;
+    private void runShootSequence(String label, PathState nextState){
+        if (follower.isBusy()) {
+            telemetry.addLine(label);
+            return;}
+        if (!shootSequenceStarted){
+            shootSequenceStarted = true;
+            launchersStarted = false;
+            intakeStarted = false;
 
+            pathTimer.resetTimer();
+            startLaunchers();
+            launchersStarted = true;
+
+            telemetry.addLine("Arrived. Spooling for: " + label);
+        }
+
+        double time = pathTimer.getElapsedTimeSeconds();
+        if (time > 2.0 && time < 2.5 && !intakeStarted) {
+            setIntakePower(INTAKE_POWER);
+            intakeStarted = true;
+            telemetry.addLine("Firing sample!");
+        }
+        if (time > 5.0){
+            stopLaunchers();
+            setIntakePower(0);
+            launchersStarted = false;
+            intakeStarted = false;
+            shootSequenceStarted = false;
+            setPathState(nextState);
+        }
+    }
     private final Pose startPose = new Pose(122, 126, Math.toRadians(37));
     private final Pose shootPose = new Pose(95, 100, Math.toRadians(45));
     private final Pose firstRowPose = new Pose(102, 84, Math.toRadians(0));
@@ -135,31 +166,12 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
     public void statePathUpdate() {
         switch(pathState) {
             case DRIVE_STARTPOS_SHOOTPOS:
-                follower.followPath(driveStartPosShootPos);
+                follower.followPath(driveStartPosShootPos,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
 
             case SHOOT_PRELOAD:
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    pathTimer.resetTimer();
-                    telemetry.addLine("Spooling up launchers...");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing preload!");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_FIRSTROW);
-                }
+                runShootSequence("PRELOAD", PathState.DRIVE_SHOOTPOS_FIRSTROW);
                 break;
 
             case DRIVE_SHOOTPOS_FIRSTROW:
@@ -180,32 +192,13 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
             case DRIVE_GRABROW1_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
-                    follower.followPath(driveGrab1PosShootPos);
+                    follower.followPath(driveGrab1PosShootPos,true);
                     setPathState(PathState.SHOOT_ROW1);
                 }
                 break;
 
             case SHOOT_ROW1:
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    pathTimer.resetTimer();
-                    telemetry.addLine("Spooling up launchers...");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing row 1 sample!");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_SECONDROW);
-                }
+                runShootSequence("ROW 1", PathState.DRIVE_SHOOTPOS_SECONDROW);
                 break;
 
             case DRIVE_SHOOTPOS_SECONDROW:
@@ -226,39 +219,13 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
             case DRIVE_GRABROW2_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
-                    follower.followPath(driveGrab2PosShootPos);
+                    follower.followPath(driveGrab2PosShootPos,true);
                     setPathState(PathState.SHOOT_ROW2);
                 }
                 break;
 
             case SHOOT_ROW2:
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    pathTimer.resetTimer();
-                    telemetry.addLine("Spooling up launchers...");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing row 2 sample!");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_THIRDROW);
-                }
-                break;
-
-            case DRIVE_SHOOTPOS_THIRDROW:
-                if (!follower.isBusy()) {
-                    follower.followPath(driveShootPosRow3Pos);
-                    setPathState(PathState.DRIVE_THIRDROW_GRABROW3);
-                }
+                runShootSequence("ROW 2", PathState.DRIVE_SHOOTPOS_THIRDROW);
                 break;
 
             case DRIVE_THIRDROW_GRABROW3:
@@ -272,32 +239,13 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
             case DRIVE_GRABROW3_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
-                    follower.followPath(driveGrab3PosShootPos);
+                    follower.followPath(driveGrab3PosShootPos,true);
                     setPathState(PathState.SHOOT_ROW3);
                 }
                 break;
 
             case SHOOT_ROW3:
-                if (!launchersStarted) {
-                    startLaunchers();
-                    launchersStarted = true;
-                    pathTimer.resetTimer();
-                    telemetry.addLine("Spooling up launchers...");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 2 && pathTimer.getElapsedTimeSeconds() < 2.5 && !intakeStarted) {
-                    setIntakePower(INTAKE_POWER);
-                    intakeStarted = true;
-                    telemetry.addLine("Firing row 3 sample!");
-                }
-
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    stopLaunchers();
-                    setIntakePower(0);
-                    launchersStarted = false;
-                    intakeStarted = false;
-                    setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
-                }
+               runShootSequence("ROW 3", PathState.DRIVE_SHOOTPOS_ENDPOS);
                 break;
 
             case DRIVE_SHOOTPOS_ENDPOS:

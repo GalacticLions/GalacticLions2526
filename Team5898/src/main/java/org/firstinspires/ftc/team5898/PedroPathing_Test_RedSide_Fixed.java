@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.team5898;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -45,22 +46,22 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
         DRIVE_STARTPOS_SHOOTPOS,
         SHOOT_PRELOAD,
 
-        DRIVE_SHOOTPOS_FIRSTROW,
-        DRIVE_FIRSTROW_GRABROW1,
-        SHOOT_ROW1,
-        DRIVE_GRABROW1_SHOOTPOS,
+        DRIVE_SHOOTPOS_PPG,
+        DRIVE_PPG_GRABPPG,
+        DRIVE_GRABPPG_SHOOTPOS,
+        SHOOT_PPG,
 
-        DRIVE_SHOOTPOS_SECONDROW,
-        DRIVE_SECONDROW_GRABROW2,
-        DRIVE_GRABROW2_SHOOTPOS,
-        SHOOT_ROW2,
+        DRIVE_SHOOTPOS_PGP,
+        DRIVE_PGP_GRABPGP,
+        DRIVE_GRABPGP_SHOOTPOS,
+        SHOOT_PGP,
 
-        DRIVE_SHOOTPOS_THIRDROW,
-        DRIVE_THIRDROW_GRABROW3,
-        DRIVE_GRABROW3_SHOOTPOS,
-        SHOOT_ROW3,
+        DRIVE_SHOOTPOS_GPP,
+        DRIVE_GPP_GRABGPP,
+        DRIVE_GRABGPP_SHOOTPOS,
+        SHOOT_GPP,
 
-        DRIVE_SHOOTPOS_ENDPOS,
+        DRIVE_SHOOTPOS_PARKPOS,
         IDLE
     }
 
@@ -89,7 +90,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
         }
         if (time > 5.0){
             stopLaunchers();
-            setIntakePower(0);
+            // setIntakePower(0);
             launchersStarted = false;
             intakeStarted = false;
             shootSequenceStarted = false;
@@ -98,159 +99,162 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
     }
     private final Pose startPose = new Pose(122, 126, Math.toRadians(37));
     private final Pose shootPose = new Pose(95, 100, Math.toRadians(45));
-    private final Pose firstRowPose = new Pose(102, 84, Math.toRadians(0));
-    private final Pose firstGrabPose = new Pose(129, 84, Math.toRadians(0));
-    private final Pose secondRowPose = new Pose(102, 59, Math.toRadians(0));
-    private final Pose secondGrabPose = new Pose(135, 59, Math.toRadians(0));
-    private final Pose thirdRowPose = new Pose(102, 35, Math.toRadians(0));
-    private final Pose thirdGrabPose = new Pose(135, 35, Math.toRadians(0));
+    private final Pose PPGPose = new Pose(95, 86, Math.toRadians(0));
+    private final Pose PPGGrabPose = new Pose(130, 86, Math.toRadians(0));
+    private final Pose PGPPose = new Pose(95, 61, Math.toRadians(0));
+    private final Pose PGPGrabPose = new Pose(136, 61, Math.toRadians(0));
+    private final Pose GPPPose = new Pose(95, 37, Math.toRadians(0));
+    private final Pose GPPGrabPose = new Pose(136, 37, Math.toRadians(0));
 
-    private final Pose endPose = new Pose(96, 126, Math.toRadians(0));
+    private final Pose ParkPose = new Pose(111, 75, Math.toRadians(0));
 
-    private PathChain driveStartPosShootPos, driveShootPosEndPos;
-    private PathChain driveShootPosRow1Pos, driveRow1PosGrab1Pos, driveGrab1PosShootPos;
-    private PathChain driveShootPosRow2Pos, driveRow2PosGrab2Pos, driveGrab2PosShootPos;
-    private PathChain driveShootPosRow3Pos, driveRow3PosGrab3Pos, driveGrab3PosShootPos;
+    private PathChain StartToShootPose, ShootToParkPose;
+    private PathChain ShootToPPGPose, GrabPPGPose, PPGToShootPose;
+    private PathChain ShootToPGPPose, GrabPGPPose, PGPToShootPose;
+    private PathChain ShootToGPPPose, GrabGPPPose, GPPToShootPose;
 
     public void buildPaths() {
-        driveStartPosShootPos = follower.pathBuilder()
+        StartToShootPose = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        driveShootPosRow1Pos = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, firstRowPose))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), firstRowPose.getHeading())
+        ShootToPPGPose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, PPGPose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), PPGPose.getHeading())
                 .build();
-        driveRow1PosGrab1Pos = follower.pathBuilder()
-                .addPath(new BezierLine(firstRowPose, firstGrabPose))
-                .setLinearHeadingInterpolation(firstRowPose.getHeading(), firstGrabPose.getHeading())
+        GrabPPGPose = follower.pathBuilder()
+                .addPath(new BezierLine(PPGPose, PPGGrabPose))
+                .setLinearHeadingInterpolation(PPGPose.getHeading(), PPGGrabPose.getHeading())
                 .build();
-        driveGrab1PosShootPos = follower.pathBuilder()
-                .addPath(new BezierLine(firstGrabPose, shootPose))
-                .setLinearHeadingInterpolation(firstGrabPose.getHeading(), shootPose.getHeading())
-                .build();
-
-        driveShootPosRow2Pos = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, secondRowPose))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), secondRowPose.getHeading())
-                .build();
-        driveRow2PosGrab2Pos = follower.pathBuilder()
-                .addPath(new BezierLine(secondRowPose, secondGrabPose))
-                .setLinearHeadingInterpolation(secondRowPose.getHeading(), secondGrabPose.getHeading())
-                .build();
-        driveGrab2PosShootPos = follower.pathBuilder()
-                .addPath(new BezierLine(secondGrabPose, shootPose))
-                .setLinearHeadingInterpolation(secondGrabPose.getHeading(), shootPose.getHeading())
+        PPGToShootPose = follower.pathBuilder()
+                .addPath(new BezierLine(PPGGrabPose, shootPose))
+                .setLinearHeadingInterpolation(PPGGrabPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        driveShootPosRow3Pos = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, thirdRowPose))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), thirdRowPose.getHeading())
+        ShootToPGPPose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, PGPPose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), PGPPose.getHeading())
                 .build();
-        driveRow3PosGrab3Pos = follower.pathBuilder()
-                .addPath(new BezierLine(thirdRowPose, thirdGrabPose))
-                .setLinearHeadingInterpolation(thirdRowPose.getHeading(), thirdGrabPose.getHeading())
+        GrabPGPPose = follower.pathBuilder()
+                .addPath(new BezierLine(PGPPose, PGPGrabPose))
+                .setLinearHeadingInterpolation(PGPPose.getHeading(), PGPGrabPose.getHeading())
                 .build();
-        driveGrab3PosShootPos = follower.pathBuilder()
-                .addPath(new BezierLine(thirdGrabPose, shootPose))
-                .setLinearHeadingInterpolation(thirdGrabPose.getHeading(), shootPose.getHeading())
+        PGPToShootPose = follower.pathBuilder()
+                .addPath(new BezierCurve(PGPGrabPose,
+                        new Pose(92.000, 56.000),
+                        new Pose(99.000, 90.000),
+                        shootPose))
+                .setLinearHeadingInterpolation(PGPGrabPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        driveShootPosEndPos = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, endPose))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), endPose.getHeading())
+        ShootToGPPPose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, GPPPose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), GPPPose.getHeading())
+                .build();
+        GrabGPPPose = follower.pathBuilder()
+                .addPath(new BezierLine(GPPPose, GPPGrabPose))
+                .setLinearHeadingInterpolation(GPPPose.getHeading(), GPPGrabPose.getHeading())
+                .build();
+        GPPToShootPose = follower.pathBuilder()
+                .addPath(new BezierLine(GPPGrabPose, shootPose))
+                .setLinearHeadingInterpolation(GPPGrabPose.getHeading(), shootPose.getHeading())
+                .build();
+
+        ShootToParkPose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, ParkPose))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), ParkPose.getHeading())
                 .build();
     }
 
     public void statePathUpdate() {
         switch(pathState) {
             case DRIVE_STARTPOS_SHOOTPOS:
-                follower.followPath(driveStartPosShootPos,true);
+                follower.followPath(StartToShootPose,true);
                 setPathState(PathState.SHOOT_PRELOAD);
                 break;
 
             case SHOOT_PRELOAD:
-                runShootSequence("PRELOAD", PathState.DRIVE_SHOOTPOS_FIRSTROW);
+                runShootSequence("PRELOAD", PathState.DRIVE_SHOOTPOS_PPG);
                 break;
 
-            case DRIVE_SHOOTPOS_FIRSTROW:
+            case DRIVE_SHOOTPOS_PPG:
                 if (!follower.isBusy()) {
-                    follower.followPath(driveShootPosRow1Pos);
-                    setPathState(PathState.DRIVE_FIRSTROW_GRABROW1);
+                    follower.followPath(ShootToPPGPose);
+                    setPathState(PathState.DRIVE_PPG_GRABPPG);
                 }
                 break;
 
-            case DRIVE_FIRSTROW_GRABROW1:
+            case DRIVE_PPG_GRABPPG:
                 if (!follower.isBusy()) {
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(driveRow1PosGrab1Pos);
-                    setPathState(PathState.DRIVE_GRABROW1_SHOOTPOS);
+                    follower.followPath(GrabPPGPose);
+                    setPathState(PathState.DRIVE_GRABPPG_SHOOTPOS);
                 }
                 break;
 
-            case DRIVE_GRABROW1_SHOOTPOS:
+            case DRIVE_GRABPPG_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
-                    follower.followPath(driveGrab1PosShootPos,true);
-                    setPathState(PathState.SHOOT_ROW1);
+                    follower.followPath(PPGToShootPose,true);
+                    setPathState(PathState.SHOOT_PPG);
                 }
                 break;
 
-            case SHOOT_ROW1:
-                runShootSequence("ROW 1", PathState.DRIVE_SHOOTPOS_SECONDROW);
+            case SHOOT_PPG:
+                runShootSequence("PPG", PathState.DRIVE_SHOOTPOS_PGP);
                 break;
 
-            case DRIVE_SHOOTPOS_SECONDROW:
+            case DRIVE_SHOOTPOS_PGP:
                 if (!follower.isBusy()) {
-                    follower.followPath(driveShootPosRow2Pos);
-                    setPathState(PathState.DRIVE_SECONDROW_GRABROW2);
+                    follower.followPath(ShootToPGPPose);
+                    setPathState(PathState.DRIVE_PGP_GRABPGP);
                 }
                 break;
 
-            case DRIVE_SECONDROW_GRABROW2:
+            case DRIVE_PGP_GRABPGP:
                 if (!follower.isBusy()) {
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(driveRow2PosGrab2Pos);
-                    setPathState(PathState.DRIVE_GRABROW2_SHOOTPOS);
+                    follower.followPath(GrabPGPPose);
+                    setPathState(PathState.DRIVE_GRABPGP_SHOOTPOS);
                 }
                 break;
 
-            case DRIVE_GRABROW2_SHOOTPOS:
+            case DRIVE_GRABPGP_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
-                    follower.followPath(driveGrab2PosShootPos,true);
-                    setPathState(PathState.SHOOT_ROW2);
+                    follower.followPath(PGPToShootPose,true);
+                    setPathState(PathState.SHOOT_PGP);
                 }
                 break;
 
-            case SHOOT_ROW2:
-                runShootSequence("ROW 2", PathState.DRIVE_SHOOTPOS_THIRDROW);
+            case SHOOT_PGP:
+                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_GPP);
                 break;
 
-            case DRIVE_THIRDROW_GRABROW3:
+            case DRIVE_GPP_GRABGPP:
                 if (!follower.isBusy()) {
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(driveRow3PosGrab3Pos);
-                    setPathState(PathState.DRIVE_GRABROW3_SHOOTPOS);
+                    follower.followPath(GrabGPPPose);
+                    setPathState(PathState.DRIVE_GRABGPP_SHOOTPOS);
                 }
                 break;
 
-            case DRIVE_GRABROW3_SHOOTPOS:
+            case DRIVE_GRABGPP_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
-                    follower.followPath(driveGrab3PosShootPos,true);
-                    setPathState(PathState.SHOOT_ROW3);
+                    follower.followPath(GPPToShootPose,true);
+                    setPathState(PathState.SHOOT_GPP);
                 }
                 break;
 
-            case SHOOT_ROW3:
-               runShootSequence("ROW 3", PathState.DRIVE_SHOOTPOS_ENDPOS);
+            case SHOOT_GPP:
+               runShootSequence("GPP", PathState.DRIVE_SHOOTPOS_PARKPOS);
                 break;
 
-            case DRIVE_SHOOTPOS_ENDPOS:
+            case DRIVE_SHOOTPOS_PARKPOS:
                 if (!follower.isBusy()) {
-                    follower.followPath(driveShootPosEndPos);
+                    follower.followPath(ShootToParkPose);
                     setPathState(PathState.IDLE);
                 }
                 break;

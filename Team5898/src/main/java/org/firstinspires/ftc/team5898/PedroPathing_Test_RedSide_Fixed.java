@@ -97,6 +97,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
             setPathState(nextState);
         }
     }
+
     private final Pose startPose = new Pose(122, 126, Math.toRadians(37));
     private final Pose shootPose = new Pose(95, 100, Math.toRadians(45));
     private final Pose PPGPose = new Pose(95, 86, Math.toRadians(0));

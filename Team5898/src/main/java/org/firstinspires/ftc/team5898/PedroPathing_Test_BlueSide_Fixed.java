@@ -102,11 +102,11 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
     private final Pose startPose = new Pose(22, 126, Math.toRadians(143));
     private final Pose shootPose = new Pose(49, 100, Math.toRadians(135));
     private final Pose PPGPose = new Pose(42, 84, Math.toRadians(180));
-    private final Pose PPGGrabPose = new Pose(14, 84, Math.toRadians(180));
-    private final Pose PGPPose = new Pose(42, 59, Math.toRadians(180));
-    private final Pose PGPGrabPose = new Pose(8, 59, Math.toRadians(180));
-    private final Pose GPPPose = new Pose(42, 35, Math.toRadians(180));
-    private final Pose GPPGrabPose = new Pose(8, 35, Math.toRadians(180));
+    private final Pose PPGGrabPose = new Pose(15, 84, Math.toRadians(180));
+    private final Pose PGPPose = new Pose(42, 60, Math.toRadians(180));
+    private final Pose PGPGrabPose = new Pose(14, 60, Math.toRadians(180));
+    private final Pose GPPPose = new Pose(42, 36, Math.toRadians(180));
+    private final Pose GPPGrabPose = new Pose(14, 35, Math.toRadians(180));
 
     private final Pose ParkPose = new Pose(33, 75, Math.toRadians(180));
 

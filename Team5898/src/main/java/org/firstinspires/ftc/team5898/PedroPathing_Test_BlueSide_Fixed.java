@@ -84,14 +84,18 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
         }
 
         double time = pathTimer.getElapsedTimeSeconds();
-        if (time > 2.0 && time < 2.5 && !intakeStarted) {
+        if( time>0.5 && time < 2 && !intakeStarted){
+            backLeftServo.setPower(-.2);
+            backRightServo.setPower(-.2);
+        }
+        if (time > 2.3 && time < 3 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
             intakeStarted = true;
             telemetry.addLine("Firing sample!");
         }
-        if (time > 5.0){
+        if (time > 5.25){
             stopLaunchers();
-            // setIntakePower(0);
+            setIntakePower(0);
             launchersStarted = false;
             intakeStarted = false;
             shootSequenceStarted = false;
@@ -101,19 +105,19 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
 
     private final Pose startPose = new Pose(22, 126, Math.toRadians(143));
     private final Pose shootPose = new Pose(49, 100, Math.toRadians(135));
-    private final Pose PPGPose = new Pose(42, 84, Math.toRadians(180));
-    private final Pose PPGGrabPose = new Pose(15, 84, Math.toRadians(180));
-    private final Pose PGPPose = new Pose(42, 60, Math.toRadians(180));
-    private final Pose PGPGrabPose = new Pose(14, 60, Math.toRadians(180));
-    private final Pose GPPPose = new Pose(42, 36, Math.toRadians(180));
-    private final Pose GPPGrabPose = new Pose(14, 35, Math.toRadians(180));
+    private final Pose PPGPose = new Pose(45, 84, Math.toRadians(180));
+    private final Pose PPGGrabPose = new Pose(16, 84, Math.toRadians(180));
+    private final Pose PGPPose = new Pose(45, 61, Math.toRadians(180));
+    private final Pose PGPGrabPose = new Pose(11, 61, Math.toRadians(180));
+//    private final Pose GPPPose = new Pose(45, 37, Math.toRadians(180));
+//    private final Pose GPPGrabPose = new Pose(13, 37, Math.toRadians(180));
 
     private final Pose ParkPose = new Pose(33, 75, Math.toRadians(180));
 
     private PathChain StartToShootPose, ShootToParkPose;
     private PathChain ShootToPPGPose, GrabPPGPose, PPGToShootPose;
     private PathChain ShootToPGPPose, GrabPGPPose, PGPToShootPose;
-    private PathChain ShootToGPPPose, GrabGPPPose, GPPToShootPose;
+//    private PathChain ShootToGPPPose, GrabGPPPose, GPPToShootPose;
 
     public void buildPaths() {
         StartToShootPose = follower.pathBuilder()
@@ -144,24 +148,23 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                 .build();
         PGPToShootPose = follower.pathBuilder()
                 .addPath(new BezierCurve(PGPGrabPose,
-                        new Pose(92.000, 56.000),
-                        new Pose(99.000, 90.000),
+                        new Pose(69.00, 61.00),
                         shootPose))
                 .setLinearHeadingInterpolation(PGPGrabPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        ShootToGPPPose = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, GPPPose))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), GPPPose.getHeading())
-                .build();
-        GrabGPPPose = follower.pathBuilder()
-                .addPath(new BezierLine(GPPPose, GPPGrabPose))
-                .setLinearHeadingInterpolation(GPPPose.getHeading(), GPPGrabPose.getHeading())
-                .build();
-        GPPToShootPose = follower.pathBuilder()
-                .addPath(new BezierLine(GPPGrabPose, shootPose))
-                .setLinearHeadingInterpolation(GPPGrabPose.getHeading(), shootPose.getHeading())
-                .build();
+//        ShootToGPPPose = follower.pathBuilder()
+//                .addPath(new BezierLine(shootPose, GPPPose))
+//                .setLinearHeadingInterpolation(shootPose.getHeading(), GPPPose.getHeading())
+//                .build();
+//        GrabGPPPose = follower.pathBuilder()
+//                .addPath(new BezierLine(GPPPose, GPPGrabPose))
+//                .setLinearHeadingInterpolation(GPPPose.getHeading(), GPPGrabPose.getHeading())
+//                .build();
+//        GPPToShootPose = follower.pathBuilder()
+//                .addPath(new BezierLine(GPPGrabPose, shootPose))
+//                .setLinearHeadingInterpolation(GPPGrabPose.getHeading(), shootPose.getHeading())
+//                .build();
 
         ShootToParkPose = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, ParkPose))
@@ -231,28 +234,9 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                 break;
 
             case SHOOT_PGP:
-                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_GPP);
+                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_PARKPOS);
                 break;
 
-            case DRIVE_GPP_GRABGPP:
-                if (!follower.isBusy()) {
-                    setIntakePower(INTAKE_POWER);
-                    follower.followPath(GrabGPPPose);
-                    setPathState(PathState.DRIVE_GRABGPP_SHOOTPOS);
-                }
-                break;
-
-            case DRIVE_GRABGPP_SHOOTPOS:
-                if (!follower.isBusy()) {
-                    setIntakePower(0);
-                    follower.followPath(GPPToShootPose,true);
-                    setPathState(PathState.SHOOT_GPP);
-                }
-                break;
-
-            case SHOOT_GPP:
-               runShootSequence("GPP", PathState.DRIVE_SHOOTPOS_PARKPOS);
-                break;
 
             case DRIVE_SHOOTPOS_PARKPOS:
                 if (!follower.isBusy()) {

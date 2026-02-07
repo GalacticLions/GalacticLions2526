@@ -83,6 +83,10 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
         }
 
         double time = pathTimer.getElapsedTimeSeconds();
+        if( time>0.5 && time < 1.7 && !intakeStarted){
+            backLeftServo.setPower(-.2);
+            backRightServo.setPower(-.2);
+        }
         if (time > 2.0 && time < 2.5 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
             intakeStarted = true;
@@ -147,19 +151,6 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
                         new Pose(99.000, 90.000),
                         shootPose))
                 .setLinearHeadingInterpolation(PGPGrabPose.getHeading(), shootPose.getHeading())
-                .build();
-
-        ShootToGPPPose = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, GPPPose))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), GPPPose.getHeading())
-                .build();
-        GrabGPPPose = follower.pathBuilder()
-                .addPath(new BezierLine(GPPPose, GPPGrabPose))
-                .setLinearHeadingInterpolation(GPPPose.getHeading(), GPPGrabPose.getHeading())
-                .build();
-        GPPToShootPose = follower.pathBuilder()
-                .addPath(new BezierLine(GPPGrabPose, shootPose))
-                .setLinearHeadingInterpolation(GPPGrabPose.getHeading(), shootPose.getHeading())
                 .build();
 
         ShootToParkPose = follower.pathBuilder()
@@ -230,28 +221,9 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
                 break;
 
             case SHOOT_PGP:
-                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_GPP);
+                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_PARKPOS);
                 break;
 
-            case DRIVE_GPP_GRABGPP:
-                if (!follower.isBusy()) {
-                    setIntakePower(INTAKE_POWER);
-                    follower.followPath(GrabGPPPose);
-                    setPathState(PathState.DRIVE_GRABGPP_SHOOTPOS);
-                }
-                break;
-
-            case DRIVE_GRABGPP_SHOOTPOS:
-                if (!follower.isBusy()) {
-                    setIntakePower(0);
-                    follower.followPath(GPPToShootPose,true);
-                    setPathState(PathState.SHOOT_GPP);
-                }
-                break;
-
-            case SHOOT_GPP:
-               runShootSequence("GPP", PathState.DRIVE_SHOOTPOS_PARKPOS);
-                break;
 
             case DRIVE_SHOOTPOS_PARKPOS:
                 if (!follower.isBusy()) {

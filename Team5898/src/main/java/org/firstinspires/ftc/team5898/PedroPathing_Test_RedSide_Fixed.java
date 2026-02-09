@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
-@Autonomous(name = "PedroPathing Red - Fixed")
+@Autonomous(name = "PedroPathing Red - Fixed",preselectTeleOp = "Beta TeleOP (PID)")
 public class PedroPathing_Test_RedSide_Fixed extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -83,18 +83,18 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
         }
 
         double time = pathTimer.getElapsedTimeSeconds();
-        if( time>0.5 && time < 1.7 && !intakeStarted){
+        if( time>0.5 && time < 2 && !intakeStarted){
             backLeftServo.setPower(-.2);
             backRightServo.setPower(-.2);
         }
-        if (time > 2.0 && time < 2.5 && !intakeStarted) {
+        if (time > 2.5 && time < 3.2 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
             intakeStarted = true;
             telemetry.addLine("Firing sample!");
         }
-        if (time > 5.0){
+        if (time > 5.7){
             stopLaunchers();
-            // setIntakePower(0);
+            setIntakePower(0);
             launchersStarted = false;
             intakeStarted = false;
             shootSequenceStarted = false;
@@ -104,10 +104,10 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
 
     private final Pose startPose = new Pose(122, 126, Math.toRadians(37));
     private final Pose shootPose = new Pose(95, 100, Math.toRadians(45));
-    private final Pose PPGPose = new Pose(95, 86, Math.toRadians(0));
-    private final Pose PPGGrabPose = new Pose(130, 86, Math.toRadians(0));
-    private final Pose PGPPose = new Pose(95, 61, Math.toRadians(0));
-    private final Pose PGPGrabPose = new Pose(136, 61, Math.toRadians(0));
+    private final Pose PPGPose = new Pose(95, 85, Math.toRadians(0));
+    private final Pose PPGGrabPose = new Pose(130, 85, Math.toRadians(0));
+    private final Pose PGPPose = new Pose(95, 60, Math.toRadians(0));
+    private final Pose PGPGrabPose = new Pose(136, 60, Math.toRadians(0));
     private final Pose GPPPose = new Pose(95, 37, Math.toRadians(0));
     private final Pose GPPGrabPose = new Pose(136, 37, Math.toRadians(0));
 

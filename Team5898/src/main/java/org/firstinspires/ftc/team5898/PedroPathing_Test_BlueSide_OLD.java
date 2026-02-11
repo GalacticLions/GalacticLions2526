@@ -19,6 +19,7 @@ import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
 @Autonomous(name = "PedroPathing Blue - OLD")
 @Disabled
+@Deprecated
 public class PedroPathing_Test_BlueSide_OLD extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;

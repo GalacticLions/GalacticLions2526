@@ -16,7 +16,9 @@ import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
+
 @TeleOp(name="Beta TeleOP (PID)", group="TeleOP")
+@Deprecated
 public class Beta_TeleOP_PID extends OpMode {
     Limelight3A limelight;
     DcMotor frontLeft, frontRight, backLeft, backRight, leftSlide, rightSlide;

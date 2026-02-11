@@ -1,33 +1,45 @@
 package org.firstinspires.ftc.team5898;
 
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
-import org.firstinspires.ftc.team5898.Constants.SlideConstants;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
-@Disabled
-@TeleOp(name="Beta TeleOP", group="TeleOP")
-public class Beta_TeleOP extends OpMode {
+@TeleOp(name = "Beta TeleOP")
+public class Beta_TeleOP_Refactor extends OpMode {
     Limelight3A limelight;
     DcMotor frontLeft, frontRight, backLeft, backRight, leftSlide, rightSlide;
-    DcMotor topLauncher, bottomLauncher;
+    DcMotorEx topLauncher, bottomLauncher;
     VisualServoing visualServoing;
-    CRServo frontServo, backLeftServo, backRightServo;
+    CRServo backLeftServo, backRightServo;
+    Servo stopperServo;
+    DcMotor frontIntake;
     IMU imu;
-    Integer Offset,  errorThreshold, slideLeftTarget, slideRightTarget,slideLeftPosition, slideRightPosition,leftError,rightError;
-    Double slidePower, intakePower;
+    Double intakePower;
+    Double LAUNCH_VELOCITY;
+    int kP;
+    Double kI;
+    Double kD;
+    Integer kF;
 
-    Double LAUNCH_VELOCITY, LAUNCH_VELOCITY_ALT;
+    enum States {IDLE, INTAKE, LAUNCH, SPOOL_UP, VISUAL_SERVOING};
+    private States robotState = States.IDLE;
+    boolean a1Pressed = gamepad1.a, b2Pressed = gamepad2.b, a2Pressed = gamepad2.a;
+    boolean prevA1 = a1Pressed, prevB2 = b2Pressed, prevA2 = a2Pressed;
+    boolean a1JustPressed = a1Pressed && !prevA1, b2JustPressed = b2Pressed && !prevB2, a2JustPressed = a2Pressed && !prevA2;
+
 
 
     @Override
@@ -35,15 +47,13 @@ public class Beta_TeleOP extends OpMode {
         //Constants Init
         //Cannon Constants
         intakePower = CannonConstants.IntakePower;
-        Offset = SlideConstants.Offset;
-        //Slide Constants
-        slidePower = SlideConstants.movePower;
-        errorThreshold = SlideConstants.ErrorThreshold;
-
+        kP = CannonConstants.kP;
+        kI = CannonConstants.kI;
+        kD = CannonConstants.kD;
+        kF = CannonConstants.kF;
 
         // Set target velocities in Ticks Per Second. These are example values and will need tuning.
         LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
-
 
         //Limelight Init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -57,94 +67,120 @@ public class Beta_TeleOP extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "FR");
         backLeft = hardwareMap.get(DcMotor.class, "BL");
         backRight = hardwareMap.get(DcMotor.class, "BR");
-        leftSlide = hardwareMap.get(DcMotor.class, "LS");
-        rightSlide = hardwareMap.get(DcMotor.class, "RS");
-        topLauncher = hardwareMap.get(DcMotor.class, "TLaunch");
-        bottomLauncher = hardwareMap.get(DcMotor.class, "BLaunch");
+        topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
+        bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
+        frontIntake = hardwareMap.get(DcMotor.class, "Intake");
+
+
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
-        backRight.setDirection(DcMotor.Direction.FORWARD);
 
         topLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
         bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        // Set motors to use encoders for velocity control. This is a crucial step.
-        topLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bottomLauncher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        topLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bottomLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        topLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Set zero power behavior to FLOAT for launchers (reduces resistance)
+        topLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
+        bottomLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
+
         topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bottomLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        slideLeftTarget = 0;
-        slideRightTarget = 0;
-        frontServo = hardwareMap.get(CRServo.class, "IntServo");
         backLeftServo = hardwareMap.get(CRServo.class, "LServo");
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
+        stopperServo = hardwareMap.get(Servo.class, "STPR");
 
-        //TODO: Directions could be flipped for code below
-        frontServo.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontIntake.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftServo.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        frontIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //IMU Init for Field-Centric
-        //TODO: Double check for new robot
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         imu.initialize(parameters);
 
-
         //Visual Servoing Init
         visualServoing = new VisualServoing(limelight, frontLeft, frontRight, backRight, backLeft, telemetry);
-
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
 
     @Override
     public void loop() {
+        kP = CannonConstants.kP;
+        kI = CannonConstants.kI;
+        kD = CannonConstants.kD;
 
-        //Slide Control System
-        slideLeftPosition = leftSlide.getCurrentPosition();
-        slideRightPosition = rightSlide.getCurrentPosition();
+        switch (robotState) {
+            case IDLE:
+                FieldCentricDrive(false);
+                if (a1JustPressed) {
+                    robotState = States.VISUAL_SERVOING;
+                }
+                backLeftServo.setPower(0);
+                backRightServo.setPower(0);
+                frontIntake.setPower(0);
+                bottomLauncher.setPower(0);
+                topLauncher.setPower(0);
+                if(b2JustPressed){
+                    robotState = States.INTAKE;
+                }
 
-        leftError = Math.abs(slideLeftTarget - slideLeftPosition);
-        rightError = Math.abs(slideRightTarget - slideRightPosition) ;
-//
-//        if (gamepad1.dpad_up) {
-//            slideRightTarget += 10;
-//            slideLeftTarget -= 10;
-//        }
+                stopperServo.setPosition(1); //TODO: Can be changed
 
-        if (leftError >= 3) {
-            leftSlide.setTargetPosition(slideLeftTarget);
-            leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            leftSlide.setPower(slidePower);
-        } else {
-            leftSlide.setPower(0.0);
-            leftSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            case INTAKE:
+                FieldCentricDrive(false);
+                if(b2JustPressed){
+                    robotState = States.IDLE;
+                }
+
+                if(gamepad2.right_trigger > 0.3){
+                    robotState = States.SPOOL_UP;
+                }
+
+                backLeftServo.setPower(intakePower);
+                backRightServo.setPower(intakePower);
+                frontIntake.setPower(.7);
+                stopperServo.setPosition(0.5); //TODO: Can be changed
+
+            case LAUNCH:
+                FieldCentricDrive(false);
+                backLeftServo.setPower(.7);
+                topLauncher.setVelocity(LAUNCH_VELOCITY);
+                bottomLauncher.setVelocity(LAUNCH_VELOCITY);
+                if () {
+
+                }
+
+
+            case SPOOL_UP:
+                FieldCentricDrive(false);
+                if(gamepad2.right_trigger > 0.3){
+                robotState = States.SPOOL_UP;
+            } else if (gamepad2.right_trigger < 0.3){
+                robotState = States.IDLE;
+            } if () {
+                topLauncher.setVelocity(LAUNCH_VELOCITY);
+                bottomLauncher.setVelocity(LAUNCH_VELOCITY);
+                }
+
+
+            case VISUAL_SERVOING:
+                FieldCentricDrive(true);
+                visualServoing.visualServo();
+                if (a1JustPressed) {
+                    robotState = States.IDLE;
+                }
+
         }
-
-        if (rightError >= 3) {
-            rightSlide.setTargetPosition(slideRightTarget);
-            rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightSlide.setPower(slidePower);
-        } else {
-            rightSlide.setPower(0.0);
-            rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-
-
 
         //VisualServoing: gamepad1.a
         //Check if VisualServoing
@@ -153,52 +189,45 @@ public class Beta_TeleOP extends OpMode {
             visualServoing.visualServo();
         }
 
-
         //Cannon Control - Now using setVelocity for closed-loop control
         if (gamepad2.left_stick_y > 0.3) {
-            topLauncher.setPower(-0.6);
-            bottomLauncher.setPower(0.6);
+            topLauncher.setVelocity(-LAUNCH_VELOCITY);
+            bottomLauncher.setVelocity(LAUNCH_VELOCITY);
         } else if (gamepad2.left_stick_y < -0.3) {
-            topLauncher.setPower(0.6);
-            bottomLauncher.setPower(-0.6);
+            topLauncher.setVelocity(LAUNCH_VELOCITY);
+            bottomLauncher.setVelocity(-LAUNCH_VELOCITY);
         } else {
-            topLauncher.setPower(0);
-            bottomLauncher.setPower(0);
+            topLauncher.setVelocity(0);
+            bottomLauncher.setVelocity(0);
         }
 
-//        // Add telemetry to monitor launcher performance
-//        telemetry.addData("Top Launcher Velocity", "Target: %.0f, Actual: %.0f",
-//            gamepad2.left_stick_y > 0.3 ? -LAUNCH_VELOCITY_ALT : (gamepad2.left_stick_y < -0.3 ? LAUNCH_VELOCITY_ALT : 0.0),
-//            topLauncher.getVelocity());
-//        telemetry.addData("Bottom Launcher Velocity", "Target: %.0f, Actual: %.0f",
-//            gamepad2.left_stick_y > 0.3 ? LAUNCH_VELOCITY : (gamepad2.left_stick_y < -0.3 ? -LAUNCH_VELOCITY : 0.0),
-//            bottomLauncher.getVelocity());
-//        telemetry.addData("Velocity Error", "Top: %.0f, Bottom: %.0f",
-//            Math.abs(topLauncher.getVelocity() - (gamepad2.left_stick_y > 0.3 ? -LAUNCH_VELOCITY_ALT : (gamepad2.left_stick_y < -0.3 ? LAUNCH_VELOCITY_ALT : 0.0))),
-//            Math.abs(bottomLauncher.getVelocity() - (gamepad2.left_stick_y > 0.3 ? LAUNCH_VELOCITY : (gamepad2.left_stick_y < -0.3 ? -LAUNCH_VELOCITY : 0.0))));
-//        telemetry.update();
-//
-
-        //TODO: Need to be tested
         if (gamepad2.right_stick_y > 0.3) {
-            backLeftServo.setPower(intakePower);
-            backRightServo.setPower(intakePower);
-            frontServo.setPower(intakePower);
-        } else if (gamepad2.right_stick_y < -0.3) {
             backLeftServo.setPower(-intakePower);
             backRightServo.setPower(-intakePower);
-            frontServo.setPower(-intakePower);
+            frontIntake.setPower(-intakePower);
+        } else if (gamepad2.right_stick_y < -0.3) {
+            backLeftServo.setPower(intakePower);
+            backRightServo.setPower(intakePower);
+            frontIntake.setPower(.7);
         }else {
             backLeftServo.setPower(0);
             backRightServo.setPower(0);
-            frontServo.setPower(0);
+            frontIntake.setPower(0);
+        }
+
+        if (gamepad2.dpad_down){
+            backLeftServo.setPower(intakePower-0.3);
+            backRightServo.setPower(intakePower-0.3);
+        }else if (gamepad2.dpad_up){
+            backLeftServo.setPower(-intakePower+0.3);
+            backRightServo.setPower(-intakePower+0.3);
         }
 
 
 
-        //===========================================
 
-        // Field-Centric Drive Code (skip if Visual Servoing is active)
+    }
+    public void FieldCentricDrive(Boolean isVisualServoing){
         if (!isVisualServoing) {
             double y = -gamepad1.left_stick_y; // Forward/Backward (reversed)
             double x = gamepad1.left_stick_x * 1.1; // Strafe Left/Right (counteract imperfect strafing)
@@ -236,12 +265,18 @@ public class Beta_TeleOP extends OpMode {
                 backRight.setPower(backRightPower * 0.5);
             }
         }
-
     }
     @Override
     public void stop(){
         limelight.stop();
         leftSlide.setPower(0);
         rightSlide.setPower(0);
+    }
+    public void setIntakePower(double power) {
+        frontIntake.setPower(0);
+        backLeftServo.setPower(0);
+        backRightServo.setPower(0);
+        topLauncher.setVelocity(0);
+        bottomLauncher.setVelocity(0);
     }
 }

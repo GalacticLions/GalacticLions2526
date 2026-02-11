@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.team5898;
 
+import androidx.annotation.Discouraged;
+
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;

@@ -1,23 +1,27 @@
+// TeleOp using PedroPathing instead of manual field-centric drive
 package org.firstinspires.ftc.team5898;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
+import org.firstinspires.ftc.team5898.pedroPathing.Constants;
+import com.pedropathing.follower.Follower;
 
-@TeleOp(name = "Beta TeleOP")
-public class Beta_TeleOP_Refactor extends OpMode {
+@TeleOp(name = "Beta TeleOP (PedroPathing)")
+public class Beta_TeleOP_Pedro extends OpMode {
+
+    // PedroPathing follower
+    Follower follower;
+
+    // Mechanism hardware
     Limelight3A limelight;
     DcMotor frontLeft, frontRight, backLeft, backRight;
     DcMotorEx topLauncher, bottomLauncher;
@@ -25,21 +29,28 @@ public class Beta_TeleOP_Refactor extends OpMode {
     CRServo backLeftServo, backRightServo;
     Servo stopperServo;
     DcMotor frontIntake;
-    IMU imu;
 
+    // Mechanism constants
     double intakePower;
     double LAUNCH_VELOCITY;
     double kP, kI, kD, kF;
 
-    enum States {IDLE, INTAKE, LAUNCH, SPOOL_UP, VISUAL_SERVOING}
+    // State machine for mechanisms
+    enum States { IDLE, INTAKE, LAUNCH, SPOOL_UP, VISUAL_SERVOING }
     private States robotState = States.IDLE;
 
-    // Button state variables
+    // Button state tracking
     boolean prevA1 = false, prevB2 = false, prevA2 = false;
 
     @Override
     public void init() {
-        // Constants Init
+        // 1) PedroPathing init
+        follower = Constants.createFollower(hardwareMap);
+        // startingPose can be set if you want a specific field-relative starting position
+        follower.setStartingPose(null); // you can pass a saved Pose here if desired
+        follower.update(); // update once so pose is valid
+
+        // 2) Mechanism constants
         intakePower = CannonConstants.IntakePower;
         kP = CannonConstants.kP;
         kI = CannonConstants.kI;
@@ -47,43 +58,51 @@ public class Beta_TeleOP_Refactor extends OpMode {
         kF = CannonConstants.kF;
         LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
 
-        // Limelight Init
+        // 3) Limelight init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
         telemetry.setMsTransmissionInterval(11);
         limelight.setPollRateHz(90);
         limelight.start();
 
-        // Motors Init
+        // 4) Drive motors – still need them for mechanisms, but Pedro handles their powers
         frontLeft = hardwareMap.get(DcMotor.class, "FL");
         frontRight = hardwareMap.get(DcMotor.class, "FR");
         backLeft = hardwareMap.get(DcMotor.class, "BL");
         backRight = hardwareMap.get(DcMotor.class, "BR");
+
         topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
         bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
         frontIntake = hardwareMap.get(DcMotor.class, "Intake");
 
-        // Directions
+        // Directions (only needed for mechanisms; Pedro handles drive motors internally)
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
-        backRight.setDirection(DcMotor.Direction.FORWARD); // Added missing direction
+        backRight.setDirection(DcMotor.Direction.FORWARD);
 
         topLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
         bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        // Mode setup
+        // Mode setup for launchers (RUN_USING_ENCODER + PIDF)
         topLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bottomLauncher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         topLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bottomLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        topLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
-        bottomLauncher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
+        topLauncher.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                new com.qualcomm.robotcore.hardware.PIDFCoefficients(kP, kI, kD, kF)
+        );
+        bottomLauncher.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                new com.qualcomm.robotcore.hardware.PIDFCoefficients(kP, kI, kD, kF)
+        );
 
         topLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bottomLauncher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        // Intake & servos
         backLeftServo = hardwareMap.get(CRServo.class, "LServo");
         backRightServo = hardwareMap.get(CRServo.class, "RServo");
         stopperServo = hardwareMap.get(Servo.class, "STPR");
@@ -94,44 +113,46 @@ public class Beta_TeleOP_Refactor extends OpMode {
 
         frontIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // IMU Init
-        imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP));
-        imu.initialize(parameters);
-
-        // Visual Servoing Init
+        // Visual servoing helper
         visualServoing = new VisualServoing(limelight, frontLeft, frontRight, backRight, backLeft, telemetry);
 
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status", "Initialized (PedroPathing TeleOp)");
         telemetry.update();
     }
 
     @Override
+    public void start() {
+        // Tell Pedro we’re in TeleOp and we want brake mode on the drive motors
+        follower.startTeleopDrive(true); // true = use BRAKE mode in TeleOp【turn1fetch0】
+    }
+
+    @Override
     public void loop() {
-        // 1. Update button states
+        // 1) Update PedroPathing (this updates pose, odometry, drive powers)
+        follower.update();
+
+        // 2) Update button states
         boolean a1Pressed = gamepad1.a;
         boolean b2Pressed = gamepad2.b;
         boolean a2Pressed = gamepad2.a;
-        boolean rightTrigger2 = gamepad2.right_trigger > 0.3; // Threshold for trigger
+        boolean rightTrigger2 = gamepad2.right_trigger > 0.3;
 
         boolean a1JustPressed = a1Pressed && !prevA1;
         boolean b2JustPressed = b2Pressed && !prevB2;
         boolean a2JustPressed = a2Pressed && !prevA2;
 
-        // 2. State machine logic
+        // 3) Mechanism state machine (same logic, but drive is handled by Pedro)
         switch (robotState) {
             case IDLE:
-                FieldCentricDrive(false);
+                // Drive is handled by Pedro via setTeleOpDrive below, so no manual motor powers here
 
-                // Stop all motors
+                // Stop all mechanisms
                 backLeftServo.setPower(0);
                 backRightServo.setPower(0);
                 frontIntake.setPower(0);
                 topLauncher.setPower(0);
                 bottomLauncher.setPower(0);
-                stopperServo.setPosition(1); // Close the stopper
+                stopperServo.setPosition(1); // Close stopper
 
                 // State transitions
                 if (b2JustPressed) {
@@ -142,45 +163,45 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 break;
 
             case INTAKE:
-                FieldCentricDrive(false);
+                // Drive still Pedro-controlled
 
                 // Intake action
                 backLeftServo.setPower(intakePower);
                 backRightServo.setPower(intakePower);
                 frontIntake.setPower(0.7);
-                stopperServo.setPosition(1); // Ensure stopper is closed
+                stopperServo.setPosition(1); // Stopper closed
 
                 // State transitions
                 if (b2JustPressed) {
                     robotState = States.IDLE; // Press B again to stop
                 } else if (rightTrigger2) {
-                    robotState = States.SPOOL_UP; // Press Trigger to start spooling up
+                    robotState = States.SPOOL_UP; // Trigger to spool up
                 }
                 break;
 
             case SPOOL_UP:
-                FieldCentricDrive(false);
+                // Drive still Pedro-controlled
 
                 // Launcher wheel acceleration
                 topLauncher.setVelocity(LAUNCH_VELOCITY);
                 bottomLauncher.setVelocity(LAUNCH_VELOCITY);
 
-                // Optional: keep intake running or stop. Here we stop intake while waiting to launch to prevent jamming
+                // Stop intake while waiting to launch
                 backLeftServo.setPower(0);
                 backRightServo.setPower(0);
                 frontIntake.setPower(0);
-                stopperServo.setPosition(1); // Stopper closed
+                stopperServo.setPosition(1);
 
                 // State transitions
                 if (!rightTrigger2) {
-                    robotState = States.IDLE; // Release Trigger to return to IDLE
+                    robotState = States.IDLE; // Release Trigger -> IDLE
                 } else if (a2JustPressed) {
                     robotState = States.LAUNCH; // Press A to launch
                 }
                 break;
 
             case LAUNCH:
-                FieldCentricDrive(false);
+                // Drive still Pedro-controlled
 
                 // Maintain launcher wheel velocity
                 topLauncher.setVelocity(LAUNCH_VELOCITY);
@@ -188,71 +209,58 @@ public class Beta_TeleOP_Refactor extends OpMode {
 
                 // Open stopper and feed the ring
                 stopperServo.setPosition(0.5); // Move stopper away
-                backLeftServo.setPower(0.7);   // Feed servos/motors
+                backLeftServo.setPower(0.7);
                 backRightServo.setPower(0.7);
 
                 // State transitions
-                // If A is released, return to SPOOL_UP (keep spinning, prep for next shot)
                 if (!a2Pressed) {
-                    robotState = States.SPOOL_UP;
+                    robotState = States.SPOOL_UP; // Release A -> back to SPOOL_UP
                 }
-                // If Trigger is released, return to IDLE
                 if (!rightTrigger2) {
-                    robotState = States.IDLE;
+                    robotState = States.IDLE; // Release Trigger -> IDLE
                 }
                 break;
 
             case VISUAL_SERVOING:
-                FieldCentricDrive(true);
+                // In VISUAL_SERVOING we still want Pedro drive, but we can override
+                // with visualServoing if it sets its own motor powers.
                 visualServoing.visualServo();
 
-                // State transitions
+                // State transition
                 if (a1JustPressed) {
                     robotState = States.IDLE;
                 }
                 break;
         }
 
-        // 3. Update previous button states
+        // 4) Update previous button states
         prevA1 = a1Pressed;
         prevB2 = b2Pressed;
         prevA2 = a2Pressed;
 
-        // Telemetry
+        // 5) TeleOp drive input to PedroPathing
+        //    This is the standard TeleOp pattern from the docs.
+        if (robotState != States.VISUAL_SERVOING) {
+            // Gamepad input ( Pedro uses: forward, strafe, turn, isRobotCentric, headingOffset )
+            double forward = -gamepad1.left_stick_y;
+            double strafe  = -gamepad1.left_stick_x;
+            double turn    = -gamepad1.right_stick_x;
+
+            // Example: field-centric (what you had before), so isRobotCentric = false
+            // If you want robot-centric, set the last parameter to true.
+            // headingOffset = 0 means "forward" on the field is 0 radians.
+            follower.setTeleOpDrive(forward, strafe, turn, false, 0.0f);
+        } else {
+            // In VISUAL_SERVOING, visualServoing is setting motor powers directly.
+            // You can choose to still apply a small turn correction here, or leave it fully to visualServoing.
+            // For simplicity, we let visualServoing control the drive motors.
+        }
+
+        // 6) Telemetry
         telemetry.addData("State", robotState);
         telemetry.addData("Launcher Velocity", topLauncher.getVelocity());
+        telemetry.addData("PedroPose", follower.getPose());
         telemetry.update();
-    }
-
-    public void FieldCentricDrive(Boolean isVisualServoing) {
-        if (!isVisualServoing) {
-            double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x * 1.1;
-            double rx = gamepad1.right_stick_x;
-
-            if (gamepad1.guide) {
-                imu.resetYaw();
-            }
-
-            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-            double frontLeftPower = (rotY + rotX + rx) / denominator;
-            double backLeftPower = (rotY - rotX + rx) / denominator;
-            double frontRightPower = (rotY - rotX - rx) / denominator;
-            double backRightPower = (rotY + rotX - rx) / denominator;
-
-            double multiplier = gamepad1.left_bumper ? 0.5 : 1.0;
-
-            frontLeft.setPower(frontLeftPower * multiplier);
-            backLeft.setPower(backLeftPower * multiplier);
-            frontRight.setPower(frontRightPower * multiplier);
-            backRight.setPower(backRightPower * multiplier);
-        }
-        // If isVisualServoing is true, this method does nothing, chassis is handled by visualServoing.visualServo()
     }
 
     @Override

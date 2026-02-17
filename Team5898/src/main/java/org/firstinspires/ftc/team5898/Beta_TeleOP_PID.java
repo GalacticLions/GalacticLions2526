@@ -18,7 +18,6 @@ import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
 
 @TeleOp(name="Beta TeleOP (PID)", group="TeleOP")
-@Deprecated
 public class Beta_TeleOP_PID extends OpMode {
     Limelight3A limelight;
     DcMotor frontLeft, frontRight, backLeft, backRight, leftSlide, rightSlide;
@@ -47,7 +46,7 @@ public class Beta_TeleOP_PID extends OpMode {
         kF = CannonConstants.kF;
 
         // Set target velocities in Ticks Per Second. These are example values and will need tuning.
-        LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+        LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
 
         //Limelight Init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");

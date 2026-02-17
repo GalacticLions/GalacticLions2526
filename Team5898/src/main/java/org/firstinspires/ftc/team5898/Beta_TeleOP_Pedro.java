@@ -56,7 +56,7 @@ public class Beta_TeleOP_Pedro extends OpMode {
         kI = CannonConstants.kI;
         kD = CannonConstants.kD;
         kF = CannonConstants.kF;
-        LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+        LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
 
         // 3) Limelight init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");

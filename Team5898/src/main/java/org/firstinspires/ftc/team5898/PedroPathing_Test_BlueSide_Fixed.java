@@ -28,7 +28,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
     private CRServo backLeftServo, backRightServo;
 
     // Flywheel constants
-    private final double LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+    private final double LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
     private final double INTAKE_POWER = CannonConstants.IntakePower;
     private final Integer P = CannonConstants.kP;
     private final Double I = CannonConstants.kI;

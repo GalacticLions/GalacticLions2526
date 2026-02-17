@@ -45,7 +45,7 @@ public class Beta_Auto_Limelight extends LinearOpMode {
     double strafeBias = 0.9;// change to adjust only strafing movement
     //
     double conversion = cpi * bias;
-    final double LaunchVelocity = CannonConstants.LAUNCH_VELOCITY;
+    final double LaunchVelocity = CannonConstants.FRONT_LAUNCH_VELOCITY;
     double intakePower = CannonConstants.IntakePower;
     IMU imu;
     Limelight3A limelight;
@@ -68,7 +68,7 @@ public class Beta_Auto_Limelight extends LinearOpMode {
         intakePower = CannonConstants.IntakePower;
 
         // Set target velocities in Ticks Per Second. These are example values and will need tuning.
-        LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+        LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
 
 
         //Limelight Init

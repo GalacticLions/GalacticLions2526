@@ -29,6 +29,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
 
     double intakePower;
     double LAUNCH_VELOCITY;
+    double stopperPosition = CannonConstants.stopperPosition;
     double kP, kI, kD, kF;
 
     enum States {IDLE, INTAKE, LAUNCH, SPOOL_UP, VISUAL_SERVOING}
@@ -45,7 +46,8 @@ public class Beta_TeleOP_Refactor extends OpMode {
         kI = CannonConstants.kI;
         kD = CannonConstants.kD;
         kF = CannonConstants.kF;
-        LAUNCH_VELOCITY = CannonConstants.LAUNCH_VELOCITY;
+        LAUNCH_VELOCITY = -(CannonConstants.FRONT_LAUNCH_VELOCITY);
+        stopperPosition = CannonConstants.stopperPosition;
 
         // Limelight Init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -69,7 +71,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD); // Added missing direction
 
-        topLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
+        topLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
         bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Mode setup
@@ -119,6 +121,11 @@ public class Beta_TeleOP_Refactor extends OpMode {
         boolean a1JustPressed = a1Pressed && !prevA1;
         boolean b2JustPressed = b2Pressed && !prevB2;
         boolean a2JustPressed = a2Pressed && !prevA2;
+        kP = CannonConstants.kP;
+        kI = CannonConstants.kI;
+        kD = CannonConstants.kD;
+        kF = CannonConstants.kF;
+
 
         // 2. State machine logic
         switch (robotState) {
@@ -131,7 +138,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 frontIntake.setPower(0);
                 topLauncher.setPower(0);
                 bottomLauncher.setPower(0);
-                stopperServo.setPosition(1); // Close the stopper
+                stopperServo.setPosition(stopperPosition); // Close the stopper
 
                 // State transitions
                 if (b2JustPressed) {
@@ -148,7 +155,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 backLeftServo.setPower(intakePower);
                 backRightServo.setPower(intakePower);
                 frontIntake.setPower(0.7);
-                stopperServo.setPosition(1); // Ensure stopper is closed
+                stopperServo.setPosition(stopperPosition); // Ensure stopper is closed
 
                 // State transitions
                 if (b2JustPressed) {
@@ -169,7 +176,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 backLeftServo.setPower(0);
                 backRightServo.setPower(0);
                 frontIntake.setPower(0);
-                stopperServo.setPosition(1); // Stopper closed
+                stopperServo.setPosition(1); // Stopper open
 
                 // State transitions
                 if (!rightTrigger2) {
@@ -187,9 +194,10 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 bottomLauncher.setVelocity(LAUNCH_VELOCITY);
 
                 // Open stopper and feed the ring
-                stopperServo.setPosition(0.5); // Move stopper away
-                backLeftServo.setPower(0.7);   // Feed servos/motors
-                backRightServo.setPower(0.7);
+                stopperServo.setPosition(1); // Move stopper away
+                backLeftServo.setPower(1);   // Feed servos/motors
+                backRightServo.setPower(1);
+                frontIntake.setPower(.7);
 
                 // State transitions
                 // If A is released, return to SPOOL_UP (keep spinning, prep for next shot)

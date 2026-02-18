@@ -2,6 +2,7 @@
 package org.firstinspires.ftc.team5898;
 
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 import com.pedropathing.follower.Follower;
 
+@Disabled
 @TeleOp(name = "Beta TeleOP (PedroPathing)")
 public class Beta_TeleOP_Pedro extends OpMode {
 

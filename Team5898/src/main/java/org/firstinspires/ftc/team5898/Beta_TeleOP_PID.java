@@ -218,8 +218,6 @@ public class Beta_TeleOP_PID extends OpMode {
     @Override
     public void stop(){
         limelight.stop();
-        leftSlide.setPower(0);
-        rightSlide.setPower(0);
     }
 }
 

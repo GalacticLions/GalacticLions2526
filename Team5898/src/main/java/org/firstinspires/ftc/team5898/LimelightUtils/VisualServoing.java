@@ -5,6 +5,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.List;
@@ -12,8 +13,6 @@ import java.util.List;
 @Configurable
 public class VisualServoing {
     // Horizontal (tx) alignment - turning left/right
-
-    public static int[] ALLOWED_TAG_IDS = {20,24};
     public static final double Kp_HEADING = 0.02; // Proportional gain for horizontal alignment
     public static final double MIN_COMMAND_HEADING = 0.10;
     public static final double HEADING_THRESHOLD = 0.80; // Horizontal offset threshold (degrees)
@@ -24,8 +23,12 @@ public class VisualServoing {
     public static final double MIN_COMMAND_DISTANCE = 0.12;
     public static final double DISTANCE_THRESHOLD = 1.0; // Vertical offset threshold (degrees)
     public static final double MAX_DRIVE_POWER = 0.5;
-    public static final double TARGET_TY = 0.0; // Target ty value (adjust based on desired distance)
 
+    // Target values
+    public static double TARGET_TY = 0.0; // Target ty value (adjust based on desired distance)
+    public static double TARGET_TX = 0.0; // Target tx value (default 0.0 = center)
+    public static int TagID = -1;
+    public static double targetAreaThreshold = 80; //TODO: TBD
     private final Limelight3A limelight;
     private final DcMotor frontLeft;
     private final DcMotor frontRight;
@@ -34,7 +37,7 @@ public class VisualServoing {
     private final Telemetry telemetry;
 
     public VisualServoing(Limelight3A limelight, DcMotor frontLeft, DcMotor frontRight, DcMotor backRight,
-            DcMotor backLeft, Telemetry telemetry) {
+                          DcMotor backLeft, Telemetry telemetry) {
         this.limelight = limelight;
         this.frontLeft = frontLeft;
         this.frontRight = frontRight;
@@ -47,27 +50,43 @@ public class VisualServoing {
         LLResult result = limelight.getLatestResult();
         List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
         boolean targetFound = false;
+
+        // Fix: Added closing brace for the loop and if-statement logic
         for (LLResultTypes.FiducialResult fr : fiducialResults) {
             int fiducialId = fr.getFiducialId();
             if (fiducialId == 20 || fiducialId == 24) {
                 targetFound = true;
+                TagID = fiducialId;
+            } else {
+                targetFound = false;
+                TagID = -1;
+            }
         }
 
-        if (result != null && result.isValid() && targetFound) {
-            double tx = result.getTx(); // Horizontal offset from center
-            double ty = result.getTy(); // Vertical offset from center
-            double ta = result.getTa();
+        if (result != null && result.isValid() && targetFound && TagID != -1) {
+            double tx = result.getTx(); // Horizontal offset from crosshair
+            double ty = result.getTy(); // Vertical offset from crosshair
+            double ta = result.getTa(); // Target Area to determine distance
 
-            // Calculate steering adjustment based on horizontal offset (tx)
-            // tx > 0 means target is to the right -> robot needs to turn right (positive steeringAdjust)
-            // tx < 0 means target is to the left -> robot needs to turn left (negative steeringAdjust)
+            // --- TX Determination by using distance ---
+            if (ta <= targetAreaThreshold) {
+                if (TagID == 20) TARGET_TX = 0.49; //TODO: TBD
+                else if (TagID == 24) TARGET_TX = -0.49; //TODO: TBD
+            } else {
+                TARGET_TX = 0.0;
+            }
+
+            // --- TX (Heading) Control ---
+            // Calculate error relative to TARGET_TX
+            double txError = tx - TARGET_TX;
             double steeringAdjust = 0.0;
-            if (Math.abs(tx) > HEADING_THRESHOLD) {
-                // Proportional control for turning
-                steeringAdjust = Kp_HEADING * tx;
 
-                // Add minimum command to overcome friction (in the same direction as the error)
-                if (tx > 0) {
+            if (Math.abs(txError) > HEADING_THRESHOLD) {
+                // Proportional control based on error
+                steeringAdjust = Kp_HEADING * txError;
+
+                // Add minimum command to overcome friction
+                if (txError > 0) {
                     steeringAdjust += MIN_COMMAND_HEADING;
                 } else {
                     steeringAdjust -= MIN_COMMAND_HEADING;
@@ -75,20 +94,16 @@ public class VisualServoing {
                 steeringAdjust = Math.max(-MAX_TURN_POWER, Math.min(MAX_TURN_POWER, steeringAdjust));
             }
 
-            // For vertical alignment (ty), we only move forward/backward if you want distance control.
-            // If you ONLY want to align with the AprilTag's vertical axis (center horizontally),
-            // set driveAdjust to 0 to disable forward/backward movement.
-            // ty > TARGET_TY means target is above center -> robot is too far, needs to move forward
-            // ty < TARGET_TY means target is below center -> robot is too close, needs to move backward
+            // --- TY (Distance) Control ---
             double tyError = ty - TARGET_TY;
             double driveAdjust = 0.0;
-            // DISABLED: Set to true if you want distance control, false for only horizontal alignment
+
+            // DISABLED by default: Set to true if you want distance control
             boolean enableDistanceControl = false;
+
             if (enableDistanceControl && Math.abs(tyError) > DISTANCE_THRESHOLD) {
-                // Proportional control for forward/backward
                 driveAdjust = Kp_DISTANCE * tyError;
 
-                // Add minimum command to overcome friction (in the same direction as the error)
                 if (tyError > 0) {
                     driveAdjust += MIN_COMMAND_DISTANCE;
                 } else {
@@ -97,13 +112,13 @@ public class VisualServoing {
                 driveAdjust = Math.max(-MAX_DRIVE_POWER, Math.min(MAX_DRIVE_POWER, driveAdjust));
             }
 
-            // Combine turning and driving: power = drive + turn (for left), drive - turn (for right)
+            // Combine turning and driving
             double frontLeftPower = driveAdjust + steeringAdjust;
             double backLeftPower = driveAdjust + steeringAdjust;
             double frontRightPower = driveAdjust - steeringAdjust;
             double backRightPower = driveAdjust - steeringAdjust;
 
-
+            // Normalize powers if they exceed 1.0
             double maxPower = Math.max(Math.abs(frontLeftPower),
                     Math.max(Math.abs(backLeftPower),
                             Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
@@ -123,9 +138,10 @@ public class VisualServoing {
             telemetry.addData("tx", tx);
             telemetry.addData("ty", ty);
             telemetry.addData("ta", ta);
+            telemetry.addData("txError", txError);
             telemetry.addData("steeringAdjust", steeringAdjust);
             telemetry.addData("driveAdjust", driveAdjust);
-            telemetry.addData("Heading Aligned", Math.abs(tx) <= HEADING_THRESHOLD);
+            telemetry.addData("Heading Aligned", Math.abs(txError) <= HEADING_THRESHOLD);
             telemetry.addData("Distance Aligned", Math.abs(tyError) <= DISTANCE_THRESHOLD);
             telemetry.update();
         } else {
@@ -137,8 +153,6 @@ public class VisualServoing {
 
             telemetry.addData("No valid result", "");
             telemetry.update();
-            }
         }
     }
 }
-

@@ -33,6 +33,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
     double kP, kI, kD, kF;
 
     enum States {IDLE, INTAKE, LAUNCH, SPOOL_UP, VISUAL_SERVOING}
+
     private States robotState = States.IDLE;
 
     // Button state variables

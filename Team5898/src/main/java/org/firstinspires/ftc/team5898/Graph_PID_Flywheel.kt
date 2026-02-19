@@ -21,7 +21,7 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-@TeleOp(name = "Beta TeleOP (PID)", group = "TeleOP")
+@TeleOp(name = "Flywheel Test", group = "TeleOP")
 class Graph_PID_Flywheel : OpMode() {
     private val timer = ElapsedTime()
     // Late initialization for hardware variables
@@ -47,10 +47,10 @@ class Graph_PID_Flywheel : OpMode() {
     private var LAUNCH_VELOCITY: Double = 0.0
 
     // PID Gains (Using Int/Double to match the types in the Java code)
-    private var kP: Int = 0
+    private var kP: Double = 0.0
     private var kI: Double = 0.0
     private var kD: Double = 0.0
-    private var kF: Int = 0
+    private var kF: Double = 0.0
 
     override fun init() {
         // Constants Init
@@ -58,10 +58,7 @@ class Graph_PID_Flywheel : OpMode() {
         val t = timer.seconds()
         intakePower = CannonConstants.IntakePower
 
-        LAUNCH_VELOCITY = CannonConstants.BACK_LAUNCH_VELOCITY
 
-        topCurrentVelocity = abs(topLauncher.getVelocity())
-        bottomCurrentVelocity = abs(bottomLauncher.getVelocity())
         panelsTelemetry.addData("timer", t)
         panelsTelemetry.addData("Launch Velocity", LAUNCH_VELOCITY)
         panelsTelemetry.addData("topLauncher Velocity", topCurrentVelocity)
@@ -147,6 +144,10 @@ class Graph_PID_Flywheel : OpMode() {
         // Visual Servoing Init
         visualServoing = VisualServoing(limelight, frontLeft, frontRight, backRight, backLeft, telemetry)
 
+        LAUNCH_VELOCITY = CannonConstants.BACK_LAUNCH_VELOCITY
+
+        topCurrentVelocity = abs(topLauncher.getVelocity())
+        bottomCurrentVelocity = abs(bottomLauncher.getVelocity())
         telemetry.addData("Status", "Initialized")
         telemetry.update()
     }
@@ -167,6 +168,15 @@ class Graph_PID_Flywheel : OpMode() {
         kI = CannonConstants.kI
         kD = CannonConstants.kD
         kF = CannonConstants.kF
+
+        topLauncher.setPIDFCoefficients(
+            DcMotor.RunMode.RUN_USING_ENCODER,
+            PIDFCoefficients(kP.toDouble(), kI, kD, kF.toDouble())
+        )
+        bottomLauncher.setPIDFCoefficients(
+            DcMotor.RunMode.RUN_USING_ENCODER,
+            PIDFCoefficients(kP.toDouble(), kI, kD, kF.toDouble())
+        )
 
         // VisualServoing: gamepad1.a
         // Check if VisualServoing
@@ -256,8 +266,5 @@ class Graph_PID_Flywheel : OpMode() {
 
     override fun stop() {
         limelight.stop()
-    }
-    private fun updateSignals(){
-
     }
 }

@@ -5,19 +5,22 @@ import com.bylazar.configurables.annotations.Configurable
 @Configurable
 object CannonConstants {
     @JvmField
-    public var IntakePower: Double = 1.0;
+    public var IntakePower: Double = 0.3;
     @JvmField
-    public var FRONT_LAUNCH_VELOCITY = 1100.0;
+    public var FRONT_LAUNCH_VELOCITY = 1150.0;
     @JvmField
     public var BACK_LAUNCH_VELOCITY = 1515.0;
     @JvmField
-    public var kP: Int = 300;
+    public var kP: Double = 300.0;
     @JvmField
     public var kI: Double = 0.0;
     @JvmField
     public var kD:Double = 0.2;
     @JvmField
-    public var kF: Int = 15;
+    public var kF: Double = 15.0;
     @JvmField
-    public var stopperPosition: Double = 0.51;
+    public var stopperClosePosition: Double = 0.5;
+    @JvmField
+    public var stopperOpenPosition: Double = 0.8;
+
 }

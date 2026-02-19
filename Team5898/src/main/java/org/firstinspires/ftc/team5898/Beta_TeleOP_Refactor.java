@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
 @TeleOp(name = "Beta TeleOP")
 public class Beta_TeleOP_Refactor extends OpMode {
+    ElapsedTime timer = new ElapsedTime();
     Limelight3A limelight;
     DcMotor frontLeft, frontRight, backLeft, backRight;
     DcMotorEx topLauncher, bottomLauncher;
@@ -29,7 +31,8 @@ public class Beta_TeleOP_Refactor extends OpMode {
 
     double intakePower;
     double LAUNCH_VELOCITY;
-    double stopperPosition = CannonConstants.stopperPosition;
+    double stopperClosePosition = CannonConstants.stopperClosePosition;
+    double stopperOpenPosition = CannonConstants.stopperOpenPosition;
     double kP, kI, kD, kF;
 
     enum States {IDLE, INTAKE, LAUNCH, SPOOL_UP, VISUAL_SERVOING}
@@ -48,7 +51,8 @@ public class Beta_TeleOP_Refactor extends OpMode {
         kD = CannonConstants.kD;
         kF = CannonConstants.kF;
         LAUNCH_VELOCITY = -(CannonConstants.FRONT_LAUNCH_VELOCITY);
-        stopperPosition = CannonConstants.stopperPosition;
+        stopperClosePosition = CannonConstants.stopperClosePosition;
+        stopperOpenPosition = CannonConstants.stopperOpenPosition;
 
         // Limelight Init
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -139,13 +143,15 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 frontIntake.setPower(0);
                 topLauncher.setPower(0);
                 bottomLauncher.setPower(0);
-                stopperServo.setPosition(stopperPosition); // Close the stopper
+                stopperServo.setPosition(stopperClosePosition); // Close the stopper
 
                 // State transitions
                 if (b2JustPressed) {
                     robotState = States.INTAKE;
                 } else if (a1JustPressed) {
                     robotState = States.VISUAL_SERVOING;
+                } else if (gamepad2.right_trigger > 0.3) {
+                    robotState = States.SPOOL_UP;
                 }
                 break;
 
@@ -156,7 +162,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 backLeftServo.setPower(intakePower);
                 backRightServo.setPower(intakePower);
                 frontIntake.setPower(0.7);
-                stopperServo.setPosition(stopperPosition); // Ensure stopper is closed
+                stopperServo.setPosition(stopperClosePosition); // Ensure stopper is closed
 
                 // State transitions
                 if (b2JustPressed) {
@@ -177,7 +183,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 backLeftServo.setPower(0);
                 backRightServo.setPower(0);
                 frontIntake.setPower(0);
-                stopperServo.setPosition(1); // Stopper open
+                stopperServo.setPosition(stopperOpenPosition); // Stopper open
 
                 // State transitions
                 if (!rightTrigger2) {
@@ -195,7 +201,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 bottomLauncher.setVelocity(LAUNCH_VELOCITY);
 
                 // Open stopper and feed the ring
-                stopperServo.setPosition(1); // Move stopper away
+                stopperServo.setPosition(stopperOpenPosition); // Move stopper away
                 backLeftServo.setPower(1);   // Feed servos/motors
                 backRightServo.setPower(1);
                 frontIntake.setPower(.7);

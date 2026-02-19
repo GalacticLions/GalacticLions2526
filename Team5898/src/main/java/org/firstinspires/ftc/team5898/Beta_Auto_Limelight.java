@@ -56,10 +56,10 @@ public class Beta_Auto_Limelight extends LinearOpMode {
 
     VisualServoing visualServoing;
 
-    Integer P = CannonConstants.kP;
+    Double P = CannonConstants.kP;
     Double I = CannonConstants.kI;
     Double D = CannonConstants.kD;
-    Integer F = CannonConstants.kF;
+    Double F = CannonConstants.kF;
 
     @Override
     public void runOpMode() {

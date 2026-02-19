@@ -29,10 +29,10 @@ public class Beta_TeleOP_PID extends OpMode {
     Double intakePower;
 
     Double LAUNCH_VELOCITY;
-    int kP;
+    Double kP;
     Double kI;
     Double kD;
-    Integer kF;
+    Double kF;
 
 
     @Override

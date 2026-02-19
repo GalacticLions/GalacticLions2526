@@ -32,10 +32,10 @@ public class PedroPathing_Test_BlueSide_OLD extends OpMode {
     // Flywheel constants
     private final double LAUNCH_VELOCITY = 1220;
     private final double INTAKE_POWER = CannonConstants.IntakePower;
-    private final Integer P = CannonConstants.kP;
+    private final Double P = CannonConstants.kP;
     private final Double I = CannonConstants.kI;
     private final Double D = CannonConstants.kD;
-    private final Integer F = CannonConstants.kF;
+    private final Double F = CannonConstants.kF;
 
     // State flags to prevent repeated calls
     private boolean launchersStarted = false;

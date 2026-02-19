@@ -17,8 +17,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
-@Autonomous(name = "PedroPathing Red Far",preselectTeleOp = "Beta TeleOP (PID)")
-public class PedroPathing_Test_RedSideFar extends OpMode {
+@Autonomous(name = "PedroPathing Blue Far",preselectTeleOp = "Beta TeleOP (PID)")
+public class PedroPathing_TestBlueSideFar extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 
@@ -46,7 +46,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
         // SHOOT > SCORING
         DRIVE_STARTPOS_SHOOTPOS,
         SHOOT_PRELOAD,
-
+        DRIVE_SHOOTPOS_PAUSEPOS,
         DRIVE_SHOOTPOS_GPP,
         DRIVE_GPP_GRABGPP,
         DRIVE_GRABGPP_SHOOTPOS,
@@ -94,14 +94,15 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
     }
 
     private final Pose startPose = new Pose(60, 16, Math.toRadians(90));
-    private final Pose shootPose = new Pose(59, 16, Math.toRadians(110));
+    private final Pose shootPose = new Pose(59, 16, Math.toRadians(120));
+    private final Pose pausePose = new Pose(30, 14, Math.toRadians(180));
     private final Pose GPPPose = new Pose(42, 35, Math.toRadians(180));
     private final Pose GPPGrabPose = new Pose(8, 35, Math.toRadians(180));
     private final Pose zonePose = new Pose(10, 25, Math.toRadians(270));
     private final Pose zoneGrabPose = new Pose(8, 8, Math.toRadians(270));
     private final Pose ParkPose = new Pose(30, 14, Math.toRadians(180));
 
-    private PathChain StartToShootPose, ShootToParkPose;
+    private PathChain StartToShootPose, ShootToParkPose, ShootToPausePose;
     private PathChain ShootToGPPPose, GrabGPPPose, GPPToShootPose;
 
     public void buildPaths() {
@@ -109,8 +110,12 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
                 .addPath(new BezierLine(startPose, shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
+        ShootToPausePose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, pausePose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
+                .build();
         ShootToGPPPose = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, GPPPose))
+                .addPath(new BezierLine(pausePose, GPPPose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), GPPPose.getHeading())
                 .build();
         GrabGPPPose = follower.pathBuilder()
@@ -139,6 +144,13 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
             case SHOOT_PRELOAD:
                 runShootSequence("PRELOAD", PathState.DRIVE_SHOOTPOS_GPP);
                 break;
+
+            case DRIVE_SHOOTPOS_PAUSEPOS:
+            if (!follower.isBusy()) {
+                follower.followPath(ShootToPausePose);
+                setPathState(PathState.DRIVE_SHOOTPOS_GPP);
+            }
+            break;
 
             case DRIVE_SHOOTPOS_GPP:
                 if (!follower.isBusy()) {
@@ -240,8 +252,8 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
      * Start the flywheel launchers at the configured velocity
      */
     private void startLaunchers() {
-        topLauncher.setVelocity(-LAUNCH_VELOCITY);
-        bottomLauncher.setVelocity(-LAUNCH_VELOCITY);
+        topLauncher.setVelocity(-BACK_LAUNCH_VELOCITY);
+        bottomLauncher.setVelocity(-BACK_LAUNCH_VELOCITY);
     }
 
     /**

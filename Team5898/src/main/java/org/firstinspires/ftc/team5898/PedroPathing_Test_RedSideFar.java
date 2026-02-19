@@ -47,6 +47,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
         DRIVE_STARTPOS_SHOOTPOS,
         SHOOT_PRELOAD,
 
+        DRIVE_SHOOTPOS_PAUSEPOS,
         DRIVE_SHOOTPOS_GPP,
         DRIVE_GPP_GRABGPP,
         DRIVE_GRABGPP_SHOOTPOS,
@@ -94,14 +95,15 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
     }
 
     private final Pose startPose = new Pose(84, 16, Math.toRadians(90));
-    private final Pose shootPose = new Pose(85, 16, Math.toRadians(70));
+    private final Pose shootPose = new Pose(85, 16, Math.toRadians(60));
+    private final Pose pausePose = new Pose(110, 14, Math.toRadians(0));
     private final Pose GPPPose = new Pose(102, 35, Math.toRadians(0));
     private final Pose GPPGrabPose = new Pose(136, 35, Math.toRadians(0));
     private final Pose zonePose = new Pose(136, 25, Math.toRadians(270));
     private final Pose zoneGrabPose = new Pose(136, 8, Math.toRadians(270));
     private final Pose ParkPose = new Pose(110, 14, Math.toRadians(0));
 
-    private PathChain StartToShootPose, ShootToParkPose;
+    private PathChain StartToShootPose, ShootToParkPose,ShootToPausePose;
     private PathChain ShootToGPPPose, GrabGPPPose, GPPToShootPose;
 
     public void buildPaths() {
@@ -109,8 +111,12 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
                 .addPath(new BezierLine(startPose, shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
+        ShootToPausePose = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, pausePose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
+                .build();
         ShootToGPPPose = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, GPPPose))
+                .addPath(new BezierLine(pausePose, GPPPose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), GPPPose.getHeading())
                 .build();
         GrabGPPPose = follower.pathBuilder()
@@ -139,6 +145,13 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
             case SHOOT_PRELOAD:
                 runShootSequence("PRELOAD", PathState.DRIVE_SHOOTPOS_GPP);
                 break;
+
+            case DRIVE_SHOOTPOS_PAUSEPOS:
+            if (!follower.isBusy()) {
+                follower.followPath(ShootToPausePose);
+                setPathState(PathState.DRIVE_SHOOTPOS_GPP);
+            }
+            break;
 
             case DRIVE_SHOOTPOS_GPP:
                 if (!follower.isBusy()) {

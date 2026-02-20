@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.team5898.LimelightUtils.VisualServoing;
 
 
+@Disabled
 @Autonomous(name = "Limelight Visual Servoing", group = "Limelight")
 public class LimelightVisualServoing extends OpMode {
     Limelight3A limelight;

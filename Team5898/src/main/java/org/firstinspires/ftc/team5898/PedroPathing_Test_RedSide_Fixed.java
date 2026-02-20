@@ -191,6 +191,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
             case DRIVE_GRABPPG_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
+                    closeStopper();
                     follower.followPath(PPGToShootPose,true);
                     setPathState(PathState.SHOOT_PPG);
                 }
@@ -219,6 +220,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
             case DRIVE_GRABPGP_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
+                    closeStopper();
                     follower.followPath(PGPToShootPose,true);
                     setPathState(PathState.SHOOT_PGP);
                 }

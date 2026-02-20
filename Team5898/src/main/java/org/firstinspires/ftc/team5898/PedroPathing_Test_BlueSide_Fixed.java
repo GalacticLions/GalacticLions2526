@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
@@ -26,6 +27,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
     private DcMotorEx topLauncher, bottomLauncher;
     private DcMotor frontIntake;
     private CRServo backLeftServo, backRightServo;
+    private Servo stopperServo;
 
     // Flywheel constants
     private final double LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
@@ -85,8 +87,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
 
         double time = pathTimer.getElapsedTimeSeconds();
         if( time>0.5 && time < 2 && !intakeStarted){
-            backLeftServo.setPower(-.2);
-            backRightServo.setPower(-.2);
+            openStopper();
         }
         if (time > 2.5 && time < 3.2 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
@@ -96,6 +97,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
         if (time > 5.7){
             stopLaunchers();
             setIntakePower(0);
+            closeStopper();
             launchersStarted = false;
             intakeStarted = false;
             shootSequenceStarted = false;
@@ -266,6 +268,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
+        stopperServo = hardwareMap.get(Servo.class, "STPR");
 
         // Initialize flywheel motors
         topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
@@ -330,6 +333,12 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
         frontIntake.setPower(power);
         backLeftServo.setPower(power);
         backRightServo.setPower(power);
+    }
+    private void openStopper() {
+        stopperServo.setPosition(CannonConstants.stopperOpenPosition);
+    }
+    private void closeStopper(){
+        stopperServo.setPosition(CannonConstants.stopperClosePosition);
     }
 
     @Override

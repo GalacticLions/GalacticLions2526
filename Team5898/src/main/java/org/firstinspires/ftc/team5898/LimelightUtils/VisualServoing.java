@@ -16,7 +16,7 @@ public class VisualServoing {
     // Horizontal (tx) alignment - turning left/right
     public static final double Kp_HEADING = 0.02; // Proportional gain for horizontal alignment
     public static final double MIN_COMMAND_HEADING = 0.10;
-    public static final double HEADING_THRESHOLD = 0.80; // Horizontal offset threshold (degrees)
+    public static final double HEADING_THRESHOLD = 0.05; // Horizontal offset threshold (degrees)
     public static final double MAX_TURN_POWER = 0.5;
 
     // Vertical (ty) alignment - moving forward/backward
@@ -51,27 +51,86 @@ public class VisualServoing {
         this.telemetry = telemetry;
     }
 
+    /**
+     * Returns true when the robot is aligned to the target (both tx and ty errors within thresholds).
+     * Returns false if there is no valid target or alignment is not yet complete.
+     */
+    public boolean isAligned() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) return false;
+
+        List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+        if (fiducialResults == null || fiducialResults.isEmpty()) return false;
+
+        boolean targetFound = false;
+        for (LLResultTypes.FiducialResult fr : fiducialResults) {
+            int id = fr.getFiducialId();
+            if (id == 20 || id == 24) { targetFound = true; break; }
+        }
+        if (!targetFound) return false;
+
+        double tx = result.getTx();
+        double ty = result.getTy();
+        double ta = result.getTa();
+
+        double effectiveTargetTX;
+        if (ta <= targetAreaThreshold) {
+            if (TagID == 20) effectiveTargetTX = BLUE_TX;
+            else if (TagID == 24) effectiveTargetTX = RED_TX;
+            else effectiveTargetTX = TARGET_TX;
+        } else {
+            effectiveTargetTX = 0.0;
+        }
+
+        double txError = tx - effectiveTargetTX;
+        double tyError = ty - TARGET_TY;
+
+        return Math.abs(txError) <= HEADING_THRESHOLD && Math.abs(tyError) <= DISTANCE_THRESHOLD;
+    }
+
     public void visualServo() {
         targetAreaThreshold = LimelightConstants.targetAreaThreshold;
         BLUE_TX = LimelightConstants.BLUE_ALLIANCE_TX;
         RED_TX = LimelightConstants.RED_ALLIANCE_TX;
-        LLResult result = limelight.getLatestResult();
-        List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-        boolean targetFound = false;
 
-        // Fix: Added closing brace for the loop and if-statement logic
+        LLResult result = limelight.getLatestResult();
+
+        if (result == null || !result.isValid()) {
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            telemetry.addData("No valid result", "");
+            telemetry.update();
+            return;
+        }
+
+        List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+        if (fiducialResults == null || fiducialResults.isEmpty()) {
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            telemetry.addData("No fiducials found", "");
+            telemetry.update();
+            return;
+        }
+
+        boolean targetFound = false;
         for (LLResultTypes.FiducialResult fr : fiducialResults) {
             int fiducialId = fr.getFiducialId();
             if (fiducialId == 20 || fiducialId == 24) {
                 targetFound = true;
                 TagID = fiducialId;
-            } else {
-                targetFound = false;
-                TagID = -1;
+                break;
             }
         }
 
-        if (result != null && result.isValid() && targetFound && TagID != -1) {
+        if (!targetFound) {
+            TagID = -1;
+        }
+
+        if (targetFound) {
             double tx = result.getTx(); // Horizontal offset from crosshair
             double ty = result.getTy(); // Vertical offset from crosshair
             double ta = result.getTa(); // Target Area to determine distance

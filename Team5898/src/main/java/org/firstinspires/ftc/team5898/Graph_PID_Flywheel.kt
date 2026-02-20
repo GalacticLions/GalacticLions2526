@@ -3,6 +3,7 @@ package org.firstinspires.ftc.team5898
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.limelightvision.Limelight3A
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.CRServo
@@ -21,6 +22,7 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
+@Disabled
 @TeleOp(name = "Flywheel Test", group = "TeleOP")
 class Graph_PID_Flywheel : OpMode() {
     private val timer = ElapsedTime()

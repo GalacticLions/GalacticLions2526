@@ -171,6 +171,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
             case DRIVE_GRABGPP_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
+                    closeStopper();
                     follower.followPath(GPPToShootPose,true);
                     setPathState(PathState.SHOOT_GPP);
                 }

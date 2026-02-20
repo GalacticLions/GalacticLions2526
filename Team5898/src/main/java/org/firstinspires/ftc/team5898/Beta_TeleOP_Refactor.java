@@ -129,23 +129,19 @@ public class Beta_TeleOP_Refactor extends OpMode {
         boolean a1JustPressed = a1Pressed && !prevA1;
         boolean b2JustPressed = b2Pressed && !prevB2;
         boolean a2JustPressed = a2Pressed && !prevA2;
-        kP = CannonConstants.kP;
-        kI = CannonConstants.kI;
-        kD = CannonConstants.kD;
-        kF = CannonConstants.kF;
-        LLResult Results;
-        Results = limelight.getLatestResult();
-        if (Results.isValid() && Results.getTa() < 1.5 && !shootingFromBack){
+
+        LLResult Results = limelight.getLatestResult();
+        if (Results != null && Results.isValid() && Results.getTa() < 1.5 && !shootingFromBack) {
             shootingFromBack = true;
-        }else if (Results.isValid() && Results.getTa() >= 1.6 && shootingFromBack){
+        } else if (Results != null && Results.isValid() && Results.getTa() >= 1.5 && shootingFromBack) {
             shootingFromBack = false;
-        }else if(!Results.isValid()){
+        } else if (Results == null || !Results.isValid()) {
             shootingFromBack = false;
         }
 
         if (shootingFromBack) {
             LAUNCH_VELOCITY = BACK_LAUNCH_VELOCITY;
-        }else if (!shootingFromBack){
+        } else {
             LAUNCH_VELOCITY = FRONT_LAUNCH_VELOCITY;
         }
 
@@ -242,6 +238,8 @@ public class Beta_TeleOP_Refactor extends OpMode {
                 // State transitions
                 if (a1JustPressed) {
                     robotState = States.IDLE;
+                } else if (visualServoing.isAligned()) {
+                    robotState = States.IDLE;
                 }
                 break;
         }
@@ -257,7 +255,7 @@ public class Beta_TeleOP_Refactor extends OpMode {
         telemetry.update();
     }
 
-    public void FieldCentricDrive(Boolean isVisualServoing) {
+    public void FieldCentricDrive(boolean isVisualServoing) {
         if (!isVisualServoing) {
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1;
@@ -291,5 +289,14 @@ public class Beta_TeleOP_Refactor extends OpMode {
     @Override
     public void stop() {
         limelight.stop();
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
+        topLauncher.setPower(0);
+        bottomLauncher.setPower(0);
+        frontIntake.setPower(0);
+        backLeftServo.setPower(0);
+        backRightServo.setPower(0);
     }
 }

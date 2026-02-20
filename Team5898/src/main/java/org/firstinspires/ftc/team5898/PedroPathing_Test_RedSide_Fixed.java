@@ -94,7 +94,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
             intakeStarted = true;
             telemetry.addLine("Firing sample!");
         }
-        if (time > 5.7){
+        if (time > 6.2){
             stopLaunchers();
             setIntakePower(0);
             launchersStarted = false;
@@ -105,7 +105,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
     }
 
     private final Pose startPose = new Pose(122, 126, Math.toRadians(37));
-    private final Pose shootPose = new Pose(95, 100, Math.toRadians(45));
+    private final Pose shootPose = new Pose(95, 100, Math.toRadians(40));
     private final Pose PPGPose = new Pose(95, 85, Math.toRadians(0));
     private final Pose PPGGrabPose = new Pose(130, 85, Math.toRadians(0));
     private final Pose PGPPose = new Pose(95, 60, Math.toRadians(0));
@@ -183,7 +183,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
                 if (!follower.isBusy()) {
                     closeStopper();
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(GrabPPGPose);
+                    follower.followPath(GrabPPGPose, .5, false);
                     setPathState(PathState.DRIVE_GRABPPG_SHOOTPOS);
                 }
                 break;
@@ -212,7 +212,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
                 if (!follower.isBusy()) {
                     closeStopper();
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(GrabPGPPose);
+                    follower.followPath(GrabPGPPose, .5, false);
                     setPathState(PathState.DRIVE_GRABPGP_SHOOTPOS);
                 }
                 break;
@@ -222,13 +222,13 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
                     setIntakePower(0);
                     closeStopper();
                     follower.followPath(PGPToShootPose,true);
-                    setPathState(PathState.SHOOT_PGP);
+                    setPathState(PathState.DRIVE_SHOOTPOS_PARKPOS);
                 }
                 break;
 
-            case SHOOT_PGP:
-                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_PARKPOS);
-                break;
+//            case SHOOT_PGP:
+//                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_PARKPOS);
+//                break;
 
 
             case DRIVE_SHOOTPOS_PARKPOS:

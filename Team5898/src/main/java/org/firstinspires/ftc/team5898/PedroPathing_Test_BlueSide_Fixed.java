@@ -86,10 +86,10 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
         }
 
         double time = pathTimer.getElapsedTimeSeconds();
-        if( time>0.5 && time < 2 && !intakeStarted){
+        if( time>0.5 && time < 1 && !intakeStarted){
             openStopper();
         }
-        if (time > 2.5 && time < 3.2 && !intakeStarted) {
+        if (time > 1.5 && time < 2 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
             intakeStarted = true;
             telemetry.addLine("Firing sample!");
@@ -106,10 +106,10 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
     }
 
     private final Pose startPose = new Pose(22, 126, Math.toRadians(143));
-    private final Pose shootPose = new Pose(49, 100, Math.toRadians(135));
-    private final Pose PPGPose = new Pose(45, 84, Math.toRadians(180));
+    private final Pose shootPose = new Pose(49, 100, Math.toRadians(140));
+    private final Pose PPGPose = new Pose(49, 84, Math.toRadians(180));
     private final Pose PPGGrabPose = new Pose(16, 84, Math.toRadians(180));
-    private final Pose PGPPose = new Pose(45, 61, Math.toRadians(180));
+    private final Pose PGPPose = new Pose(49, 61, Math.toRadians(180));
     private final Pose PGPGrabPose = new Pose(11, 61, Math.toRadians(180));
 //    private final Pose GPPPose = new Pose(45, 37, Math.toRadians(180));
 //    private final Pose GPPGrabPose = new Pose(13, 37, Math.toRadians(180));
@@ -150,7 +150,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                 .build();
         PGPToShootPose = follower.pathBuilder()
                 .addPath(new BezierCurve(PGPGrabPose,
-                        new Pose(69.00, 61.00),
+                        new Pose(62.00, 70.00),
                         shootPose))
                 .setLinearHeadingInterpolation(PGPGrabPose.getHeading(), shootPose.getHeading())
                 .build();
@@ -195,7 +195,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
             case DRIVE_PPG_GRABPPG:
                 if (!follower.isBusy()) {
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(GrabPPGPose);
+                    follower.followPath(GrabPPGPose, .5, false);
                     setPathState(PathState.DRIVE_GRABPPG_SHOOTPOS);
                 }
                 break;
@@ -204,6 +204,8 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
                 if (!follower.isBusy()) {
                     setIntakePower(0);
                     follower.followPath(PPGToShootPose,true);
+                    launchersStarted = true;
+                    startLaunchers();
                     setPathState(PathState.SHOOT_PPG);
                 }
                 break;
@@ -222,7 +224,7 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
             case DRIVE_PGP_GRABPGP:
                 if (!follower.isBusy()) {
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(GrabPGPPose);
+                    follower.followPath(GrabPGPPose,0.5,false);
                     setPathState(PathState.DRIVE_GRABPGP_SHOOTPOS);
                 }
                 break;
@@ -230,14 +232,15 @@ public class PedroPathing_Test_BlueSide_Fixed extends OpMode {
             case DRIVE_GRABPGP_SHOOTPOS:
                 if (!follower.isBusy()) {
                     setIntakePower(0);
+
                     follower.followPath(PGPToShootPose,true);
-                    setPathState(PathState.SHOOT_PGP);
+                    setPathState(PathState.DRIVE_SHOOTPOS_PARKPOS);
                 }
                 break;
-
-            case SHOOT_PGP:
-                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_PARKPOS);
-                break;
+//
+//            case SHOOT_PGP:
+//                runShootSequence("PGP", PathState.DRIVE_SHOOTPOS_PARKPOS);
+//                break;
 
 
             case DRIVE_SHOOTPOS_PARKPOS:

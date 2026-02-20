@@ -84,7 +84,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
             intakeStarted = true;
             telemetry.addLine("Firing sample!");
         }
-        if (time > 5.7){
+        if (time > 6.2){
             stopLaunchers();
             setIntakePower(0);
             launchersStarted = false;
@@ -101,7 +101,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
     private final Pose GPPGrabPose = new Pose(136, 35, Math.toRadians(0));
     private final Pose zonePose = new Pose(136, 25, Math.toRadians(270));
     private final Pose zoneGrabPose = new Pose(136, 8, Math.toRadians(270));
-    private final Pose ParkPose = new Pose(110, 14, Math.toRadians(0));
+    private final Pose ParkPose = new Pose(106, 14, Math.toRadians(0));
 
     private PathChain StartToShootPose, ShootToParkPose,ShootToPausePose;
     private PathChain ShootToGPPPose, GrabGPPPose, GPPToShootPose;
@@ -163,7 +163,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
             case DRIVE_GPP_GRABGPP:
                 if (!follower.isBusy()) {
                     setIntakePower(INTAKE_POWER);
-                    follower.followPath(GrabGPPPose);
+                    follower.followPath(GrabGPPPose, .5, false);
                     setPathState(PathState.DRIVE_GRABGPP_SHOOTPOS);
                 }
                 break;

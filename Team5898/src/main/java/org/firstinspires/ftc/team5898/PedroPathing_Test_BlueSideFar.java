@@ -13,12 +13,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
-@Autonomous(name = "PedroPathing Blue Far",preselectTeleOp = "Beta TeleOP (PID)")
-public class PedroPathing_TestBlueSideFar extends OpMode {
+@Autonomous(name = "PedroPathing Blue Far",preselectTeleOp = "Beta TeleOP")
+public class PedroPathing_Test_BlueSideFar extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
 
@@ -26,14 +27,15 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
     private DcMotorEx topLauncher, bottomLauncher;
     private DcMotor frontIntake;
     private CRServo backLeftServo, backRightServo;
+    private Servo stopperServo;
 
     // Flywheel constants
-    private final double LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
+    private final double LAUNCH_VELOCITY = CannonConstants.BACK_LAUNCH_VELOCITY;
     private final double INTAKE_POWER = CannonConstants.IntakePower;
-    private final Integer P = CannonConstants.kP;
+    private final Double P = CannonConstants.kP;
     private final Double I = CannonConstants.kI;
     private final Double D = CannonConstants.kD;
-    private final Integer F = CannonConstants.kF;
+    private final Double F = CannonConstants.kF;
 
     // State flags to prevent repeated calls
     private boolean launchersStarted = false;
@@ -46,7 +48,7 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
         // SHOOT > SCORING
         DRIVE_STARTPOS_SHOOTPOS,
         SHOOT_PRELOAD,
-        DRIVE_SHOOTPOS_PAUSEPOS,
+
         DRIVE_SHOOTPOS_GPP,
         DRIVE_GPP_GRABGPP,
         DRIVE_GRABGPP_SHOOTPOS,
@@ -75,8 +77,7 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
 
         double time = pathTimer.getElapsedTimeSeconds();
         if( time>0.5 && time < 2 && !intakeStarted){
-            backLeftServo.setPower(-.2);
-            backRightServo.setPower(-.2);
+            openStopper();
         }
         if (time > 2.5 && time < 3.2 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
@@ -86,6 +87,7 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
         if (time > 5.7){
             stopLaunchers();
             setIntakePower(0);
+            closeStopper();
             launchersStarted = false;
             intakeStarted = false;
             shootSequenceStarted = false;
@@ -93,16 +95,15 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
         }
     }
 
-    private final Pose startPose = new Pose(60, 16, Math.toRadians(90));
-    private final Pose shootPose = new Pose(59, 16, Math.toRadians(120));
-    private final Pose pausePose = new Pose(30, 14, Math.toRadians(180));
+    private final Pose startPose = new Pose(60, 8, Math.toRadians(90));
+    private final Pose shootPose = new Pose(59, 16, Math.toRadians(110));
     private final Pose GPPPose = new Pose(42, 35, Math.toRadians(180));
     private final Pose GPPGrabPose = new Pose(8, 35, Math.toRadians(180));
     private final Pose zonePose = new Pose(10, 25, Math.toRadians(270));
     private final Pose zoneGrabPose = new Pose(8, 8, Math.toRadians(270));
     private final Pose ParkPose = new Pose(30, 14, Math.toRadians(180));
 
-    private PathChain StartToShootPose, ShootToParkPose, ShootToPausePose;
+    private PathChain StartToShootPose, ShootToParkPose;
     private PathChain ShootToGPPPose, GrabGPPPose, GPPToShootPose;
 
     public void buildPaths() {
@@ -110,12 +111,8 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
                 .addPath(new BezierLine(startPose, shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
-        ShootToPausePose = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, pausePose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
-                .build();
         ShootToGPPPose = follower.pathBuilder()
-                .addPath(new BezierLine(pausePose, GPPPose))
+                .addPath(new BezierLine(shootPose, GPPPose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), GPPPose.getHeading())
                 .build();
         GrabGPPPose = follower.pathBuilder()
@@ -145,13 +142,6 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
                 runShootSequence("PRELOAD", PathState.DRIVE_SHOOTPOS_GPP);
                 break;
 
-            case DRIVE_SHOOTPOS_PAUSEPOS:
-            if (!follower.isBusy()) {
-                follower.followPath(ShootToPausePose);
-                setPathState(PathState.DRIVE_SHOOTPOS_GPP);
-            }
-            break;
-
             case DRIVE_SHOOTPOS_GPP:
                 if (!follower.isBusy()) {
                     follower.followPath(ShootToGPPPose);
@@ -161,6 +151,7 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
 
             case DRIVE_GPP_GRABGPP:
                 if (!follower.isBusy()) {
+                    closeStopper();
                     setIntakePower(INTAKE_POWER);
                     follower.followPath(GrabGPPPose);
                     setPathState(PathState.DRIVE_GRABGPP_SHOOTPOS);
@@ -208,7 +199,7 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
-
+        stopperServo = hardwareMap.get(Servo.class, "STPR");
         // Initialize flywheel motors
         topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
         bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
@@ -252,8 +243,8 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
      * Start the flywheel launchers at the configured velocity
      */
     private void startLaunchers() {
-        topLauncher.setVelocity(-BACK_LAUNCH_VELOCITY);
-        bottomLauncher.setVelocity(-BACK_LAUNCH_VELOCITY);
+        topLauncher.setVelocity(-LAUNCH_VELOCITY);
+        bottomLauncher.setVelocity(-LAUNCH_VELOCITY);
     }
 
     /**
@@ -272,6 +263,12 @@ public class PedroPathing_TestBlueSideFar extends OpMode {
         frontIntake.setPower(power);
         backLeftServo.setPower(power);
         backRightServo.setPower(power);
+    }
+    private void openStopper() {
+        stopperServo.setPosition(CannonConstants.stopperOpenPosition);
+    }
+    private void closeStopper(){
+        stopperServo.setPosition(CannonConstants.stopperClosePosition);
     }
 
     @Override

@@ -13,11 +13,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
-@Autonomous(name = "PedroPathing Red Far",preselectTeleOp = "Beta TeleOP (PID)")
+@Autonomous(name = "PedroPathing Red Far",preselectTeleOp = "Beta TeleOP")
 public class PedroPathing_Test_RedSideFar extends OpMode {
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -26,14 +27,14 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
     private DcMotorEx topLauncher, bottomLauncher;
     private DcMotor frontIntake;
     private CRServo backLeftServo, backRightServo;
-
+    private Servo stopperServo;
     // Flywheel constants
-    private final double LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
+    private final double LAUNCH_VELOCITY = CannonConstants.BACK_LAUNCH_VELOCITY;
     private final double INTAKE_POWER = CannonConstants.IntakePower;
-    private final Integer P = CannonConstants.kP;
+    private final Double P = CannonConstants.kP;
     private final Double I = CannonConstants.kI;
     private final Double D = CannonConstants.kD;
-    private final Integer F = CannonConstants.kF;
+    private final Double F = CannonConstants.kF;
 
     // State flags to prevent repeated calls
     private boolean launchersStarted = false;
@@ -76,8 +77,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
 
         double time = pathTimer.getElapsedTimeSeconds();
         if( time>0.5 && time < 2 && !intakeStarted){
-            backLeftServo.setPower(-.2);
-            backRightServo.setPower(-.2);
+            openStopper();
         }
         if (time > 2.5 && time < 3.2 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
@@ -94,7 +94,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
         }
     }
 
-    private final Pose startPose = new Pose(84, 16, Math.toRadians(90));
+    private final Pose startPose = new Pose(84, 8, Math.toRadians(90));
     private final Pose shootPose = new Pose(85, 16, Math.toRadians(60));
     private final Pose pausePose = new Pose(110, 14, Math.toRadians(0));
     private final Pose GPPPose = new Pose(102, 35, Math.toRadians(0));
@@ -209,6 +209,7 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
         pathTimer = new Timer();
         opModeTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
+        stopperServo = hardwareMap.get(Servo.class, "STPR");
 
         // Initialize flywheel motors
         topLauncher = hardwareMap.get(DcMotorEx.class, "TLaunch");
@@ -274,7 +275,12 @@ public class PedroPathing_Test_RedSideFar extends OpMode {
         backLeftServo.setPower(power);
         backRightServo.setPower(power);
     }
-
+    private void openStopper() {
+        stopperServo.setPosition(CannonConstants.stopperOpenPosition);
+    }
+    private void closeStopper(){
+        stopperServo.setPosition(CannonConstants.stopperClosePosition);
+    }
     @Override
     public void loop() {
         follower.update();

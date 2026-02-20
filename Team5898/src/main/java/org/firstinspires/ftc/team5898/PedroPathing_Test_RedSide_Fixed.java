@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.team5898.Constants.CannonConstants;
 import org.firstinspires.ftc.team5898.pedroPathing.Constants;
 
@@ -25,6 +27,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
     private DcMotorEx topLauncher, bottomLauncher;
     private DcMotor frontIntake;
     private CRServo backLeftServo, backRightServo;
+    private Servo stopperServo;
 
     // Flywheel constants
     private final double LAUNCH_VELOCITY = CannonConstants.FRONT_LAUNCH_VELOCITY;
@@ -84,8 +87,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
 
         double time = pathTimer.getElapsedTimeSeconds();
         if( time>0.5 && time < 2 && !intakeStarted){
-            backLeftServo.setPower(-.2);
-            backRightServo.setPower(-.2);
+            openStopper();
         }
         if (time > 2.5 && time < 3.2 && !intakeStarted) {
             setIntakePower(INTAKE_POWER);
@@ -179,6 +181,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
 
             case DRIVE_PPG_GRABPPG:
                 if (!follower.isBusy()) {
+                    closeStopper();
                     setIntakePower(INTAKE_POWER);
                     follower.followPath(GrabPPGPose);
                     setPathState(PathState.DRIVE_GRABPPG_SHOOTPOS);
@@ -206,6 +209,7 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
 
             case DRIVE_PGP_GRABPGP:
                 if (!follower.isBusy()) {
+                    closeStopper();
                     setIntakePower(INTAKE_POWER);
                     follower.followPath(GrabPGPPose);
                     setPathState(PathState.DRIVE_GRABPGP_SHOOTPOS);
@@ -259,6 +263,8 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
         bottomLauncher = hardwareMap.get(DcMotorEx.class, "BLaunch");
         topLauncher.setDirection(DcMotorSimple.Direction.REVERSE);
         bottomLauncher.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        stopperServo = hardwareMap.get(Servo.class, "STPR");
 
         // Set motors to use encoders for velocity control
         topLauncher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -318,7 +324,12 @@ public class PedroPathing_Test_RedSide_Fixed extends OpMode {
         backLeftServo.setPower(power);
         backRightServo.setPower(power);
     }
-
+    private void openStopper() {
+        stopperServo.setPosition(CannonConstants.stopperOpenPosition);
+    }
+    private void closeStopper(){
+        stopperServo.setPosition(CannonConstants.stopperClosePosition);
+    }
     @Override
     public void loop() {
         follower.update();

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.team5898;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -30,13 +31,12 @@ public class Beta_TeleOP_Refactor extends OpMode {
     IMU imu;
 
     double intakePower;
-    double LAUNCH_VELOCITY;
+    double FRONT_LAUNCH_VELOCITY, BACK_LAUNCH_VELOCITY, LAUNCH_VELOCITY;
     double stopperClosePosition = CannonConstants.stopperClosePosition;
     double stopperOpenPosition = CannonConstants.stopperOpenPosition;
     double kP, kI, kD, kF;
-
     enum States {IDLE, INTAKE, LAUNCH, SPOOL_UP, VISUAL_SERVOING}
-
+    boolean shootingFromBack = false;
     private States robotState = States.IDLE;
 
     // Button state variables
@@ -50,7 +50,8 @@ public class Beta_TeleOP_Refactor extends OpMode {
         kI = CannonConstants.kI;
         kD = CannonConstants.kD;
         kF = CannonConstants.kF;
-        LAUNCH_VELOCITY = -(CannonConstants.FRONT_LAUNCH_VELOCITY);
+        FRONT_LAUNCH_VELOCITY = -(CannonConstants.FRONT_LAUNCH_VELOCITY);
+        BACK_LAUNCH_VELOCITY = -(CannonConstants.BACK_LAUNCH_VELOCITY);
         stopperClosePosition = CannonConstants.stopperClosePosition;
         stopperOpenPosition = CannonConstants.stopperOpenPosition;
 
@@ -113,6 +114,8 @@ public class Beta_TeleOP_Refactor extends OpMode {
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+
     }
 
     @Override
@@ -130,6 +133,21 @@ public class Beta_TeleOP_Refactor extends OpMode {
         kI = CannonConstants.kI;
         kD = CannonConstants.kD;
         kF = CannonConstants.kF;
+        LLResult Results;
+        Results = limelight.getLatestResult();
+        if (Results.isValid() && Results.getTa() < 1.5 && !shootingFromBack){
+            shootingFromBack = true;
+        }else if (Results.isValid() && Results.getTa() >= 1.6 && shootingFromBack){
+            shootingFromBack = false;
+        }else if(!Results.isValid()){
+            shootingFromBack = false;
+        }
+
+        if (shootingFromBack) {
+            LAUNCH_VELOCITY = BACK_LAUNCH_VELOCITY;
+        }else if (!shootingFromBack){
+            LAUNCH_VELOCITY = FRONT_LAUNCH_VELOCITY;
+        }
 
 
         // 2. State machine logic

@@ -38,4 +38,10 @@ public class Constants {
     public static double kD = 0.0;
     public static double kF = 0.0;
   }
+
+  public static class Limelight {
+    public static double targetAreaThreshold = 2.0;
+    public static double BLUE_ALLIANCE_TX = 3.30;
+    public static double RED_ALLIANCE_TX = 0.31;
+  }
 }

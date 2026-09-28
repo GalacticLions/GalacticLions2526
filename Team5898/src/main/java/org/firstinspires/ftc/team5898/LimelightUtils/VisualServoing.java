@@ -7,7 +7,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.team5898.Constants.LimelightConstants;
+import org.firstinspires.ftc.team5898.Constants.Limelight;
 
 import java.util.List;
 
@@ -29,15 +29,15 @@ public class VisualServoing {
     public static double TARGET_TY = 0.0; // Target ty value (adjust based on desired distance)
     public static double TARGET_TX = 0.0; // Target tx value (default 0.0 = center)
     public static int TagID = -1;
-    public static double targetAreaThreshold = LimelightConstants.targetAreaThreshold;
+    public static double targetAreaThreshold = Limelight.targetAreaThreshold;
     private final Limelight3A limelight;
     private final DcMotor frontLeft;
     private final DcMotor frontRight;
     private final DcMotor backLeft;
     private final DcMotor backRight;
     private final Telemetry telemetry;
-    private static double BLUE_TX = LimelightConstants.BLUE_ALLIANCE_TX;
-    private static double RED_TX = LimelightConstants.RED_ALLIANCE_TX;
+    private static double BLUE_TX = Limelight.BLUE_ALLIANCE_TX;
+    private static double RED_TX = Limelight.RED_ALLIANCE_TX;
 
     // Constructor
 
@@ -89,9 +89,9 @@ public class VisualServoing {
     }
 
     public void visualServo() {
-        targetAreaThreshold = LimelightConstants.targetAreaThreshold;
-        BLUE_TX = LimelightConstants.BLUE_ALLIANCE_TX;
-        RED_TX = LimelightConstants.RED_ALLIANCE_TX;
+        targetAreaThreshold = Limelight.targetAreaThreshold;
+        BLUE_TX = Limelight.BLUE_ALLIANCE_TX;
+        RED_TX = Limelight.RED_ALLIANCE_TX;
 
         LLResult result = limelight.getLatestResult();
 

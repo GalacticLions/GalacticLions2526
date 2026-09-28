@@ -29,7 +29,7 @@ public class VisualServoing {
     public static double TARGET_TY = 0.0; // Target ty value (adjust based on desired distance)
     public static double TARGET_TX = 0.0; // Target tx value (default 0.0 = center)
     public static int TagID = -1;
-    public static double targetAreaThreshold = Limelight.targetAreaThreshold;
+    public static double targetAreaThreshold = Limelight.TARGET_AREA_THRESHOLD;
     private final Limelight3A limelight;
     private final DcMotor frontLeft;
     private final DcMotor frontRight;
@@ -89,7 +89,7 @@ public class VisualServoing {
     }
 
     public void visualServo() {
-        targetAreaThreshold = Limelight.targetAreaThreshold;
+        targetAreaThreshold = Limelight.TARGET_AREA_THRESHOLD;
         BLUE_TX = Limelight.BLUE_ALLIANCE_TX;
         RED_TX = Limelight.RED_ALLIANCE_TX;
 

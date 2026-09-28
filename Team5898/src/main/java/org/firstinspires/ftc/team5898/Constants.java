@@ -40,7 +40,7 @@ public class Constants {
   }
 
   public static class Limelight {
-    public static double targetAreaThreshold = 2.0;
+    public static double TARGET_AREA_THRESHOLD = 2.0;
     public static double BLUE_ALLIANCE_TX = 3.30;
     public static double RED_ALLIANCE_TX = 0.31;
   }

@@ -1,0 +1,45 @@
+name: Team5898 Build
+
+on:
+  push:
+    branches: [ "5898" ]
+    paths:
+      - "Team5898/**"
+      - "*.gradle"
+      - "gradle/**"
+      - "gradle.properties"
+      - "FtcRobotController/**"
+  pull_request:
+    branches: [ "5898" ]
+    paths:
+      - "Team5898/**"
+      - "*.gradle"
+      - "gradle/**"
+      - "gradle.properties"
+      - "FtcRobotController/**"
+  workflow_dispatch:
+
+# A new push cancels the older run that's still going.
+concurrency:
+  group: team5898-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Compile only. Skips dexing and APK packaging, which are the slow parts.
+      - name: Compile Team5898
+        run: |
+          chmod +x gradlew
+          ./gradlew :Team5898:compileDebugSources

@@ -11,16 +11,18 @@ also builds every push to `5898` (the Actions tab). If it goes red, fix it first
 ## 1. Where code goes
 
 ```
-team5898/
-├── Constants.java        tunable numbers and hardware config names
-├── *TeleOp*.java, *Auto*.java   OpModes
-├── pedro/                Pedro Pathing config and tuners
-└── Archive/              old code, not compiled
+Team5898/
+├── Archive/              old code, outside src/ so it isn't compiled
+└── src/main/java/org/firstinspires/ftc/team5898/
+    ├── Constants.java    tunable numbers and hardware config names
+    ├── *TeleOp*.java, *Auto*.java   OpModes
+    └── pedro/            Pedro Pathing config and tuners
 ```
 
 - Look up hardware with the names in `Constants.Hardware`. Don't type the
   config strings directly in OpModes.
-- Don't use `Archive/` from live code. To retire an OpMode, move it there.
+- To retire an OpMode, move it to `Team5898/Archive/`. It's outside the source
+  folder, so it isn't compiled and Android Studio won't show errors in it.
 - Write new code in Java.
 - Pedro Pathing API reference: <https://javadoc.io/doc/com.pedropathing/core/latest/index.html>. Look up
   methods there, not in old tutorials, since many of them are for Pedro 2.x.

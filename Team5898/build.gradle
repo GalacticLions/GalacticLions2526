@@ -32,14 +32,8 @@ android {
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
-    // Archive/ holds retired OpModes (incl. Pedro 2.x code) kept for reference only; not compiled.
-    sourceSets.main.java.exclude '**/Archive/**'
 }
 
 dependencies {
     implementation project(':FtcRobotController')
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    exclude '**/Archive/**'
 }
